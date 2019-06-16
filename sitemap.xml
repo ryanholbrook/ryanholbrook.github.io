@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml"
+  xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+  xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"
+>
+  <url>
+    <loc>https://mathformachines.com</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+
+  <url>
+    <loc>https://mathformachines.com/posts/retirement-formula/index.html</loc>
+    <lastmod>May 15, 2019</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mathformachines.com/posts/permitted-and-forbidden-sets/index.html</loc>
+    <lastmod>April  8, 2019</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mathformachines.com/posts/change-of-basis-for-vectors-and-covectors/index.html</loc>
+    <lastmod>March 18, 2019</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mathformachines.com/posts/a-tour-of-tensors/index.html</loc>
+    <lastmod>February  5, 2019</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mathformachines.com/posts/bayesian-topic-modeling/index.html</loc>
+    <lastmod>January 30, 2019</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+
+
+  <url>
+    <loc>https://mathformachines.com/./about/index.html</loc>
+    <lastmod></lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://mathformachines.com/./archive/index.html</loc>
+    <lastmod></lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+
+</urlset>
