@@ -1,0 +1,337 @@
+---
+title: A Tour of Tensors
+date: February 5, 2019
+tags: numpy, sage, tensors
+---
+
+Tensors can sometimes have a fearsome reputation. They are at heart, however, no more difficult to define than polynomials. I've tried in these notes to take a computational focus and to avoid formalism when possible; I haven't assumed any more than what you might encounter in an undergraduate linear algebra course. If you're interested in tensors applied to machine learning, or have wondered why arrays in Tensorflow are called tensors, you might find this useful. I'll do some computations in [[http://www.sagemath.org/][Sage]] and also in [[http://www.numpy.org/][Numpy]] for illustration.
+
+* Abstract Tensors
+ First, let's take brief look at tensors in the abstract. This is just to give us an idea of what properties they have and how they function. I'll gloss over most of the details of the construction.
+
+ A tensor is a vector. It is an element of a vector space. Being a vector, if we have a basis for the space we can write the tensor as a list of coordinates (or maybe something like a matrix or an array – we'll see how).
+
+ A tensor is a vector in a product vector space. This means that part of it comes from one vector space and part of it comes from another. These parts combine in a way that fits with the usual notions of how products should work. Why would we want these tensors, these products of vectors? It turns out that lots of useful things are tensors. Matrices and linear maps are tensors, and so are determinants and inner products and cross products. Tensors give us power to express many useful ideas.
+
+
+ A simple product of vectors looks like $v \otimes w$ and the product space looks like $V \otimes W$, where $V$ and $W$ are vector spaces. The elements of $V \otimes W$ are linear combinations of these simple products. So, a typical element of $V \otimes W$ might look like $v_1 \otimes w_2 + 5(v_4 \otimes w_1) + 3(v_3 \otimes w_2)$.
+
+ Again, $V \otimes W$ is a vector space. Its vectors are called tensors. Tensors are linear combinations of simple tensors like $v \otimes w$.
+
+ The tensor space $V \otimes W$ is a vector space, but its vectors have some special properties given to them by $\otimes$. This product has many of the same useful properties as products of numbers. They are:
+
+ \[ \textbf{Distributivity:  } v \otimes (w_1 + w_2) = v \otimes w_1 + v \otimes w_2 \]
+
+ (Just like $x(y + z) = xy + xz$.)
+
+ and
+
+ \[ \textbf{Scalar Multiples: } a (v \otimes w) = (av) \otimes w = v \otimes (aw) \]
+
+ (Just like $a(xy) = (ax)y = x(ay)$.)
+
+ The tensor product also does what we expect with the zero vector, namely: $v \otimes w = 0$ if and only if $v = 0$ or $w = 0$. The tensor product does not have the commutivity property however. A tensor $v \otimes w$ doesn't have to be the same as $w \otimes v$. For one, the vector on the left has to come from $V$ and the vector on the right has to come from $W$.
+
+ Using these properties we can manipulate tensors just like we do polynomials. For instance:
+
+ \begin{equation}
+ \begin{split}
+ & 2(v_1 \otimes w_1) + 3(v_1 + v_2) \otimes w_1 \\
+ = & 2(v_1 \otimes w_1) + 3(v_1 \otimes w_1) + 3(v_2 \otimes w_1) \\
+ = & 5(v_1 \otimes w_1) + 3(v_2 \otimes w_1)
+ \end{split}
+ \end{equation}
+
+ You could think of an abstract tensor as a sort of polynomial where the odd-looking product $\otimes$ reminds us that the $v$ and $w$ don't generally commute.
+
+ Here's an example. ~FiniteRankFreeModule~ is creating a vector space of dimension 2 over the quotients $\mathbb Q$. A module is a kind of generalized vector space.
+
+ #+BEGIN_SRC python
+   M = FiniteRankFreeModule(QQ, 2, name='M', start_index=1)
+   v = M.basis('v')
+   s = M.tensor((2, 0), name='s')
+   s[v,:] = [[1, 2], [3, 4]]
+   t = M.tensor((2, 0), name='t')
+   t[v,:] = [[5, 6], [7, 8]]
+   latex(s.display(v))
+   latex(t.display(v))
+   latex((s + t).display(v))
+ #+end_src
+
+ #+RESULTS:
+ :results:
+\[ s = v_{1}\otimes v_{1} + 2 v_{1}\otimes v_{2} + 3 v_{2}\otimes v_{1} + 4 v_{2}\otimes v_{2} \]
+\[ t = 5 v_{1}\otimes v_{1} + 6 v_{1}\otimes v_{2} + 7 v_{2}\otimes v_{1} + 8 v_{2}\otimes v_{2} \]
+\[ s+t = 6 v_{1}\otimes v_{1} + 8 v_{1}\otimes v_{2} + 10 v_{2}\otimes v_{1} + 12 v_{2}\otimes v_{2} \]
+ :end:
+
+** Construction of the Tensor Space
+ This is just a note on how the tensor space $V \otimes W$ can be constructed from $V$ and $W$. It's not essential to anything that follows.
+
+ Basically, we can construct $V \otimes W$ the same way that we can construct the complex numbers from the real numbers. To get the complex numbers from the reals, we just add in some new number $i$ to the real numbers and then define a simplification rule that says $i^2 = -1$. To get $V \otimes W$ from $V$ and $W$, we just take all linear combinations of vectors from $V$ and vectors from $W$ and then define the Distributivity and Scalar Multiplication rules. The formalism that does this is called a [[https://en.wikipedia.org/wiki/][quotient space]], or see [[https://en.wikipedia.org/wiki/Tensor_product#The_definition_of_the_abstract_tensor_product][here]] for the tensor product construction.
+
+ By constructing the space $V \otimes W$ in the most general way possible (meaning, not adding any other rules except distribution and scalar multiplication), we ensure that any kind of space or object that has these kinds of linear or multilinear properties has a representation as a tensor, and any other kind of construction that satisfies these rules will be essentially equivalent to the tensor construction. (The property is called a [[https://en.wikipedia.org/wiki/Universal_property][universal property]]. It occurs all the time in mathematics and is very useful.) Tensors are the general language of linearity. 
+
+* Tensors as Arrays
+ We can represent tensors as arrays, which is nice for doing computations.
+
+ If we have a basis for $V$ and a basis for $W$, then we can make a basis for $V \otimes W$ in just the way we should expect: by taking all the products of the basis vectors. Namely, if $(e_i)$ is a basis for $V$ and $(f_j)$ is a basis for $W$, then $(e_i \otimes f_j)$ is a basis for $V \otimes W$. This also means that the dimension of $V \otimes W$ is the product of the dimensions of $V$ and $W$; that is, $dim(V \otimes W) = dim(V)dim(W)$.
+
+ Recall that if we can write a vector in $V$ as $v = \sum a_i e_i$, then $(a_i)$ is its representation as a vector of coordinates. A tensor in $V \otimes W$ will instead have a representation as a matrix. If $m = dim(V)$ and $n = dim(W)$, then this will be an $m \times n$ matrix. If we write a tensor in terms of its basis elements as:
+
+ $$\sum_i \sum_j c_{i,j} (e_i \otimes f_j)$$
+
+ then its matrix is $[c_{i,j}]$. The subscript of $e_i$ tells you the row and the subscript of $f_j$ tells you the column. For example, let's say $V$ and $W$ are both two-dimensional. We could write a tensor
+
+ $$(e_1 \otimes f_1) + 2(e_1 \otimes f_2) + 3(e_2 \otimes f_1) + 4(e_2 \otimes f_2)$$
+
+ as
+
+ \begin{bmatrix}
+ 1 & 2 \\
+ 3 & 4 \\
+ \end{bmatrix}
+
+ But what if we have a vector $v$ in $V$ and a vector $w$ in $W$ and we want to find out what the matrix of $v \otimes w$ is? This is easy too. Say $v = \sum a_i e_i$ and $w = \sum b_j f_j$. Then
+
+ $$v \otimes w = \sum_i \sum_j a_i b_j (e_i \otimes f_j)$$
+
+ and its matrix is $[a_i b_j]$. In other words, the entry in row $i$ and column $j$ will be $a_i b_j$. 
+
+ It's easy to find this matrix using matrix multiplication. If we write our coordinate vectors as column vectors, then our tensor product becomes an [[https://en.wikipedia.org/wiki/Outer_product][outer product]]:
+
+ $$\color{RubineRed}v \color{black}\otimes \color{MidnightBlue}w\color{black} = \color{RubineRed}v\color{MidnightBlue} w^\mathsf{T}$$
+
+ For instance,
+
+ \[
+ \color{RubineRed}(1, 2, 3)\color{Black} \otimes \color{RoyalBlue}(4, 5, 6)\color{Black} = 
+ \color{RubineRed}\begin{bmatrix}
+ 1\\
+ 2\\
+ 3 \end{bmatrix} \color{black}
+ \color{RoyalBlue}[4, 5, 6]\color{black}
+ = \begin{bmatrix}
+ \color{RubineRed}1\color{black}\cdot \color{RoyalBlue}4\color{black} & \color{RubineRed}1\color{black}\cdot \color{RoyalBlue}5\color{black} & \color{RubineRed}1\color{black}\cdot \color{RoyalBlue}6\color{black} \\ 
+ \color{RubineRed}2\color{black}\cdot \color{RoyalBlue}4\color{black} & \color{RubineRed}2\color{black}\cdot \color{RoyalBlue}5\color{black} & \color{RubineRed}2\color{black}\cdot \color{RoyalBlue}6\color{black} \\ 
+ \color{RubineRed}3\color{black}\cdot \color{RoyalBlue}4\color{black} & \color{RubineRed}3\color{black}\cdot \color{RoyalBlue}5\color{black} & \color{RubineRed}3\color{black}\cdot \color{RoyalBlue}6\color{black}\end{bmatrix}
+ =\begin{bmatrix}
+ 4 & 5 & 6 \\
+ 8 & 10 & 15 \\
+ 12 & 15 & 18\end{bmatrix}
+ \]
+
+ Notice the correspondence between the basis elements and the entries of the matrix in the next example.
+ #+begin_src python :results drawer :exports both :session
+   M = FiniteRankFreeModule(QQ, 3, name='M', start_index=1)
+   e = M.basis('e')
+   v = M([-2, 9, 5], basis=e, name='v')
+   w = M([1, 0, -2], basis=e, name='w')
+   latex((v*w).display())
+   latex((v*w)[e,:])
+ #+end_src
+
+ #+results:
+ :results:
+ \[
+ v\otimes w = -2 e_{1}\otimes e_{1} + 4 e_{1}\otimes e_{3} + 9 e_{2}\otimes e_{1} -18 e_{2}\otimes e_{3} + 5 e_{3}\otimes e_{1} -10 e_{3}\otimes e_{3} \\
+ \left(\begin{array}{rrr}
+ -2 & 0 & 4 \\
+ 9 & 0 & -18 \\
+ 5 & 0 & -10
+ \end{array}\right)
+ \]
+ :end:
+
+ We can extend the tensor product construction to any number of vector spaces. In this way we get multidimensional arrays. We might represent a tensor in a space $U \otimes V \otimes W$ as a "matrix of matricies."
+
+ \[
+ \left[\begin{array}{r}
+   \left[\begin{array}{rr}
+   c_{111} & c_{112} \\
+   c_{121} & c_{122}
+   \end{array}\right] \\
+   \left[\begin{array}{rr}
+   c_{211} & c_{212} \\
+   c_{221} & c_{222}
+   \end{array}\right]
+ \end{array}\right]
+ \]
+
+ And we use the more general [[https://en.wikipedia.org/wiki/Kronecker_product][Kronecker product]] to find the product of tensors:
+
+ \[
+ \color{RubineRed}(1, 2)
+   \color{Black} \otimes
+   \color{RoyalBlue}
+   \left[\begin{array}{rr}
+   1 & 2 \\
+   3 & 4
+   \end{array}\right]
+ \color{Black} =
+   \color{RubineRed}
+   \left[\begin{array}{r}
+   1 \\
+   2 
+   \end{array}\right]
+   \color{RoyalBlue}
+   \left[\begin{array}{rr}
+   1 & 2 \\
+   3 & 4
+   \end{array}\right]
+ \color{Black} =
+ \left[\begin{array}{r}
+   \color{RubineRed} 1
+   \color{RoyalBlue}
+   \left[\begin{array}{rr}
+   1 & 2 \\
+   3 & 4
+   \end{array}\right] \\
+   \color{RubineRed} 2
+   \color{RoyalBlue}
+   \left[\begin{array}{rr}
+   1 & 2 \\
+   3 & 4
+   \end{array}\right]
+ \color{Black}\end{array}\right] =
+ \left[\begin{array}{r}
+   \left[\begin{array}{rr}
+   1 & 2 \\
+   3 & 4
+   \end{array}\right] \\
+   \left[\begin{array}{rr}
+   2 & 4 \\
+   6 & 8
+   \end{array}\right]
+ \color{Black}\end{array}\right]
+ \]
+
+ #+BEGIN_SRC python :exports both :session
+   M = FiniteRankFreeModule(QQ, 2, name='M', start_index=1)
+   e = M.basis('e')
+   u = M([1, 2], basis=e, name='u')
+   vw = M.tensor((2, 0), name='vw')
+   vw[e,:] = [[1, 2], [3, 4]]
+   (u*vw).display(e)
+   print()
+   (u*vw)[e,:]
+ #+end_src
+
+ #+RESULTS:
+ : u*vw = e_1*e_1*e_1 + 2 e_1*e_1*e_2 + 3 e_1*e_2*e_1 + 4 e_1*e_2*e_2 + 2 e_2*e_1*e_1 + 4 e_2*e_1*e_2 + 6 e_2*e_2*e_1 + 8 e_2*e_2*e_2
+ : 
+ : [[[1, 2], [3, 4]], [[2, 4], [6, 8]]]
+
+ The number of vector spaces in the product space is the same as the number of dimensions in the arrays of its tensors (that is, the number of indices needed to specify a component). This number is called the "order" of a tensor (or sometimes "degree"). The order of the tensor above is 3.
+
+ We can extend this product to tensors of any order. The components of a tensor $s \otimes t$ can always be found by taking the product of the respective components of $s$ and $t$. For instance, if $s_{12} = 5$ and $t_{345} = 7$, then $(s \otimes t)_{12345} = s_{12}t_{345} = 5\cdot7 = 35$.
+
+ #+begin_src python :exports both :session
+   M = FiniteRankFreeModule(QQ, 5, name='M', start_index=1)
+   e = M.basis('e')
+   s = M.tensor((2, 0), name='s')
+   s[e,1,2] = 5
+   t = M.tensor((3, 0), name='t')
+   t[e,3,4,5] = 7
+   (s*t)[e,1,2,3,4,5]
+ #+end_src
+
+ #+RESULTS:
+ : 35
+
+
+* Tensors as Maps
+
+ I mentioned earlier that things like cross-products and determinants are tensors. We'll see how that works now. Recall that every vector space $V$ has a dual vector space $V^*$ which is the space of all linear maps $V \rightarrow F$, where $F$ is the field of scalars of $V$. In terms of matricies, we might think of elements in $V$ as column vectors and elements of $V^*$ as row vectors. Then, we can apply an element of $V^*$ to an element of $V$ just like we do when representing linear maps as matricies:
+
+ \[
+ \left[a_1, a_2, a_3\right]
+   \left[\begin{array}{r} 
+   b_1 \\
+   b_2 \\
+   b_3 \end{array}\right] =
+ a_1b_1 + a_2b_2 + a_3b_3
+ \]
+
+ This in fact is just the [[https://en.wikipedia.org/wiki/Dot_product][dot product]] of the two vectors.
+
+ Let's take a product $T = V \otimes \cdots \otimes V \otimes V^* \otimes \cdots \otimes V^*$. The number of times $V$ occurs is called the "covariant" order of the space and the number of times $V^*$ occurs is called the "contravariant" order of the space. (The reason for these names is related to the [[https://en.wikipedia.org/wiki/Covariance_and_contravariance_of_vectors][change-of-basis]] on vectors of those types). We say that a tensor has "type $(k, l)$" when it is of contravariant order $k$ and covariant order $l$. So when we had earlier ~M.tensor((2, 0), name='t')~, the ~(2, 0)~ was saying that we wanted a tensor with 2 contravariant parts.
+
+ Tensors of order $(0, 1)$ are mappings $V \rightarrow F$. They will map tensors of order $(1, 0)$ (that is, column vectors) to the scalar field, and like above, this will just be the dot product of the two vectors.
+
+ #+begin_src python :exports both :session
+   M = FiniteRankFreeModule(QQ, 3, name='M', start_index=1)
+   e = M.basis('e')
+
+   s = M.tensor((0, 1), name='s')
+   s[e, :] = [1, 2, 3]
+   t = M.tensor((1, 0), name='t')
+   t[e, :] = [4, 5, 6]
+
+   v = vector([1, 2, 3])
+   w = vector([4, 5, 6])
+
+   s(t) == v.dot_product(w)
+ #+end_src
+
+ #+RESULTS:
+ : True
+
+ Expanding this idea, we can think of a tensor $t$ of order $(1,1)$ either as a [[https://en.wikipedia.org/wiki/Multilinear_form][multilinear form]] $t:V^* \otimes V \rightarrow F$ or as a [[https://en.wikipedia.org/wiki/Linear_map][linear map]], as $t:V \rightarrow V$ or as $t:V^* \rightarrow V^*$. The difference is just in [[https://en.wikipedia.org/wiki/Partial_application][what and how many]] arguments we pass in to the tensor. For instance, if we pass a column vector $v$ into the tensor $t$ in its second position (the position of $V$), then we get a map $V \rightarrow V$; this is the same as multiplying a vector by a matrix representing a linear map. This partial application is called a "contraction."
+
+ #+begin_src python :exports both :session
+   s = M.tensor((1, 1), name='s')
+   s[e, :] = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+   t = M.tensor((1, 0), name='t')
+   t[e, :] = [4, 5, 6]
+
+   m = Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+   w = vector([4, 5, 6])
+  
+   s.contract(t)[e,:] == list(m*w)
+ #+end_src
+
+ #+RESULTS:
+ : True
+
+ Generally, we can represent any kind of multilinear map $V^* \times \cdots \times V^* \times V \times \cdots \times V \rightarrow F$ as a tensor in the space $V \otimes \cdots \otimes V \otimes V^* \otimes \cdots \otimes V^*$. Since determinants and cross-products are multilinear maps, they too are tensors.
+
+ Sage makes a distinction between contravariant and covariant parts, but libraries like ~numpy~ and ~tensorflow~ do not. When using these, we can contract one tensor with another along any axes whose dimensions are the same. Their contraction operation is called ~tensordot~.
+
+ #+begin_src python :exports both :session
+   import numpy as np
+
+   s = np.ones((2, 3, 4, 5))
+   t = np.ones((5, 4, 3, 2))
+   np.tensordot(s, t, axes=[[0, 1, 2], [3, 2, 1]])
+ #+end_src
+
+ #+RESULTS:
+ : array([[24., 24., 24., 24., 24.],
+ :        [24., 24., 24., 24., 24.],
+ :        [24., 24., 24., 24., 24.],
+ :        [24., 24., 24., 24., 24.],
+ :        [24., 24., 24., 24., 24.]])
+
+ We could think of the axes in ~s~ as representing row vectors ($V^*$) and the axes in ~t~ as representing column vectors ($V$).
+
+ We could also do this using [[https://en.wikipedia.org/wiki/Einstein_notation][Einstein notation]]. Basically, whenever an index appears twice in an expression, it means to sum over that index while multiplying together the respective components (just like a dot product on those two axes).
+
+ #+begin_src python :exports both :session
+   s = np.ones((2, 3, 4))
+   t = np.ones((4, 3, 2))
+  
+   np.einsum('ija, bji -> ab', s, t)
+ #+end_src
+
+ #+RESULTS:
+ : array([[6., 6., 6., 6.],
+ :        [6., 6., 6., 6.],
+ :        [6., 6., 6., 6.],
+ :        [6., 6., 6., 6.]])
+
+ Einstein summations are a convenient way to do lots of different kinds of tensor computations. [[https://rockt.github.io/2018/04/30/einsum][Here]] are a bunch of great examples.
+
+* Conclusion
+
+ That's all for now! For anyone reading, I hope you found it informative. Tensors can be hard to get started on, but once you see the idea, I think you'll find them a pleasure to work with.

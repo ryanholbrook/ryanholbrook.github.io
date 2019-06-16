@@ -1,0 +1,5 @@
+# Ignore Emacs backups
+*~
+_cache/
+_site/
+.stack-work/

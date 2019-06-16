@@ -1,0 +1,29 @@
+<!-- Post Header  -->
+<div class="Subhead">
+  <div class="Subhead-heading">
+      <h2 class="mt-3 mb-1"><a id="post-title" href=$url$>$title$</a></h2>
+  </div>
+  <div class="Subhead-description">
+    $if(tags)$
+      $tags$
+    $endif$
+    <div class="float-md-right" style="text-align=right">
+      Published: $date$
+      $if(updated)$<br>Last Modified: $updated$ $endif$
+    </div>
+  </div>
+</div>
+
+<article>
+  $if(toc)$
+  <div id="toc" class="Box mb-3">
+    <h1>Table of Contents</h1>
+    $toc$
+  </div>
+  $endif$
+  
+  <section id="content" class="pb-2 mb-4 border-bottom">
+    $body$
+  </section>
+  
+</article>

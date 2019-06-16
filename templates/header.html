@@ -1,0 +1,52 @@
+<header id="header" class="bg-white">
+
+  <div class="p-4" style="text-align: center">
+
+    <a class="title" href="/">
+      Math for Machines
+    </a>
+
+  </div>
+  
+  <nav class="UnderlineNav UnderlineNav--right px-2 border-top">
+    <div class="UnderlineNav-body">
+      <a class="UnderlineNav-item " href="/about/">
+        <span>About</span>
+      </a>
+      <a class="UnderlineNav-item " href="/archive/">
+        <span>Archive</span>
+      </a>
+    </div>
+  </nav>
+
+
+  <!-- Scripts -->
+  <!-- Enable MathJax -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        "HTML-CSS": { scale: 90, linebreaks: { automatic: true } },
+        SVG: { linebreaks: { automatic:true } },
+    });
+    MathJax.Hub.Config({ TeX: { extensions: ["color.js"] }});
+    MathJax.Hub.Config({
+        TeX: {
+            Macros: {
+                formbox: ["\\bbox[15px, border:1px solid Gray]{#1}", 1],
+            }
+        }
+    });
+  </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-133546767-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-133546767-1', { 'optimize_id': 'GTM-T3XD3JM'});
+  </script>
+
+</header>

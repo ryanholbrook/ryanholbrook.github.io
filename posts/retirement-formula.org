@@ -1,0 +1,118 @@
+------
+title: 'A Somewhat Better Retirement Formula'
+date: May 15, 2019
+category:
+tags: finance, retirement, calculator
+------
+
+/This is based off a lesson I put together for a class I teach about general mathematics. I wanted a retirement savings formula that was simple enough for an ordinary person to use on their own, but also flexible enough to account for varied goals or circumstances./
+
+/My formula [[https://www.investopedia.com/articles/personal-finance/092414/retirement-what-percentage-salary-save.asp][agrees pretty well]] with what appear to be experts recommend, and it seems to be fairly robust in simulation. [[https://www.portfoliovisualizer.com/financial-goals?s=y&stages=2&careerYears=41&mode=1&initialAmount=12000&years=70&simulationModel=1&historicalVolatility=true&fullHistory=true&startYear=1972&endYear=2018&bootstrapModel=1&bootstrapMinYears=1&bootstrapMaxYears=20&circularBootstrap=true&distribution=1&dof=30&meanReturn=7.0&volatility=12.0&sequenceStressTest=0&stressTestRetirement=true&inflationModel=1&inflationMean=4.26&inflationVolatility=3.13&customIntervals=false&percentileList=10%2C+25%2C+50%2C+75%2C+90&returnList=0%2C+2.5%2C+5%2C+7.5%2C+10%2C+12.5&asset1=TotalStockMarket&allocation1_1=90&asset2=TotalBond&allocation2_1=10&total1=100&endasset1=TotalStockMarket&endallocation1_1=30&endasset2=TotalBond&endallocation2_1=50&endasset3=ShortTreasury&endallocation3_1=20&endtotal1=100&cfname1=Saving&cftype1=1&cfamount1=12000&cfinfadj1=true&__checkbox_cfinfadj1=true&cfstart1=1&cffrequency1=4&cfoccurs1=1&cfname2=Retirement&cftype2=2&cfamount2=48000&cfinfadj2=true&__checkbox_cfinfadj2=true&cfstart2=2&cffrequency2=4&cfoccurs2=2&cftype3=2&__checkbox_cfinfadj3=true&cfstart3=3&cffrequency3=4&cfoccurs3=3][This simulation]] [[file:/files/WithSS.pdf][(pdf)]] based on historical data, says that a plan like this would have succeeded about 97% of the time with typical investments, and [[https://www.portfoliovisualizer.com/financial-goals?s=y&stages=2&careerYears=41&mode=1&initialAmount=12000&years=70&simulationModel=1&historicalVolatility=true&fullHistory=true&startYear=1972&endYear=2018&bootstrapModel=1&bootstrapMinYears=1&bootstrapMaxYears=20&circularBootstrap=true&distribution=1&dof=30&meanReturn=7.0&volatility=12.0&sequenceStressTest=0&stressTestRetirement=true&inflationModel=1&inflationMean=4.26&inflationVolatility=3.13&customIntervals=false&percentileList=10%2C+25%2C+50%2C+75%2C+90&returnList=0%2C+2.5%2C+5%2C+7.5%2C+10%2C+12.5&asset1=TotalStockMarket&allocation1_1=90&asset2=TotalBond&allocation2_1=10&total1=100&endasset1=TotalStockMarket&endallocation1_1=30&endasset2=TotalBond&endallocation2_1=50&endasset3=ShortTreasury&endallocation3_1=20&endtotal1=100&cfname1=Saving&cftype1=1&cfamount1=12000&cfinfadj1=true&__checkbox_cfinfadj1=true&cfstart1=1&cffrequency1=4&cfoccurs1=1&cfname2=Retirement&cftype2=2&cfamount2=80000&cfinfadj2=true&__checkbox_cfinfadj2=true&cfstart2=2&cffrequency2=4&cfoccurs2=2&cftype3=2&__checkbox_cfinfadj3=true&cfstart3=3&cffrequency3=4&cfoccurs3=3][even lacking social security]] [[file:/files/WithoutSS.pdf][(pdf)]] would have succeeded about 76% of the time. A warning: I however am not a financial expert, so caveat emptor./
+
+The biggest financial problem in anyone’s life is how to provide for oneself in retirement. If you retire in your 60’s, you have a good chance of living for another several decades. Even someone used to living on a modest income of $40,000 a year, could need over half a million dollars saved up to keep from running out of money. "Half a million dollars‽" you cry. "I can barely afford my student loans!" Fortunately, by taking advantage of the [[https://www.snopes.com/fact-check/compound-interest/][most powerful force in the universe]] it’s easier than you think, especially if you get started early.
+
+* The Formula
+
+After thinking about it really hard for a while, you come up with the following goal: "I want to retire at 67 with enough savings to live for 20 years at 80% of my usual income." What can you do to have a fair chance of meeting this goal? How much you need to save depends most of all on what age you start saving at. Under some reasonable assumptions, the percent $p$ of your income you would need to save if you started saving at age $A$ would be:
+\[\formbox{p = 12\times0.8\left(\frac{0.03}{1.03^N - 1}\right)}\]
+where $N=67-A$. If you wanted to type it in to a [[https://en.wikipedia.org/wiki/TI-30][calculator]], the keypresses would likely be something like this:
+#+begin_src
+  12 * 0.8 * 0.03 ÷ ( 1.03 ^ N - 1 )
+#+end_src
+
+Or you could use the fancy Javascript calculator [[*Appendix - Calculator][below]].
+
+** Example
+For instance, say you start saving at 25. Then, assuming no prolonged periods of unemployment, you would be saving for $N=67-25=42$ years. Plugging this in to the formula, we get
+
+\[
+p = 12 \times 0.8 \left(\frac{0.03}{1.03^{42} - 1}\right) = 0.117
+\]
+
+So you would need to put about 12% of your paycheck into some kind of [[https://investor.vanguard.com/mutual-funds/target-retirement/][retirement fund]] in order to meet your goal. If you make $50,000 a year, 12% of your income comes to $6000 a year, or $500 a month. Many employers, however, will offer to [[https://www.investopedia.com/articles/personal-finance/120315/what-good-401k-match.asp][match]] a portion of your contributions. If your employer matches[^1] 3%, then you would only need to contribute the other 9%. At $50,000 a year, this is a contribution of $375 a month.
+
+[^1]: Unless it is a matter of putting a roof over your head or food on the table, you should always contribute at least up to your employer match. This is an investment with a guaranteed 100% return. You’ll never do better.
+
+
+* The Importance of Starting Early
+
+Consider this table:
+
+| Age | % Needed |
+|-----+----------|
+|  25 |      12% |
+|  30 |      15% |
+|  35 |      18% |
+|  40 |      24% |
+|  45 |      31% |
+|  50 |      44% |
+|  55 |      68% |
+|-----+----------|
+
+If you put your contributions off until you’re 45, you would have to put back over a third of your income to maintain the lifestyle that you’re used to. Realistically, you’re going to have to make some adjustments. If you wait until you’re 55, things are going to be painful.
+
+* Assumptions
+Let’s take a look at what assumptions went into our formula and the reasons for them. Feel free to play around with the numbers, but let me try to explain why I think these are good defaults.
+
+We’re assuming that you will retire at age 67, that you will need 12 years of savings in retirement, that you will be living on 80% of your working income, and that while you are working your investments will earn a 3% annual return (adjusted for inflation).
+
+The goal in saving for retirement is to not have to worry about money after you’re not able to earn it any more. The penalty for failing to meet this goal is much greater than the sacrifice needed to achieve it. It is much worse to have $2500 less a month in retirement than it is to have $500 less a month while working. Failure means having to make decisions like whether you’ll pay for your medicine, buy groceries, or keep the lights on once your Social Security check comes in. We want a low chance of failure. These assumptions reflect that goal. 
+
+** Retire at 67
+
+In the United States, 67 is the age when a person is [[https://www.ssa.gov/planners/retire/agereduction.html][eligible]] for full Social Security benefits. [[https://dqydj.com/average-retirement-age-in-the-united-states/][These data]] show that healthy people usually decide to work until 70, when you get enhanced benefits, while unhealthy people retire as soon as they can, at 62, if they can hold out for even that long. Plan for a healthy old age, but consider [[https://www.investopedia.com/terms/d/disability-insurance.asp][disability insurance]].
+
+** 12 years of savings
+
+The current [[https://www.ssa.gov/oact/STATS/table4c6.html][life expectancy]] for someone who makes it to age 67 is about 20 years more. Social Security, in its current state, will pay for about 8 years worth of that,[^2] so you, the retiree, will have to come up with the other 12. If you want to plan for a retirement with [[https://www.ssa.gov/policy/docs/ssb/v70n3/v70n3p111.html][reduced benefits]], or if you are very averse to the risk of living to an advanced age while being very poor, or if you want to retire early, add on a few years. If you plan on dying before you reach 67, congratulations! You’re off the hook.
+
+[^2]: I don’t mean to say that Social Security pays out for eight years and then stops. I mean that it will pay for around 8/20 = 40% of your expenses during those 20 years.
+
+** 80% of working income
+
+The percentage of your income that you will need to maintain your lifestyle in retirement is called your /replacement ratio/. Generally, it will be less than your working income. Why? Though some costs will have increased (medical, perpetually), typically your financial obligations will be fewer: you don’t have to save money anymore (can’t take it with you), the kids have moved out (let us pray), the mortgage is paid off (at long last)... [[https://personal.vanguard.com/pdf/ISGRR.pdf][This study]] claims your replacement ratio will usually be between 70% to 85%, depending on circumstances. If you plan on being rich and in good health, you may wish to choose the lower number; if you plan on being poor and in bad health, you may wish to choose the higher. In either case, 80% seems a cautious default.
+
+** 3% annual return
+
+/Question:/ The stock market has historically had about a 7% inflation adjusted return. Even if you put half your money in bonds, you could still get well above 3% annually. So isn’t 3% way too conservative?
+
+/Answer:/ No. Because you, as an individual, don’t get an average return; you get whatever the market gives you. If your retirement years begin with a financial crisis followed by a prolonged recession, it doesn’t matter if the market recovers ten years later, you’ve already spent all your money and you’re not dead yet; as a variation on [[https://en.wikiquote.org/wiki/John_Maynard_Keynes][Keynes]]: markets can remain depressed longer than you can remain solvent. Assuming a 3% average return will give you a much better chance of avoiding the worst scenarios, and if you start saving early, isn’t much of an additional burden.
+
+* Appendix - Calculator
+#+begin_export html
+<form onsubmit="return false">
+  <ul class="form-group">
+    <li class="d-inline-block col-5"><label>Starting Age</label></li>
+    <li class="d-inline-block col-5"><input size="3" type="text" id="startage" aria-label="startage" value="25" onchange="computePercent()" /> years</li>
+  </ul>
+
+<ul class="form-group">
+  <li class="d-inline-block col-5"><label>Retirement Age</label></li>
+  <li class="d-inline-block col-5"><input size="3" type="text" id="retirementage" aria-label="retirementage" value="67" onchange="computePercent()" /> years</li>
+</ul>
+
+<ul class="form-group">
+  <li class="d-inline-block col-5"><label>Years of Savings Needed</label></li>
+  <li class="d-inline-block col-5"><input size="3" type="text" id="yearsofsavings" aria-label="yearsofsavings" value="12" onchange="computePercent()" /> years</li>
+</ul>
+
+<ul class="form-group">
+  <li class="d-inline-block col-5"><label>Percent of Working Income Needed</label></li>
+  <li class="d-inline-block col-5"><input size="3" type="text" id="percentofincome" aria-label="percentofincome" value="80" onchange="computePercent()" /> %</li>
+</ul>
+
+<ul class="form-group">    
+  <li class="d-inline-block col-5"><label>Rate of Return</label></li>
+  <li class="d-inline-block col-5"><input size="3" type="text" id="rateofreturn" aria-label="rateofreturn" value="3" onchange="computePercent()" /> % per year</li>
+</ul>
+
+    <ul>
+      <div class="text-red">
+      <li class="d-inline-block col-5"><label>You Need to Save:
+      <li class="d-inline-block col-5" id="percenttosave"></li>
+      </div> 
+    </ul>
+</form>
+
+<script src="/scripts/retirement.js"></script>
+#+end_export

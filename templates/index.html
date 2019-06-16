@@ -1,0 +1,36 @@
+<div role="main" id="main">
+  
+  $for(posts)$
+  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
+
+        $body$
+
+        <!-- Post Footer -->
+        <div>
+
+        </div>
+
+    
+  </div>
+  $endfor$
+
+<!-- Pagination -->
+<nav class="paginate-container" aria-label="Pagination">
+  <div class="pagination">
+    $if(nextPageUrl)$
+    <a class="previous_page text-gray-dark" rel="older" aria-label="Older Posts" href="$nextPageUrl$">&#11164 Older</a>
+    $else$
+    <span class="previous_page disabled">&#11164 Older</span>
+    $endif$
+
+    $if(previousPageUrl)$
+    <a class="next_page text-gray-dark" rel="newer" aria-label="Newer Posts" href="$previousPageUrl$">Newer &#11166</a>
+    $else$
+    <span class="next_page disabled">Newer &#11166</span>
+    $endif$
+  </div>
+</nav>
+
+  
+</div>
+

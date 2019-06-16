@@ -1,0 +1,36 @@
+<div role="main" id="main">
+  <div class="rounded-2 box-shadow-medium pb-3 px-4 bg-white">
+    $body$
+  </div>
+</div>
+
+<!-- Pagination -->
+<nav class="paginate-container" aria-label="Pagination">
+  <div class="pagination">
+    $if(previousPostUrl)$
+    <a class="previous_page text-gray-dark" rel="previous" aria-label="Previous Page" href="$previousPostUrl$">&#11164 Previous</a>
+    $else$
+    <span class="previous_page disabled">&#11164 Previous</span>
+    $endif$
+
+    $if(nextPostUrl)$
+    <a class="next_page text-gray-dark" rel="next" aria-label="Next Page" href="$nextPostUrl$">Next &#11166</a>
+    $else$
+    <span class="next_page disabled">Next &#11166</span>
+    $endif$
+  </div>
+</nav>
+
+<!-- Talkyard Comments -->
+<div class="container-m">
+  <div class="rounded-2 box-shadow-medium px-2 py-1 bg-white">
+    <script>talkyardServerUrl='https://comments-for-mathformachines-com.talkyard.net';</script>
+    <script async defer src="https://c1.ty-cdn.net/-/talkyard-comments.min.js"></script>
+    <!-- You can specify a per page discussion id on the next line, if your URLs might change. -->
+    <div class="talkyard-comments" data-discussion-id="" style="margin-top: 45px;">
+      <noscript>Please enable Javascript to view comments.</noscript>
+      <p style="margin-top: 25px; opacity: 0.9; font-size: 96%">Comments powered by
+        <a href="https://www.talkyard.io">Talkyard</a>.</p>
+    </div>
+  </div>
+</div>
