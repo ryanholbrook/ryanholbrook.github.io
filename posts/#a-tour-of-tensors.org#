@@ -1,6 +1,6 @@
 ---
 title: A Tour of Tensors
-date: February 5, 2019
+
 tags: numpy, sage, tensors
 ---
 
@@ -131,7 +131,7 @@ Tensors can sometimes have a fearsome reputation. They are at heart, however, no
    latex((v*w)[e,:])
  #+end_src
 
- #+RESULTS:
+ #+results:
  :results:
  \[
  v\otimes w = -2 e_{1}\otimes e_{1} + 4 e_{1}\otimes e_{3} + 9 e_{2}\otimes e_{1} -18 e_{2}\otimes e_{3} + 5 e_{3}\otimes e_{1} -10 e_{3}\otimes e_{3} \\

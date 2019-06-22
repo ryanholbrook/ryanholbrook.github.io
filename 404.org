@@ -1,0 +1,5 @@
+-----
+title: 404
+-----
+
+Sorry, the page you're looking for can't be found. Here are some [[file:archive/][other posts]] you might enjoy.

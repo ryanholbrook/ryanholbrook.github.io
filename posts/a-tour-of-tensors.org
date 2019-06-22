@@ -1,7 +1,8 @@
 ---
 title: A Tour of Tensors
-date: February 5, 2019
+published: February 5, 2019
 tags: numpy, sage, tensors
+usetoc: true
 ---
 
 Tensors can sometimes have a fearsome reputation. They are at heart, however, no more difficult to define than polynomials. I've tried in these notes to take a computational focus and to avoid formalism when possible; I haven't assumed any more than what you might encounter in an undergraduate linear algebra course. If you're interested in tensors applied to machine learning, or have wondered why arrays in Tensorflow are called tensors, you might find this useful. I'll do some computations in [[http://www.sagemath.org/][Sage]] and also in [[http://www.numpy.org/][Numpy]] for illustration.

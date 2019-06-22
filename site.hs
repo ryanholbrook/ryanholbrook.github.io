@@ -87,7 +87,7 @@ main = hakyll $ do
                 >>= cleanUrls
 
     -- Build static pages
-    match "about.org" $ do
+    match ("about.org" .||. "404.org") $ do
         route cleanRoute
         compile $
           let pageContext = mainContext tags
@@ -120,10 +120,15 @@ main = hakyll $ do
         compile $ do
             posts <- recentFirst =<< loadAll postPattern
             pages <- loadAll (fromList ["about.org", "archive.html"])
-            let sitemapCtx =
-                  listField "posts" simplePostContext (return posts)
-                  <> listField "pages" simplePostContext (return pages)
+            let ctx =
+                  defaultContext
                   <> constField "root" root
+                  <> dateField "date" "%F" -- need WC3 format
+                sitemapCtx =
+                  ctx
+                  <> listField "posts" ctx (return posts)
+                  <> listField "pages" ctx (return pages)
+
             makeItem ""
                 >>= loadAndApplyTemplate "templates/sitemap.xml" sitemapCtx
 

@@ -1,7 +1,8 @@
 -------
 title: Change of Basis for Vectors and Covectors
-date: March 18, 2019
+published: March 18, 2019
 tags: coordinates, covectors, vectors, linear-algebra
+usetoc: true
 -------
 
 

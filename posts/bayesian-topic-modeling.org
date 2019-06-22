@@ -1,7 +1,8 @@
 -----
 title: Bayesian Topic Modeling
-date: January 30, 2019
+published: January 30, 2019
 tags: MCMC, NLP, data-science, bayesian, python
+usetoc: true
 -----
 
 Imagine we have some collection of documents. They could be novels, or tweets, or financial reports---just any collection of text. We want an algorithm that can discover what they are about, and we would like our algorithm to do it automatically, without any hints. (That is, we want our algorithm to be /unsupervised/.) We will look at several models that probabilistically assign words to topics using [[https://en.wikipedia.org/wiki/Bayes'_theorem][Bayes' Theorem]]. They are all [[https://en.wikipedia.org/wiki/Bayesian_network][Bayesian Graphical Models]].

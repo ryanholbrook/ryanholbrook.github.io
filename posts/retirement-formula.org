@@ -1,8 +1,8 @@
 ------
 title: 'A Somewhat Better Retirement Formula'
-date: May 15, 2019
-category:
+published: May 15, 2019
 tags: finance, retirement, calculator
+usetoc: true
 ------
 
 /This is based off a lesson I put together for a class I teach about general mathematics. I wanted a retirement savings formula that was simple enough for an ordinary person to use on their own, but also flexible enough to account for varied goals or circumstances./

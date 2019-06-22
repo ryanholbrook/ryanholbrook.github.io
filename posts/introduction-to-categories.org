@@ -1,0 +1,15 @@
+------
+title: 'Talk: An Introduction to Categories with Haskell and Databases'
+published: 2019-06-22
+tags: talk, category-theory, functional-programming, haskell, cql
+------
+
+About a month ago, I gave an introductory talk on some applications of category theory. I tried to draw connections between the category of types in Haskell and the use of categories in [[https://www.categoricaldata.net/][CQL]], a new query language founded on category theory.
+
+*Description:* Category theory is the language of structure and composition. It is the language of composeable and coherent systems. It has been applied to neural networks and chemical networks, classical mechanics and quantum. It is pervasive in functional programming. If you've ever used a functor or a monad or a parametric type, you have used category theory. Recently, it's been applied to database design as well.
+
+This talk will be an introduction to category theory through Haskell and database programming. We will look at how similarities between the two can be expressed in categories, and how the benefits of safety and abstraction that functional programmers enjoy can be had by database users, too.
+
+#+begin_export html
+<div class="video-container"><iframe src="https://www.youtube-nocookie.com/embed/sJrVKZULiLU" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+#+end_export
