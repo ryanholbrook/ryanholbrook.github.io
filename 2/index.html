@@ -5,14 +5,14 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bayesian Topic Modeling</title>
+    <title>Math for Machines</title>
     <link href="https://fonts.googleapis.com/css?family=Merriweather:400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro&display=swap" rel="stylesheet"> 
     <link href="https://unpkg.com/primer/build/build.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../css/style.css" />
       <!-- Syntax highlighting -->
-  <link rel="stylesheet" href="../../css/github.css" />
-  <script src="../../scripts/highlight.pack.js"></script>
+  <link rel="stylesheet" href="../css/github.css" />
+  <script src="../scripts/highlight.pack.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
   
 
@@ -25,7 +25,7 @@
 
   <div class="p-4" style="text-align: center">
 
-    <a class="title" href="../../">
+    <a class="title" href="../">
       Math for Machines
     </a>
 
@@ -33,10 +33,10 @@
   
   <nav class="UnderlineNav UnderlineNav--right px-2 border-top">
     <div class="UnderlineNav-body">
-      <a class="UnderlineNav-item " href="../../about/">
+      <a class="UnderlineNav-item " href="../about/">
         <span>About</span>
       </a>
-      <a class="UnderlineNav-item " href="../../archive/">
+      <a class="UnderlineNav-item " href="../archive/">
         <span>Archive</span>
       </a>
     </div>
@@ -84,27 +84,27 @@
                 <ul>
     
         <li>
-          <a href="../../posts/introduction-to-categories/">Talk: An Introduction to Categories with Haskell and Databases</a>
+          <a href="../posts/introduction-to-categories/">Talk: An Introduction to Categories with Haskell and Databases</a>
         </li>
     
         <li>
-          <a href="../../posts/retirement-formula/">A Somewhat Better Retirement Formula</a>
+          <a href="../posts/retirement-formula/">A Somewhat Better Retirement Formula</a>
         </li>
     
         <li>
-          <a href="../../posts/permitted-and-forbidden-sets/">Journal Review: Permitted and Forbidden Sets in STLNs</a>
+          <a href="../posts/permitted-and-forbidden-sets/">Journal Review: Permitted and Forbidden Sets in STLNs</a>
         </li>
     
         <li>
-          <a href="../../posts/change-of-basis-for-vectors-and-covectors/">Change of Basis for Vectors and Covectors</a>
+          <a href="../posts/change-of-basis-for-vectors-and-covectors/">Change of Basis for Vectors and Covectors</a>
         </li>
     
         <li>
-          <a href="../../posts/a-tour-of-tensors/">A Tour of Tensors</a>
+          <a href="../posts/a-tour-of-tensors/">A Tour of Tensors</a>
         </li>
     
         <li>
-          <a href="../../posts/bayesian-topic-modeling/">Bayesian Topic Modeling</a>
+          <a href="../posts/bayesian-topic-modeling/">Bayesian Topic Modeling</a>
         </li>
     
 </ul>
@@ -115,15 +115,18 @@
             
           <div class="my-2">
           <div role="main" id="main">
-  <div class="rounded-2 box-shadow-medium pb-3 px-4 bg-white">
-    <!-- Post Header  -->
+  
+  
+  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
+
+        <!-- Post Header  -->
 <div class="Subhead">
   <div class="Subhead-heading">
-      <h2 class="mt-3 mb-1"><a id="post-title" href="../../posts/bayesian-topic-modeling/">Bayesian Topic Modeling</a></h2>
+      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/bayesian-topic-modeling/">Bayesian Topic Modeling</a></h2>
   </div>
   <div class="Subhead-description">
     
-      <a href="../../tags/MCMC/">MCMC</a>, <a href="../../tags/NLP/">NLP</a>, <a href="../../tags/data-science/">data-science</a>, <a href="../../tags/bayesian/">bayesian</a>, <a href="../../tags/python/">python</a>
+      <a href="../tags/MCMC/">MCMC</a>, <a href="../tags/NLP/">NLP</a>, <a href="../tags/data-science/">data-science</a>, <a href="../tags/bayesian/">bayesian</a>, <a href="../tags/python/">python</a>
     
     <div class="float-md-right" style="text-align=right">
       Published: January 30, 2019
@@ -176,7 +179,7 @@ plt.xlim(-0.5, 1.5)
 <pre class="example"><code>(-0.5, 1.5)
 </code></pre>
 </div>
-<figure><img src="../../images/bernoulli.png" alt="Bernoulli pmf" /></figure>
+<figure><img src="../images/bernoulli.png" alt="Bernoulli pmf" /></figure>
 
 <p>Here, 1 represents “red” and 0 represents “blue” (or not-“red”).</p>
 <p>And here is how we could generate a document with this model:</p>
@@ -215,7 +218,7 @@ f.suptitle(r'Beta Distributions for $\theta$', fontsize=20)
 </code></pre>
 <pre class="example"><code>Text(0.5, 0.98, 'Beta Distributions for $\\theta$')
 </code></pre>
-<figure><img src="../../images/beta.png" alt="a grid of six beta pdfs for various parameters" /></figure>
+<figure><img src="../images/beta.png" alt="a grid of six beta pdfs for various parameters" /></figure>
 
 <p>Values near 0 will favor “blue” and values near 1 will favor “red”. We can choose <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> to generate the kinds of documents we like. (The notation is a bit backwards here: <span class="math inline">\(\beta_0\)</span> is the <em>pseudo-count</em> for “red”, whose probability is toward 1, on the right of the graph. So <span class="math inline">\(\beta_0 &gt; \beta_1\)</span> means more “red”s, and vice versa.)</p>
 <p>Let’s generate some documents with this expanded model. We’ll set <span class="math inline">\(\beta_0 = 0.8\)</span> and <span class="math inline">\(\beta_1 = 0.8\)</span>. We would expect most of our documents to favor one word or the other, but overall to occur equally often.</p>
@@ -372,7 +375,7 @@ for i, a in enumerate(alphas):
     title = r'$\alpha = $ = ({0[0]:.3f}, {0[1]:.3f}, {0[2]:.3f})'.format(a)
     plt.title(title, fontdict={'fontsize': 14})
 </code></pre>
-<figure><img src="../../images/dirichlet.png" alt="various dirichlet pdfs" /></figure>
+<figure><img src="../images/dirichlet.png" alt="various dirichlet pdfs" /></figure>
 
 <p>Each corner of the triangle will favor a particular category (a word or a topic), just like either side of the domain of the beta distribution favored a category.</p>
 <p>As in the upper left picture, whenever all of the entries in <span class="math inline">\(\alpha\)</span> are equal, we call the distribution “symmetric,” and whenever they are all less then 1, we call the distribution “sparse.” Distributions that are both symmetric and sparse are often used as priors when inferring a topic model, symmetry because we don’t <em>a priori</em> have any reason to favor one unknown category over another, and sparsity to encourage our categories to be distinct.</p>
@@ -621,7 +624,7 @@ for i, ts in enumerate(thetas):
     title = r'$\theta_{0}$ = ({1[0]:.3f}, {1[1]:.3f}, {1[2]:.3f})'.format(i,ts)
     plt.title(title, fontdict={'fontsize': 14})
 </code></pre>
-<figure><img src="../../images/distribution.png" alt="random sample of documents in the dirichlet model" /></figure>
+<figure><img src="../images/distribution.png" alt="random sample of documents in the dirichlet model" /></figure>
 
 <p>That’s all for now!</p>
 <h1 id="references">References</h1>
@@ -632,35 +635,32 @@ for i, ts in enumerate(thetas):
   
 </article>
 
+
+        <!-- Post Footer -->
+        <div>
+
+        </div>
+
+    
   </div>
-</div>
+  
 
 <!-- Pagination -->
 <nav class="paginate-container" aria-label="Pagination">
   <div class="pagination">
     
-    <span class="previous_page disabled">⮜ Previous</span>
+    <span class="previous_page disabled">⮜ Older</span>
     
 
     
-    <a class="next_page text-gray-dark" rel="next" aria-label="Next Page" href="../../posts/a-tour-of-tensors/">Next ⮞</a>
+    <a class="next_page text-gray-dark" rel="newer" aria-label="Newer Posts" href="../">Newer ⮞</a>
     
   </div>
 </nav>
 
-<!-- Talkyard Comments -->
-<div class="container-m">
-  <div class="rounded-2 box-shadow-medium px-2 py-1 bg-white">
-    <script>talkyardServerUrl='https://comments-for-mathformachines-com.talkyard.net';</script>
-    <script async defer src="https://c1.ty-cdn.net/-/talkyard-comments.min.js"></script>
-    <!-- You can specify a per page discussion id on the next line, if your URLs might change. -->
-    <div class="talkyard-comments" data-discussion-id style="margin-top: 45px;">
-      <noscript>Please enable Javascript to view comments.</noscript>
-      <p style="margin-top: 25px; opacity: 0.9; font-size: 96%">Comments powered by
-        <a href="https://www.talkyard.io">Talkyard</a>.</p>
-    </div>
-  </div>
+  
 </div>
+
 
           </div>
           
@@ -668,7 +668,7 @@ for i, ts in enumerate(thetas):
             <div id="side">
               <div>
                 <h1>Tags</h1>
-                <a style="font-size: 100%" href="../../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../../tags/category-theory/">category-theory</a> <a style="font-size: 100%" href="../../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../../tags/cql/">cql</a> <a style="font-size: 100%" href="../../tags/data-science/">data-science</a> <a style="font-size: 100%" href="../../tags/engrams/">engrams</a> <a style="font-size: 100%" href="../../tags/finance/">finance</a> <a style="font-size: 100%" href="../../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../../tags/julia/">julia</a> <a style="font-size: 100%" href="../../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../../tags/memory/">memory</a> <a style="font-size: 100%" href="../../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../../tags/numpy/">numpy</a> <a style="font-size: 100%" href="../../tags/python/">python</a> <a style="font-size: 100%" href="../../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../../tags/sage/">sage</a> <a style="font-size: 100%" href="../../tags/talk/">talk</a> <a style="font-size: 100%" href="../../tags/tensors/">tensors</a> <a style="font-size: 100%" href="../../tags/vectors/">vectors</a>
+                <a style="font-size: 100%" href="../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../tags/category-theory/">category-theory</a> <a style="font-size: 100%" href="../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../tags/cql/">cql</a> <a style="font-size: 100%" href="../tags/data-science/">data-science</a> <a style="font-size: 100%" href="../tags/engrams/">engrams</a> <a style="font-size: 100%" href="../tags/finance/">finance</a> <a style="font-size: 100%" href="../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../tags/julia/">julia</a> <a style="font-size: 100%" href="../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../tags/memory/">memory</a> <a style="font-size: 100%" href="../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../tags/numpy/">numpy</a> <a style="font-size: 100%" href="../tags/python/">python</a> <a style="font-size: 100%" href="../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../tags/sage/">sage</a> <a style="font-size: 100%" href="../tags/talk/">talk</a> <a style="font-size: 100%" href="../tags/tensors/">tensors</a> <a style="font-size: 100%" href="../tags/vectors/">vectors</a>
               </div>
             </div>
           </div>

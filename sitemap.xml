@@ -15,36 +15,43 @@
 
 
   <url>
+    <loc>https://mathformachines.com/posts/introduction-to-categories/index.html</loc>
+    <lastmod>2019-06-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://mathformachines.com/posts/retirement-formula/index.html</loc>
-    <lastmod>May 15, 2019</lastmod>
+    <lastmod>2019-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://mathformachines.com/posts/permitted-and-forbidden-sets/index.html</loc>
-    <lastmod>April  8, 2019</lastmod>
+    <lastmod>2019-04-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://mathformachines.com/posts/change-of-basis-for-vectors-and-covectors/index.html</loc>
-    <lastmod>March 18, 2019</lastmod>
+    <lastmod>2019-03-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://mathformachines.com/posts/a-tour-of-tensors/index.html</loc>
-    <lastmod>February  5, 2019</lastmod>
+    <lastmod>2019-02-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://mathformachines.com/posts/bayesian-topic-modeling/index.html</loc>
-    <lastmod>January 30, 2019</lastmod>
+    <lastmod>2019-01-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
