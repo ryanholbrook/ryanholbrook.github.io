@@ -38,8 +38,6 @@ main = hakyll $ do
                 >>= loadAndApplyTemplate "templates/default.html" tagContext
                 >>= cleanUrls
 
---    categories <- /get metadata somehow/
-
     -- Build tables of contents
     match "posts/*" $ version "toc" $
        compile $ pandocCompilerWith defaultHakyllReaderOptions
@@ -96,6 +94,9 @@ main = hakyll $ do
             >>= loadAndApplyTemplate "templates/page.html"    pageContext
             >>= loadAndApplyTemplate "templates/default.html" pageContext
             >>= cleanUrls
+
+    -- Build notebooks
+    -- TODO
 
     -- Build main pages
     paginateBy10 <- buildPaginateWith grouperBy10 postPattern postsPageIdBy10

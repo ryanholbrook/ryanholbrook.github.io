@@ -16,7 +16,11 @@
 $for(posts)$
   <url>
     <loc>$root$$url$</loc>
-    <lastmod>$if(updated)$$updated$$else$$if(date)$$date$$endif$$endif$</lastmod>
+    $if(updated)$
+    <lastmod>$updated$</lastmod>
+    $else$$if(date)$
+    <lastmod>$date$</lastmod>
+    $endif$$endif$
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -25,7 +29,11 @@ $endfor$
 $for(pages)$
   <url>
     <loc>$root$$url$</loc>
-    <lastmod>$if(updated)$$updated$$else$$if(date)$$date$$endif$$endif$</lastmod>
+    $if(updated)$
+    <lastmod>$updated$</lastmod>
+    $else$$if(date)$
+    <lastmod>$date$</lastmod>
+    $endif$$endif$
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

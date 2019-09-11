@@ -1,3 +1,13 @@
+---
+title: investmentsim - an R Package for Simulating Investment Portfolios
+published: September 11, 2019
+date: September 11, 2019
+tags: finance, investing, R, simulation
+---
+
+
+I wrote a little package recently for a project I've been working on. I've mostly been using it to help out with Monte Carlo simulations for personal finance planning. It's a little rough at the moment, but for the adventurous it's on Github here: [investmentsim](https://github.com/ryanholbrook/investmentsim). And here's a quick tutorial on how to use it.
+
 # Introduction
 
 The `investmentsim` package implements a function `make_path` to
@@ -91,7 +101,7 @@ addLegend("topright",
           bty = "o")
 ```
 
-![](basic_usage_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](/images/allocation.png)
 
 Finally, we can define our desired transactions and collect everything
 together in a model. The `make_transactions_on_dates` function does what
@@ -138,6 +148,6 @@ addLegend("topleft",
           bty = "o")
 ```
 
-![](basic_usage_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](/images/path.png)
 
 We’re rich\!
