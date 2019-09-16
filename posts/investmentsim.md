@@ -1,8 +1,6 @@
-
 ---
-title: investmentsim - an R Package for Simulating Investment Portfolios
+title: 'investmentsim - an R Package for Simulating Investment Portfolios'
 published: September 11, 2019
-date: 2019-09-11
 tags: finance, investing, R, simulation
 usetoc: true
 ---
