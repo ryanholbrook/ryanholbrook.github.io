@@ -101,12 +101,16 @@ addLegend("topright",
           bty = "o")
 ```
 
-![](/images/allocation.png)
+![The allocation path for the portfolio.](/images/allocation.png)
+
+You can see that it is constant before the first date given and
+constant after the last date, and that it linearly interpolates the
+allocation when moving from one date to the next.
 
 Finally, we can define our desired transactions and collect everything
 together in a model. The `make_transactions_on_dates` function does what
 it sounds like it does: defines for the model a specified deposit
-(positive value) or a specified withdrawal (negative value). Within the
+(a positive value) or a specified withdrawal (a negative value). Within the
 simulation, transactions are applied at the end of the years given. So
 this transaction path just makes a $1000 deposit at the end of each
 year.
@@ -148,6 +152,6 @@ addLegend("topleft",
           bty = "o")
 ```
 
-![](/images/path.png)
+![The value of the portfolio over time.](/images/path.png)
 
 We’re rich\!
