@@ -15,6 +15,15 @@
 
 
   <url>
+    <loc>https://mathformachines.com/posts/bayes-and-means/index.html</loc>
+    
+    <lastmod>2019-10-04</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://mathformachines.com/posts/investmentsim/index.html</loc>
     
     <lastmod>2019-09-11</lastmod>
