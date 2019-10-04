@@ -2,21 +2,16 @@
 title: 'investmentsim - an R Package for Simulating Investment Portfolios'
 published: September 11, 2019
 tags: finance, investing, R, simulation
-usetoc: true
 ---
 
 
 I wrote a little package recently for a project I've been working on. I've mostly been using it to help out with Monte Carlo simulations for personal finance planning. It's a little rough at the moment, but for the adventurous it's on Github here: [investmentsim](https://github.com/ryanholbrook/investmentsim). And here's a quick tutorial on how to use it.
-
-# Introduction
 
 The `investmentsim` package implements a function `make_path` to
 simulate an investment portfolio. It supports time-varying allocation of
 assets, automatic rebalancing, and planned transactions. The purpose of
 the package is to backtest investment plans as one might do for
 retirement accounts. (It does not have support for taxes or fees.)
-
-# Example
 
 This example will demonstrate how to create an investment portfolio with
 defined allocations and transactions, and then simulate the balance of
