@@ -1,0 +1,1201 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Math for Machines</title>
+    <link href="https://fonts.googleapis.com/css?family=Merriweather:400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro&display=swap" rel="stylesheet"> 
+    <link href="https://unpkg.com/primer/build/build.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css" />
+      <!-- Syntax highlighting -->
+  <link rel="stylesheet" href="../css/github.css" />
+  <script src="../scripts/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+      </head>
+  <body class="bg-gray-dark">
+    <div class="container-xxl h-100 my-3">
+      <div class="box-shadow-large bg-gray">
+
+        <header id="header" class="bg-white">
+
+  <div class="p-4" style="text-align: center">
+
+    <a class="title" href="../">
+      Math for Machines
+    </a>
+
+  </div>
+  
+  <nav class="UnderlineNav UnderlineNav--right px-2 border-top">
+    <div class="UnderlineNav-body">
+      <a class="UnderlineNav-item " href="../about/">
+        <span>About</span>
+      </a>
+      <a class="UnderlineNav-item " href="../archive/">
+        <span>Archive</span>
+      </a>
+    </div>
+  </nav>
+
+
+  <!-- Scripts -->
+  <!-- Enable MathJax -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        "HTML-CSS": { scale: 90, linebreaks: { automatic: true } },
+        SVG: { linebreaks: { automatic:true } },
+    });
+    MathJax.Hub.Config({ TeX: { extensions: ["color.js"] }});
+    MathJax.Hub.Config({
+        TeX: {
+            Macros: {
+                formbox: ["\\bbox[15px, border:1px solid Gray]{#1}", 1],
+            }
+        }
+    });
+  </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-133546767-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-133546767-1', { 'optimize_id': 'GTM-T3XD3JM'});
+  </script>
+
+</header>
+
+        
+        <div id="holy">
+
+          <div id="left" class="mr-2 px-3 pb-3 text-gray bg-white">
+            <div id="side">
+              <div>
+                <h1>Recent Posts</h1>
+                <ul>
+    
+        <li>
+          <a href="../posts/bayes-and-means/">What I'm Reading 1: Bayes and Means</a>
+        </li>
+    
+        <li>
+          <a href="../posts/investmentsim/">investmentsim - an R Package for Simulating Investment Portfolios</a>
+        </li>
+    
+        <li>
+          <a href="../posts/introduction-to-categories/">Talk: An Introduction to Categories with Haskell and Databases</a>
+        </li>
+    
+        <li>
+          <a href="../posts/retirement-formula/">A Somewhat Better Retirement Formula</a>
+        </li>
+    
+        <li>
+          <a href="../posts/permitted-and-forbidden-sets/">Journal Review: Permitted and Forbidden Sets in STLNs</a>
+        </li>
+    
+        <li>
+          <a href="../posts/change-of-basis-for-vectors-and-covectors/">Change of Basis for Vectors and Covectors</a>
+        </li>
+    
+        <li>
+          <a href="../posts/a-tour-of-tensors/">A Tour of Tensors</a>
+        </li>
+    
+        <li>
+          <a href="../posts/bayesian-topic-modeling/">Bayesian Topic Modeling</a>
+        </li>
+    
+</ul>
+
+              </div>
+            </div>
+          </div>
+            
+          <div class="my-2">
+          <div role="main" id="main">
+  
+  
+  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
+
+        <!-- Post Header  -->
+<div class="Subhead">
+  <div class="Subhead-heading">
+      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/change-of-basis-for-vectors-and-covectors/">Change of Basis for Vectors and Covectors</a></h2>
+  </div>
+  <div class="Subhead-description">
+    
+      <a href="../tags/coordinates/">coordinates</a>, <a href="../tags/covectors/">covectors</a>, <a href="../tags/vectors/">vectors</a>, <a href="../tags/linear-algebra/">linear-algebra</a>
+    
+    <div class="float-md-right" style="text-align=right">
+      Published: March 18, 2019
+      
+    </div>
+  </div>
+</div>
+
+<article>
+  
+  <div id="toc" class="Box mb-3">
+    <h1>Table of Contents</h1>
+    <ul class="incremental">
+<li><a href="#vectors">Vectors</a><ul class="incremental">
+<li><a href="#example---part-1">Example - Part 1</a></li>
+<li><a href="#formulas">Formulas</a></li>
+<li><a href="#example---part-2">Example - Part 2</a></li>
+</ul></li>
+<li><a href="#covectors">Covectors</a><ul class="incremental">
+<li><a href="#example---part-3">Example - Part 3</a></li>
+<li><a href="#the-dual-basis">The Dual Basis</a></li>
+<li><a href="#formulas-1">Formulas</a></li>
+<li><a href="#example---part-4">Example - Part 4</a></li>
+</ul></li>
+<li><a href="#summary-of-formulas">Summary of Formulas</a></li>
+</ul>
+  </div>
+  
+  
+  <section id="content" class="pb-2 mb-4 border-bottom">
+    <blockquote>
+<p>We share a philosophy about linear algebra: we think basis-free, we write basis-free, but when the chips are down we close the office door and compute with matrices like fury.</p>
+</blockquote>
+<p><a href="https://mathoverflow.net/questions/11669/what-is-the-difference-between-matrix-theory-and-linear-algebra/19923">Irving Kaplansky</a></p>
+<p>Often, the first step in analyzing a problem is to <em>transform</em> it into something more amenable to our analysis. We would like the <em>representation</em> of our problem to reflect as naturally as possible whatever features of it we are most interested in. We might normalize data through a scaling transform, for instance, to eliminate spurious differences among like quantities. Or we might rotate data to align some of its salient dimensions with the coordinate axes, simplifying computations. Many matrix decompositions take the form <span class="math inline">\(M = BNA\)</span>. When <span class="math inline">\(B\)</span> and <span class="math inline">\(A\)</span> are non-singular, we can think of <span class="math inline">\(N\)</span> as being a simpler representation of <span class="math inline">\(M\)</span> under coordinate transforms <span class="math inline">\(B\)</span> and <span class="math inline">\(A\)</span>. The <a href="https://en.wikipedia.org/wiki/Eigendecomposition_of_a_matrix">spectral decomposition</a> and the <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> are of this form.</p>
+<p>All of these kinds of coordinate transformations are <em>linear</em> transformations. Linear coordinate transformations come about from operations on basis vectors that leave any vectors represented by them <a href="https://en.wikipedia.org/wiki/Active_and_passive_transformation">unchanged</a>. They are, in other words, a change of basis.</p>
+<p>This post came about from my frustration at not finding simple formulas for these transformations with simple explanations to go along with them. So here, I tried to give a simple exposition of coordinate transformations for vectors in vector spaces along with transformations of their cousins, the covectors in the dual space. I’ll get into matrices and some applications in a future post.</p>
+<h1 id="vectors">Vectors</h1>
+<h2 id="example---part-1">Example - Part 1</h2>
+<p>Let’s go through an example to see how it works. (I’ll assume the field is <span class="math inline">\(\mathbb{R}\)</span> throughout.)</p>
+<p>Let <span class="math inline">\(e\)</span> be the standard basis in <span class="math inline">\(\mathbb{R}^2\)</span> and let <span class="math inline">\(e'\)</span> be another basis where <span class="math display">\[
+\begin{array}{cc}
+e'_1 = \frac12 e_1, &amp; e'_2 = -e_1 + 2 e_2
+\end{array}
+\]</span> So we have written the basis <span class="math inline">\(e'\)</span> in terms of the standard basis <span class="math inline">\(e\)</span>. As vectors they look like this:</p>
+<figure><img src="../images/bases.jpg" alt="Drawing of the basis vectors e_1, e_2, and e'_1, e'_2" /></figure>
+
+<p>And each will induce its own coordinate system, indicating the angle and orientation of each axis, and each axis’ unit of measure.</p>
+<figure><img src="../images/coordinates.jpg" alt="Drawing of basis vectors and the coordinates they induce."></figure>
+
+<p>We can write any vector in <span class="math inline">\(\mathbb{R}^2\)</span> as a linear combination of these basis elements.</p>
+<p><span class="math display">\[\begin{array}{cc}
+v = e_1 + 2 e_2, &amp; w' = 5 e'_1 + \frac12 e'_2
+\end{array}\]</span></p>
+<figure><img src="../images/vectors.jpg" alt="Drawing of vectors in two coordinate systems."></figure>
+
+<p>We call the coefficients on the basis elements the <strong>coordinates</strong> of the vector in that basis. So, in basis <span class="math inline">\(e\)</span> the vector <span class="math inline">\(v\)</span> has coordinates <span class="math inline">\((1, 2)\)</span>, and in basis <span class="math inline">\(e'\)</span> the vector <span class="math inline">\(w'\)</span> has coordinates <span class="math inline">\((5, \frac12)\)</span>.</p>
+<h2 id="formulas">Formulas</h2>
+<p>The choice of basis is just a choice of representation. The vector itself should stay the same. So the question is – how can we rewrite a vector in a <em>different</em> basis without changing the vector itself?</p>
+<p>Let’s establish some notation. First, whenever we are talking about a vector in the abstract, let’s write <span class="math inline">\(\mathbf{v}\)</span>, and whenever we are talking about a vector represented in some basis let’s write <span class="math inline">\(v\)</span>. So the same vector <span class="math inline">\(\mathbf{v}\)</span> might have two different basis representations <span class="math inline">\(v\)</span> and <span class="math inline">\(v'\)</span>, which nevertheless all stand for the same vector: <span class="math inline">\(\mathbf{v} = v = v'\)</span>. However, when we write <span class="math inline">\(e\)</span> for a basis, we mean a list of vectors <span class="math inline">\(e_i\)</span> that form a basis in some vector space <span class="math inline">\(V\)</span>. So, <span class="math inline">\(v = v'\)</span> always, but in general <span class="math inline">\(e \neq e'\)</span>.</p>
+<p>Our basis elements let’s index with subscripts (like <span class="math inline">\(e_1\)</span>), and coordinates let’s index with superscripts (like <span class="math inline">\(v^1\)</span>). This will help us keep track of which one we’re working with. Also, let’s write basis elements as row vectors, and coordinates as column vectors. This way we can write a vector as a matrix product of the basis elements and the coordinates:</p>
+<p><span class="math display">\[v = \begin{bmatrix} e_1 &amp; e_2 \end{bmatrix}\begin{bmatrix}v^1 \\
+v^2\end{bmatrix} = v^1 e_1 + v^2 e_2
+\]</span></p>
+<p>Now we can also write the transformation given above of <span class="math inline">\(e\)</span> into <span class="math inline">\(e'\)</span> using matrix multiplication:</p>
+<p><span class="math display">\[e' = \begin{bmatrix}e'_1&amp; e'_2\end{bmatrix} = \begin{bmatrix}e_1&amp;  e_2\end{bmatrix}\begin{bmatrix}
+\frac12 &amp; -1 \\
+0 &amp; 2 
+\end{bmatrix} = \begin{bmatrix}\frac12 e_1 &amp; -e_1 + 2 e_2\end{bmatrix}\]</span></p>
+<p>The <span class="math inline">\(2 \times 2\)</span> matrix used in that transformation is called the <strong>transformation matrix</strong> from the basis <span class="math inline">\(e\)</span> to the basis <span class="math inline">\(e'\)</span>.</p>
+<p>The general formula is</p>
+<p><span class="math display">\[\formbox{e' = e A}\]</span></p>
+<p>where <span class="math inline">\(A\)</span> is the transformation matrix. We can use this <em>same</em> matrix to transform coordinate vectors, but we shouldn’t necessarily expect that we can use the same formula. The bases and the coordinates are playing different roles here: the basis elements are vectors that describe the coordinate system, while the coordinates are scalars that describe a vector’s position in that system.</p>
+<p>Let’s think about how this should work. Generally we write <span class="math inline">\(v = v^1 e_1 + v^2 e_2 \cdots + v^n e_n\)</span>. If we make some new basis <span class="math inline">\(e'\)</span> by multiplying all the <span class="math inline">\(e_i\)</span>’s by 2, say, and <em>also</em> multiplied all the <span class="math inline">\(v_j\)</span>’s by 2, then we would end up with a vector <em>four times</em> the size of the original. Instead, we should have multiplied all the <span class="math inline">\(v_j\)</span>’s by <span class="math inline">\(\frac12\)</span>, the inverse of 2, and then we would have <span class="math inline">\(v' = v\)</span>, as needed. The vector must be the same in either basis.</p>
+<p>So, if we change the <span class="math inline">\(e\)</span>’s by some factor then, the <span class="math inline">\(v\)</span>’s need to change in the <em>inverse</em> manner to maintain equality. This suggests that to change <span class="math inline">\(v\)</span> into a representation <span class="math inline">\(v'\)</span> in basis <span class="math inline">\(e'\)</span> we should use instead</p>
+<p><span class="math display">\[\formbox{v' = A^{-1} v}\]</span></p>
+<p>(We’ll prove it a little bit later.)</p>
+<p>The fact that basis elements change in one way (<span class="math inline">\(e' = e A\)</span>) while coordinates change in the inverse way (<span class="math inline">\(v' = A^{-1} v\)</span>), is why we sometimes call the basis elements <strong>covariant</strong> and the vector coordinates <strong>contravariant</strong>, and distinguish them with the position of their indices.</p>
+<h2 id="example---part-2">Example - Part 2</h2>
+<p>Let’s go back to our example. Using our formula, we get</p>
+<p><span class="math display">\[
+v' = \begin{bmatrix}2 &amp; 1 \\
+0 &amp; \frac12 \end{bmatrix} \begin{bmatrix}1 \\
+2\end{bmatrix} = \begin{bmatrix}4 \\
+1\end{bmatrix}
+\]</span></p>
+<p>But what about <span class="math inline">\(w'\)</span>? Well, since its representation is in <span class="math inline">\(e'\)</span>, to convert in the opposite direction, to <span class="math inline">\(e\)</span>, we need to use the transformation that’s the inverse of <span class="math inline">\(A^{-1}\)</span>, namely, <span class="math inline">\(A\)</span>.</p>
+<p><span class="math display">\[
+w = \begin{bmatrix}\frac12 &amp; -1 \\
+0 &amp; 1 \end{bmatrix} \begin{bmatrix}5 \\
+\frac12\end{bmatrix} = \begin{bmatrix}2 \\
+1\end{bmatrix}
+\]</span></p>
+<p>And now we have:</p>
+<figure><img src="../images/transformed.jpg" alt="Drawing of vectors v, v', w, and w'." /></figure>
+
+<p>Each vector is unchanged after a change of basis.</p>
+<h1 id="covectors">Covectors</h1>
+<p>Recall the <a href="https://en.wikipedia.org/wiki/Inner_product_space">inner product</a> on a vector space.</p>
+<p>We might ask, given some vector <span class="math inline">\(v\)</span> how does an inner product vary as we range over vectors <span class="math inline">\(w\)</span>? In this case, we could think of <span class="math inline">\(\langle v, \cdot\rangle\)</span> as a function of vectors in <span class="math inline">\(V\)</span> whose outputs are scalars. In fact, these sorts of functions themselves form a vector space, called the <strong>dual space</strong> of <span class="math inline">\(V\)</span>, which we write <span class="math inline">\(V^*\)</span>. The members of <span class="math inline">\(V^*\)</span> are called <strong>linear functionals</strong> or <strong>covectors</strong>. The covector given by <span class="math inline">\(\langle v, \cdot\rangle\)</span> we denote <span class="math inline">\(v^*\)</span>.</p>
+<p>We’ve been working with vectors in <span class="math inline">\(\mathbb{R}^n\)</span>, and in <span class="math inline">\(\mathbb{R}^n\)</span> the (canonical) inner product is the <a href="https://en.wikipedia.org/wiki/Dot_product">dot product</a>. This means that if we denote the covectors in <span class="math inline">\(V^*\)</span> as <em>rows</em> and the vectors in <span class="math inline">\(V\)</span> as <em>columns</em> (as usual), then we can write</p>
+<p><span class="math display">\[
+v^*(w) = \begin{bmatrix} v_1 &amp; \cdots &amp; v_n\end{bmatrix}\begin{bmatrix}w^1 \\
+\vdots\\
+w^n\end{bmatrix} = v_1 w^1 + \cdots + v_n w^n
+\]</span></p>
+<p>So, the covectors are functions <span class="math inline">\(\mathbb{R}^n \to \mathbb{R}\)</span>, but we can do computations with them just like we do with vectors, using matrix multiplication. We still write the indices of the row vectors as subscripts and the indices of the column vectors as superscripts.</p>
+<p>If we can think about vectors in <span class="math inline">\(\mathbb{R}^n\)</span> as arrows, how should we think about covectors? To simplify things, let’s restrict our attention to the two-dimensional case. Now, consider the action of a covector <span class="math inline">\(v^*\)</span> on some unknown vector <span class="math inline">\(w = \begin{bmatrix}x&amp; y\end{bmatrix}^\top\)</span> in <span class="math inline">\(\mathbb{R}^2\)</span>:</p>
+<p><span class="math display">\[
+v^*(w) = v_1 x + v_2 y
+\]</span></p>
+<p>Now if we look at the level sets of this function, <span class="math inline">\(v_1 x + v_2 y = k\)</span>, it should start to look familiar…</p>
+<p>It’s a family of <a href="https://en.wikipedia.org/wiki/Linear_equation#Two-point_form">lines</a>!</p>
+<p>And to find out the value of <span class="math inline">\(v^*(w)\)</span> we just count how many lines of <span class="math inline">\(v^*\)</span> the vector <span class="math inline">\(w\)</span> passes through (including maybe “fractional” valued lines – <span class="math inline">\(k\)</span> doesn’t have to just be an integer). More generally, the covectors of <span class="math inline">\(\mathbb{R}^n\)</span> can be thought of as <a href="https://en.wikipedia.org/wiki/Hyperplane">hyperplanes</a>, and the value of <span class="math inline">\(v^*(w)\)</span> can be determined by how many hyperplanes of <span class="math inline">\(v^*\)</span> the vector <span class="math inline">\(w\)</span> passes through. And furthermore, the vector <span class="math inline">\(v\)</span> will be the <a href="https://en.wikipedia.org/wiki/Normal_(geometry)">normal</a> vector to the hyperplanes given by <span class="math inline">\(v^*\)</span>, that is, they are perpendicular.</p>
+<h2 id="example---part-3">Example - Part 3</h2>
+<p>In the standard basis, let <span class="math inline">\(v^*\)</span> be given by <span class="math inline">\(\begin{bmatrix}1 &amp; 2\end{bmatrix}\)</span>. Its family of lines will then be <span class="math inline">\(x + 2 y = k\)</span>. Now let <span class="math inline">\(w\)</span> be given by <span class="math inline">\(\begin{bmatrix}2 &amp; 1\end{bmatrix}\)</span>, and count how many lines <span class="math inline">\(w\)</span> crosses through:</p>
+<figure><img src="../images/covectors.jpg" alt="Left: Drawing of v and v^*. Right: Drawing of v^* and w." /></figure>
+
+<p>It’s exactly the same as <span class="math inline">\(v^*(w) = 2 + 2(1) = 4\)</span>! I think that’s pretty cool.</p>
+<h2 id="the-dual-basis">The Dual Basis</h2>
+<p>Okay, so what about bases in <span class="math inline">\(V^*\)</span>? We’d like to have a basis for <span class="math inline">\(V^*\)</span> that is the “best fit” for whatever basis we have in <span class="math inline">\(V\)</span>. This turns out to be the basis given by: <span class="math display">\[
+e^i(e_j) =
+\begin{cases}
+  1 &amp; \text{if } i = j\\
+  0 &amp; \text{if } i \ne j
+\end{cases}\]</span></p>
+<p>where <span class="math inline">\((e_j)\)</span> is a basis in <span class="math inline">\(V\)</span>. Or sometimes people write instead <span class="math inline">\(e^i(e_j) = \delta^i_j\)</span>, where <span class="math inline">\(\delta^i_j\)</span> is the <a href="https://en.wikipedia.org/wiki/Kronecker_delta">Kronecker delta</a>. We call this basis <span class="math inline">\((e^i)\)</span> the <strong>dual basis</strong> of <span class="math inline">\((e_j)\)</span>. You can see that a basis and its dual have a kind of “bi-orthogonality” property that turns out to be very convenient.</p>
+<p>Let’s look at formulas for changing bases now. If we have a vector <span class="math inline">\(v\)</span> in <span class="math inline">\(V\)</span> written as a column, how can we find the corresponding vector <span class="math inline">\(v^*\)</span> in <span class="math inline">\(V^*\)</span>? The obvious thing to do would be to take the transposition of <span class="math inline">\(v\)</span>. This will not always work. Recall the definitions of <span class="math inline">\(v, v', w\)</span> and <span class="math inline">\(w'\)</span> from the <em>first section</em>, and consider:</p>
+<p><span class="math display">\[v^\top v = \begin{bmatrix} 1 &amp; 2\end{bmatrix}\begin{bmatrix}1 \\
+2\end{bmatrix} = 1 + 4 = 5\]</span></p>
+<p><span class="math display">\[v'^\top v' = \begin{bmatrix} 4 &amp; 1\end{bmatrix}\begin{bmatrix}4 \\
+1\end{bmatrix} = 16 + 1 = 17\]</span></p>
+<p>This is no good. We get two different values for <span class="math inline">\(\bar v^*(\bar w)\)</span> depending on which basis we use, but the values of a function on a vector space shouldn’t depend on the basis. The trouble is that the dual of <span class="math inline">\((e'_i)\)</span> isn’t the transpose of those basis vectors (they don’t satisfy the bi-orthogonality property), so the duals of those vectors represented in it won’t be the transposes of those vectors either.</p>
+<p>This <em>will</em> be true for <a href="https://en.wikipedia.org/wiki/Orthonormality">orthonormal</a> bases, however. The standard basis <span class="math inline">\((e_i)\)</span> <em>is</em> orthonormal, and the duals of the vectors represented in it will in fact be those transposes.</p>
+<p><span class="math display">\[ \formbox{v^* = v^\top \text{for any vector } v \text{ written in an orthonormal basis.}} \]</span></p>
+<h2 id="formulas-1">Formulas</h2>
+<p>The next question is, if we perform a change of basis in <span class="math inline">\(V\)</span>, what is the corresponding change in <span class="math inline">\(V^*\)</span>? Let’s use the same reasoning that we did before. For a vector <span class="math inline">\(w\)</span> in <span class="math inline">\(\mathbb{R}\)</span> and a covector <span class="math inline">\(v^*\)</span>, we have</p>
+<p><span class="math display">\[
+v^*(w) = v_1 w^1 + \cdots + v_n w^n
+\]</span></p>
+<p>And so, like before, if we change the values of the <span class="math inline">\(w_j\)</span>’s, the values of the <span class="math inline">\(v^i\)</span>’s should change in the inverse manner to preserve equality. But <span class="math inline">\(w\)</span> changes as <span class="math inline">\(w' = A^{-1} w\)</span>, so <span class="math inline">\(v^*\)</span> must change as <span class="math inline">\(v'^* = v^* A\)</span>. And its basis (the dual basis) must change as <em>its</em> inverse: <span class="math inline">\(e'^* = A^{-1} e^*\)</span>.</p>
+<p><span class="math display">\[\formbox{\begin{align}
+e'^* &amp;= A^{-1} e^*\\
+v'^* &amp;= v^* A
+\end{align}}\]</span></p>
+<p>Notice that this time the basis vectors are playing the <strong>contravariant</strong> part, while the coordinates are playing the <strong>covariant</strong> part with respect to the original vector space.</p>
+<h2 id="example---part-4">Example - Part 4</h2>
+<p>Lets continue our example. Since <span class="math inline">\(e\)</span> is the standard basis, it is orthonormal, and we can therefore find the duals of <span class="math inline">\(v\)</span> and <span class="math inline">\(w\)</span> by taking transposes. We can then apply our formula to find the duals of <span class="math inline">\(v'^*\)</span> and <span class="math inline">\(w'^*\)</span>.</p>
+<span class="math display">\[\begin{align}
+v'^*(x, y) &amp;= \begin{bmatrix}1 &amp; 2\end{bmatrix}\begin{bmatrix}\frac12 &amp; -1\\
+0 &amp; 2\end{bmatrix}\begin{bmatrix}x\\
+y\end{bmatrix}\\
+&amp;= \begin{bmatrix}\frac12 &amp; 3\end{bmatrix}\begin{bmatrix}x\\
+y\end{bmatrix}\\
+&amp;= \frac12 x + 3y\\
+\\
+w'^*(x, y) &amp;= \begin{bmatrix}2 &amp; 1\end{bmatrix}\begin{bmatrix}\frac12 &amp; -1\\
+0 &amp; 2\end{bmatrix}\begin{bmatrix}x\\
+y\end{bmatrix}\\
+&amp;= \begin{bmatrix}1 &amp; 0\end{bmatrix}\begin{bmatrix}x\\
+y\end{bmatrix}\\
+&amp;= 2x + 2y
+\end{align}
+\]</span>
+<p>The duals too are unchanged after a change of basis.</p>
+<figure><img src="../images/covectors2.jpg" alt="Left: Drawing of $v^*$ and $w^*$. Right: Drawing of $v'^*$ and $w'^*$." /></figure>
+
+<h1 id="summary-of-formulas">Summary of Formulas</h1>
+<p><span class="math display">\[\formbox{\begin{array}{llr} 
+e'   &amp;= e A      &amp; &amp;(1)\\ 
+v'   &amp;= A^{-1} v &amp; &amp;(2)\\
+e'^* &amp;= A^{-1} e &amp; &amp;(3)\\
+v'^* &amp;= v A      &amp; &amp;(4)
+\end{array} }\]</span></p>
+<p>Suppose <span class="math inline">\((1)\)</span>, that <span class="math inline">\(e' = e A\)</span>, where <span class="math inline">\(A\)</span> is a non-singular matrix.</p>
+<p><strong>Proof of (2):</strong> We know <span class="math inline">\(e v = e' v'\)</span>. Now</p>
+<p><span class="math display">\[
+e' v' = e v = e A A^{-1} v = e' (A^{-1} v)
+\]</span></p>
+<p>But then it must be that <span class="math inline">\(v' = A^{-1} v\)</span> since basis representations are unique.</p>
+<p><strong>Proof of (4):</strong> We also know <span class="math inline">\(v'^* w' = v^* w\)</span> for all vectors <span class="math inline">\(w\)</span>. But then</p>
+<p><span class="math display">\[
+v'^* w' = v^* w = v^* w = v^* A A^{-1} w = (v^* A) w'
+\]</span></p>
+<p>for all <span class="math inline">\(w'\)</span>. So, <span class="math inline">\(v'^* = v^* A\)</span>.</p>
+<p><strong>Proof of (3):</strong> Lastly,</p>
+<p><span class="math display">\[
+v'^* e'^* = v^* e^* = v^* A A^{-1} e^* = v'^* A^{-1} e^*
+\]</span></p>
+<p>for all <span class="math inline">\(w'\)</span>. So, <span class="math inline">\(e'^* = A^{-1}e^*\)</span>. <strong>QED</strong></p>
+  </section>
+  
+</article>
+
+
+        <!-- Post Footer -->
+        <div>
+
+        </div>
+
+    
+  </div>
+  
+  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
+
+        <!-- Post Header  -->
+<div class="Subhead">
+  <div class="Subhead-heading">
+      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/a-tour-of-tensors/">A Tour of Tensors</a></h2>
+  </div>
+  <div class="Subhead-description">
+    
+      <a href="../tags/numpy/">numpy</a>, <a href="../tags/sage/">sage</a>, <a href="../tags/tensors/">tensors</a>
+    
+    <div class="float-md-right" style="text-align=right">
+      Published: February  5, 2019
+      
+    </div>
+  </div>
+</div>
+
+<article>
+  
+  <div id="toc" class="Box mb-3">
+    <h1>Table of Contents</h1>
+    <ul class="incremental">
+<li><a href="#abstract-tensors">Abstract Tensors</a><ul class="incremental">
+<li><a href="#construction-of-the-tensor-space">Construction of the Tensor Space</a></li>
+</ul></li>
+<li><a href="#tensors-as-arrays">Tensors as Arrays</a></li>
+<li><a href="#tensors-as-maps">Tensors as Maps</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul>
+  </div>
+  
+  
+  <section id="content" class="pb-2 mb-4 border-bottom">
+    <p>Tensors can sometimes have a fearsome reputation. They are at heart, however, no more difficult to define than polynomials. I’ve tried in these notes to take a computational focus and to avoid formalism when possible; I haven’t assumed any more than what you might encounter in an undergraduate linear algebra course. If you’re interested in tensors applied to machine learning, or have wondered why arrays in Tensorflow are called tensors, you might find this useful. I’ll do some computations in <a href="http://www.sagemath.org/">Sage</a> and also in <a href="http://www.numpy.org/">Numpy</a> for illustration.</p>
+<h1 id="abstract-tensors">Abstract Tensors</h1>
+<p>First, let’s take brief look at tensors in the abstract. This is just to give us an idea of what properties they have and how they function. I’ll gloss over most of the details of the construction.</p>
+<p>A tensor is a vector. It is an element of a vector space. Being a vector, if we have a basis for the space we can write the tensor as a list of coordinates (or maybe something like a matrix or an array – we’ll see how).</p>
+<p>A tensor is a vector in a product vector space. This means that part of it comes from one vector space and part of it comes from another. These parts combine in a way that fits with the usual notions of how products should work. Why would we want these tensors, these products of vectors? It turns out that lots of useful things are tensors. Matrices and linear maps are tensors, and so are determinants and inner products and cross products. Tensors give us power to express many useful ideas.</p>
+<p>A simple product of vectors looks like <span class="math inline">\(v \otimes w\)</span> and the product space looks like <span class="math inline">\(V \otimes W\)</span>, where <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span> are vector spaces. The elements of <span class="math inline">\(V \otimes W\)</span> are linear combinations of these simple products. So, a typical element of <span class="math inline">\(V \otimes W\)</span> might look like <span class="math inline">\(v_1 \otimes w_2 + 5(v_4 \otimes w_1) + 3(v_3 \otimes w_2)\)</span>.</p>
+<p>Again, <span class="math inline">\(V \otimes W\)</span> is a vector space. Its vectors are called tensors. Tensors are linear combinations of simple tensors like <span class="math inline">\(v \otimes w\)</span>.</p>
+<p>The tensor space <span class="math inline">\(V \otimes W\)</span> is a vector space, but its vectors have some special properties given to them by <span class="math inline">\(\otimes\)</span>. This product has many of the same useful properties as products of numbers. They are:</p>
+<p><span class="math display">\[ \textbf{Distributivity:  } v \otimes (w_1 + w_2) = v \otimes w_1 + v \otimes w_2 \]</span></p>
+<p>(Just like <span class="math inline">\(x(y + z) = xy + xz\)</span>.)</p>
+<p>and</p>
+<p><span class="math display">\[ \textbf{Scalar Multiples: } a (v \otimes w) = (av) \otimes w = v \otimes (aw) \]</span></p>
+<p>(Just like <span class="math inline">\(a(xy) = (ax)y = x(ay)\)</span>.)</p>
+<p>The tensor product also does what we expect with the zero vector, namely: <span class="math inline">\(v \otimes w = 0\)</span> if and only if <span class="math inline">\(v = 0\)</span> or <span class="math inline">\(w = 0\)</span>. The tensor product does not have the commutivity property however. A tensor <span class="math inline">\(v \otimes w\)</span> doesn’t have to be the same as <span class="math inline">\(w \otimes v\)</span>. For one, the vector on the left has to come from <span class="math inline">\(V\)</span> and the vector on the right has to come from <span class="math inline">\(W\)</span>.</p>
+<p>Using these properties we can manipulate tensors just like we do polynomials. For instance:</p>
+<span class="math display">\[\begin{equation}
+ \begin{split}
+ &amp; 2(v_1 \otimes w_1) + 3(v_1 + v_2) \otimes w_1 \\
+ = &amp; 2(v_1 \otimes w_1) + 3(v_1 \otimes w_1) + 3(v_2 \otimes w_1) \\
+ = &amp; 5(v_1 \otimes w_1) + 3(v_2 \otimes w_1)
+ \end{split}
+\end{equation}
+\]</span>
+<p>You could think of an abstract tensor as a sort of polynomial where the odd-looking product <span class="math inline">\(\otimes\)</span> reminds us that the <span class="math inline">\(v\)</span> and <span class="math inline">\(w\)</span> don’t generally commute.</p>
+<p>Here’s an example. <code>FiniteRankFreeModule</code> is creating a vector space of dimension 2 over the quotients <span class="math inline">\(\mathbb Q\)</span>. A module is a kind of generalized vector space.</p>
+<pre class="python"><code>M = FiniteRankFreeModule(QQ, 2, name='M', start_index=1)
+v = M.basis('v')
+s = M.tensor((2, 0), name='s')
+s[v,:] = [[1, 2], [3, 4]]
+t = M.tensor((2, 0), name='t')
+t[v,:] = [[5, 6], [7, 8]]
+latex(s.display(v))
+latex(t.display(v))
+latex((s + t).display(v))
+</code></pre>
+<div class="RESULTS drawer">
+<p><span class="math display">\[ s = v_{1}\otimes v_{1} + 2 v_{1}\otimes v_{2} + 3 v_{2}\otimes v_{1} + 4 v_{2}\otimes v_{2} \]</span> <span class="math display">\[ t = 5 v_{1}\otimes v_{1} + 6 v_{1}\otimes v_{2} + 7 v_{2}\otimes v_{1} + 8 v_{2}\otimes v_{2} \]</span> <span class="math display">\[ s+t = 6 v_{1}\otimes v_{1} + 8 v_{1}\otimes v_{2} + 10 v_{2}\otimes v_{1} + 12 v_{2}\otimes v_{2} \]</span></p>
+</div>
+<h2 id="construction-of-the-tensor-space">Construction of the Tensor Space</h2>
+<p>This is just a note on how the tensor space <span class="math inline">\(V \otimes W\)</span> can be constructed from <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span>. It’s not essential to anything that follows.</p>
+<p>Basically, we can construct <span class="math inline">\(V \otimes W\)</span> the same way that we can construct the complex numbers from the real numbers. To get the complex numbers from the reals, we just add in some new number <span class="math inline">\(i\)</span> to the real numbers and then define a simplification rule that says <span class="math inline">\(i^2 = -1\)</span>. To get <span class="math inline">\(V \otimes W\)</span> from <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span>, we just take all linear combinations of vectors from <span class="math inline">\(V\)</span> and vectors from <span class="math inline">\(W\)</span> and then define the Distributivity and Scalar Multiplication rules. The formalism that does this is called a <a href="https://en.wikipedia.org/wiki/">quotient space</a>, or see <a href="https://en.wikipedia.org/wiki/Tensor_product#The_definition_of_the_abstract_tensor_product">here</a> for the tensor product construction.</p>
+<p>By constructing the space <span class="math inline">\(V \otimes W\)</span> in the most general way possible (meaning, not adding any other rules except distribution and scalar multiplication), we ensure that any kind of space or object that has these kinds of linear or multilinear properties has a representation as a tensor, and any other kind of construction that satisfies these rules will be essentially equivalent to the tensor construction. (The property is called a <a href="https://en.wikipedia.org/wiki/Universal_property">universal property</a>. It occurs all the time in mathematics and is very useful.) Tensors are the general language of linearity.</p>
+<h1 id="tensors-as-arrays">Tensors as Arrays</h1>
+<p>We can represent tensors as arrays, which is nice for doing computations.</p>
+<p>If we have a basis for <span class="math inline">\(V\)</span> and a basis for <span class="math inline">\(W\)</span>, then we can make a basis for <span class="math inline">\(V \otimes W\)</span> in just the way we should expect: by taking all the products of the basis vectors. Namely, if <span class="math inline">\((e_i)\)</span> is a basis for <span class="math inline">\(V\)</span> and <span class="math inline">\((f_j)\)</span> is a basis for <span class="math inline">\(W\)</span>, then <span class="math inline">\((e_i \otimes f_j)\)</span> is a basis for <span class="math inline">\(V \otimes W\)</span>. This also means that the dimension of <span class="math inline">\(V \otimes W\)</span> is the product of the dimensions of <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span>; that is, <span class="math inline">\(dim(V \otimes W) = dim(V)dim(W)\)</span>.</p>
+<p>Recall that if we can write a vector in <span class="math inline">\(V\)</span> as <span class="math inline">\(v = \sum a_i e_i\)</span>, then <span class="math inline">\((a_i)\)</span> is its representation as a vector of coordinates. A tensor in <span class="math inline">\(V \otimes W\)</span> will instead have a representation as a matrix. If <span class="math inline">\(m = dim(V)\)</span> and <span class="math inline">\(n = dim(W)\)</span>, then this will be an <span class="math inline">\(m \times n\)</span> matrix. If we write a tensor in terms of its basis elements as:</p>
+<p><span class="math display">\[\sum_i \sum_j c_{i,j} (e_i \otimes f_j)\]</span></p>
+<p>then its matrix is <span class="math inline">\([c_{i,j}]\)</span>. The subscript of <span class="math inline">\(e_i\)</span> tells you the row and the subscript of <span class="math inline">\(f_j\)</span> tells you the column. For example, let’s say <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span> are both two-dimensional. We could write a tensor</p>
+<p><span class="math display">\[(e_1 \otimes f_1) + 2(e_1 \otimes f_2) + 3(e_2 \otimes f_1) + 4(e_2 \otimes f_2)\]</span></p>
+<p>as</p>
+<span class="math display">\[\begin{bmatrix}
+ 1 &amp; 2 \\
+ 3 &amp; 4 \\
+\end{bmatrix}
+\]</span>
+<p>But what if we have a vector <span class="math inline">\(v\)</span> in <span class="math inline">\(V\)</span> and a vector <span class="math inline">\(w\)</span> in <span class="math inline">\(W\)</span> and we want to find out what the matrix of <span class="math inline">\(v \otimes w\)</span> is? This is easy too. Say <span class="math inline">\(v = \sum a_i e_i\)</span> and <span class="math inline">\(w = \sum b_j f_j\)</span>. Then</p>
+<p><span class="math display">\[v \otimes w = \sum_i \sum_j a_i b_j (e_i \otimes f_j)\]</span></p>
+<p>and its matrix is <span class="math inline">\([a_i b_j]\)</span>. In other words, the entry in row <span class="math inline">\(i\)</span> and column <span class="math inline">\(j\)</span> will be <span class="math inline">\(a_i b_j\)</span>.</p>
+<p>It’s easy to find this matrix using matrix multiplication. If we write our coordinate vectors as column vectors, then our tensor product becomes an <a href="https://en.wikipedia.org/wiki/Outer_product">outer product</a>:</p>
+<p><span class="math display">\[\color{RubineRed}v \color{black}\otimes \color{MidnightBlue}w\color{black} = \color{RubineRed}v\color{MidnightBlue} w^\mathsf{T}\]</span></p>
+<p>For instance,</p>
+<p><span class="math display">\[
+ \color{RubineRed}(1, 2, 3)\color{Black} \otimes \color{RoyalBlue}(4, 5, 6)\color{Black} = 
+ \color{RubineRed}\begin{bmatrix}
+ 1\\
+ 2\\
+ 3 \end{bmatrix} \color{black}
+ \color{RoyalBlue}[4, 5, 6]\color{black}
+ = \begin{bmatrix}
+ \color{RubineRed}1\color{black}\cdot \color{RoyalBlue}4\color{black} &amp; \color{RubineRed}1\color{black}\cdot \color{RoyalBlue}5\color{black} &amp; \color{RubineRed}1\color{black}\cdot \color{RoyalBlue}6\color{black} \\ 
+ \color{RubineRed}2\color{black}\cdot \color{RoyalBlue}4\color{black} &amp; \color{RubineRed}2\color{black}\cdot \color{RoyalBlue}5\color{black} &amp; \color{RubineRed}2\color{black}\cdot \color{RoyalBlue}6\color{black} \\ 
+ \color{RubineRed}3\color{black}\cdot \color{RoyalBlue}4\color{black} &amp; \color{RubineRed}3\color{black}\cdot \color{RoyalBlue}5\color{black} &amp; \color{RubineRed}3\color{black}\cdot \color{RoyalBlue}6\color{black}\end{bmatrix}
+ =\begin{bmatrix}
+ 4 &amp; 5 &amp; 6 \\
+ 8 &amp; 10 &amp; 15 \\
+ 12 &amp; 15 &amp; 18\end{bmatrix}
+ \]</span></p>
+<p>Notice the correspondence between the basis elements and the entries of the matrix in the next example.</p>
+<pre class="python" data-results="drawer" data-exports="both" data-session="yes"><code>M = FiniteRankFreeModule(QQ, 3, name='M', start_index=1)
+e = M.basis('e')
+v = M([-2, 9, 5], basis=e, name='v')
+w = M([1, 0, -2], basis=e, name='w')
+latex((v*w).display())
+latex((v*w)[e,:])
+</code></pre>
+<div class="RESULTS drawer">
+<p><span class="math display">\[
+ v\otimes w = -2 e_{1}\otimes e_{1} + 4 e_{1}\otimes e_{3} + 9 e_{2}\otimes e_{1} -18 e_{2}\otimes e_{3} + 5 e_{3}\otimes e_{1} -10 e_{3}\otimes e_{3} \\
+ \left(\begin{array}{rrr}
+ -2 &amp; 0 &amp; 4 \\
+ 9 &amp; 0 &amp; -18 \\
+ 5 &amp; 0 &amp; -10
+ \end{array}\right)
+ \]</span></p>
+</div>
+<p>We can extend the tensor product construction to any number of vector spaces. In this way we get multidimensional arrays. We might represent a tensor in a space <span class="math inline">\(U \otimes V \otimes W\)</span> as a “matrix of matricies.”</p>
+<p><span class="math display">\[
+ \left[\begin{array}{r}
+   \left[\begin{array}{rr}
+   c_{111} &amp; c_{112} \\
+   c_{121} &amp; c_{122}
+   \end{array}\right] \\
+   \left[\begin{array}{rr}
+   c_{211} &amp; c_{212} \\
+   c_{221} &amp; c_{222}
+   \end{array}\right]
+ \end{array}\right]
+ \]</span></p>
+<p>And we use the more general <a href="https://en.wikipedia.org/wiki/Kronecker_product">Kronecker product</a> to find the product of tensors:</p>
+<p><span class="math display">\[
+ \color{RubineRed}(1, 2)
+   \color{Black} \otimes
+   \color{RoyalBlue}
+   \left[\begin{array}{rr}
+   1 &amp; 2 \\
+   3 &amp; 4
+   \end{array}\right]
+ \color{Black} =
+   \color{RubineRed}
+   \left[\begin{array}{r}
+   1 \\
+   2 
+   \end{array}\right]
+   \color{RoyalBlue}
+   \left[\begin{array}{rr}
+   1 &amp; 2 \\
+   3 &amp; 4
+   \end{array}\right]
+ \color{Black} =
+ \left[\begin{array}{r}
+   \color{RubineRed} 1
+   \color{RoyalBlue}
+   \left[\begin{array}{rr}
+   1 &amp; 2 \\
+   3 &amp; 4
+   \end{array}\right] \\
+   \color{RubineRed} 2
+   \color{RoyalBlue}
+   \left[\begin{array}{rr}
+   1 &amp; 2 \\
+   3 &amp; 4
+   \end{array}\right]
+ \color{Black}\end{array}\right] =
+ \left[\begin{array}{r}
+   \left[\begin{array}{rr}
+   1 &amp; 2 \\
+   3 &amp; 4
+   \end{array}\right] \\
+   \left[\begin{array}{rr}
+   2 &amp; 4 \\
+   6 &amp; 8
+   \end{array}\right]
+ \color{Black}\end{array}\right]
+ \]</span></p>
+<pre class="python" data-exports="both" data-session="yes"><code>M = FiniteRankFreeModule(QQ, 2, name='M', start_index=1)
+e = M.basis('e')
+u = M([1, 2], basis=e, name='u')
+vw = M.tensor((2, 0), name='vw')
+vw[e,:] = [[1, 2], [3, 4]]
+(u*vw).display(e)
+print()
+(u*vw)[e,:]
+</code></pre>
+<pre class="example"><code>u*vw = e_1*e_1*e_1 + 2 e_1*e_1*e_2 + 3 e_1*e_2*e_1 + 4 e_1*e_2*e_2 + 2 e_2*e_1*e_1 + 4 e_2*e_1*e_2 + 6 e_2*e_2*e_1 + 8 e_2*e_2*e_2
+
+[[[1, 2], [3, 4]], [[2, 4], [6, 8]]]
+</code></pre>
+<p>The number of vector spaces in the product space is the same as the number of dimensions in the arrays of its tensors (that is, the number of indices needed to specify a component). This number is called the “order” of a tensor (or sometimes “degree”). The order of the tensor above is 3.</p>
+<p>We can extend this product to tensors of any order. The components of a tensor <span class="math inline">\(s \otimes t\)</span> can always be found by taking the product of the respective components of <span class="math inline">\(s\)</span> and <span class="math inline">\(t\)</span>. For instance, if <span class="math inline">\(s_{12} = 5\)</span> and <span class="math inline">\(t_{345} = 7\)</span>, then <span class="math inline">\((s \otimes t)_{12345} = s_{12}t_{345} = 5\cdot7 = 35\)</span>.</p>
+<pre class="python" data-exports="both" data-session="yes"><code>M = FiniteRankFreeModule(QQ, 5, name='M', start_index=1)
+e = M.basis('e')
+s = M.tensor((2, 0), name='s')
+s[e,1,2] = 5
+t = M.tensor((3, 0), name='t')
+t[e,3,4,5] = 7
+(s*t)[e,1,2,3,4,5]
+</code></pre>
+<pre class="example"><code>35
+</code></pre>
+<h1 id="tensors-as-maps">Tensors as Maps</h1>
+<p>I mentioned earlier that things like cross-products and determinants are tensors. We’ll see how that works now. Recall that every vector space <span class="math inline">\(V\)</span> has a dual vector space <span class="math inline">\(V^*\)</span> which is the space of all linear maps <span class="math inline">\(V \rightarrow F\)</span>, where <span class="math inline">\(F\)</span> is the field of scalars of <span class="math inline">\(V\)</span>. In terms of matricies, we might think of elements in <span class="math inline">\(V\)</span> as column vectors and elements of <span class="math inline">\(V^*\)</span> as row vectors. Then, we can apply an element of <span class="math inline">\(V^*\)</span> to an element of <span class="math inline">\(V\)</span> just like we do when representing linear maps as matricies:</p>
+<p><span class="math display">\[
+ \left[a_1, a_2, a_3\right]
+   \left[\begin{array}{r} 
+   b_1 \\
+   b_2 \\
+   b_3 \end{array}\right] =
+ a_1b_1 + a_2b_2 + a_3b_3
+ \]</span></p>
+<p>This in fact is just the <a href="https://en.wikipedia.org/wiki/Dot_product">dot product</a> of the two vectors.</p>
+<p>Let’s take a product <span class="math inline">\(T = V \otimes \cdots \otimes V \otimes V^* \otimes \cdots \otimes V^*\)</span>. The number of times <span class="math inline">\(V\)</span> occurs is called the “covariant” order of the space and the number of times <span class="math inline">\(V^*\)</span> occurs is called the “contravariant” order of the space. (The reason for these names is related to the <a href="https://en.wikipedia.org/wiki/Covariance_and_contravariance_of_vectors">change-of-basis</a> on vectors of those types). We say that a tensor has “type <span class="math inline">\((k, l)\)</span>” when it is of contravariant order <span class="math inline">\(k\)</span> and covariant order <span class="math inline">\(l\)</span>. So when we had earlier <code>M.tensor((2, 0), name='t')</code>, the <code>(2, 0)</code> was saying that we wanted a tensor with 2 contravariant parts.</p>
+<p>Tensors of order <span class="math inline">\((0, 1)\)</span> are mappings <span class="math inline">\(V \rightarrow F\)</span>. They will map tensors of order <span class="math inline">\((1, 0)\)</span> (that is, column vectors) to the scalar field, and like above, this will just be the dot product of the two vectors.</p>
+<pre class="python" data-exports="both" data-session="yes"><code>M = FiniteRankFreeModule(QQ, 3, name='M', start_index=1)
+e = M.basis('e')
+
+s = M.tensor((0, 1), name='s')
+s[e, :] = [1, 2, 3]
+t = M.tensor((1, 0), name='t')
+t[e, :] = [4, 5, 6]
+
+v = vector([1, 2, 3])
+w = vector([4, 5, 6])
+
+s(t) == v.dot_product(w)
+</code></pre>
+<pre class="example"><code>True
+</code></pre>
+<p>Expanding this idea, we can think of a tensor <span class="math inline">\(t\)</span> of order <span class="math inline">\((1,1)\)</span> either as a <a href="https://en.wikipedia.org/wiki/Multilinear_form">multilinear form</a> <span class="math inline">\(t:V^* \otimes V \rightarrow F\)</span> or as a <a href="https://en.wikipedia.org/wiki/Linear_map">linear map</a>, as <span class="math inline">\(t:V \rightarrow V\)</span> or as <span class="math inline">\(t:V^* \rightarrow V^*\)</span>. The difference is just in <a href="https://en.wikipedia.org/wiki/Partial_application">what and how many</a> arguments we pass in to the tensor. For instance, if we pass a column vector <span class="math inline">\(v\)</span> into the tensor <span class="math inline">\(t\)</span> in its second position (the position of <span class="math inline">\(V\)</span>), then we get a map <span class="math inline">\(V \rightarrow V\)</span>; this is the same as multiplying a vector by a matrix representing a linear map. This partial application is called a “contraction.”</p>
+<pre class="python" data-exports="both" data-session="yes"><code>s = M.tensor((1, 1), name='s')
+s[e, :] = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+t = M.tensor((1, 0), name='t')
+t[e, :] = [4, 5, 6]
+
+m = Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+w = vector([4, 5, 6])
+
+s.contract(t)[e,:] == list(m*w)
+</code></pre>
+<pre class="example"><code>True
+</code></pre>
+<p>Generally, we can represent any kind of multilinear map <span class="math inline">\(V^* \times \cdots \times V^* \times V \times \cdots \times V \rightarrow F\)</span> as a tensor in the space <span class="math inline">\(V \otimes \cdots \otimes V \otimes V^* \otimes \cdots \otimes V^*\)</span>. Since determinants and cross-products are multilinear maps, they too are tensors.</p>
+<p>Sage makes a distinction between contravariant and covariant parts, but libraries like <code>numpy</code> and <code>tensorflow</code> do not. When using these, we can contract one tensor with another along any axes whose dimensions are the same. Their contraction operation is called <code>tensordot</code>.</p>
+<pre class="python" data-exports="both" data-session="yes"><code>import numpy as np
+
+s = np.ones((2, 3, 4, 5))
+t = np.ones((5, 4, 3, 2))
+np.tensordot(s, t, axes=[[0, 1, 2], [3, 2, 1]])
+</code></pre>
+<pre class="example"><code>array([[24., 24., 24., 24., 24.],
+       [24., 24., 24., 24., 24.],
+       [24., 24., 24., 24., 24.],
+       [24., 24., 24., 24., 24.],
+       [24., 24., 24., 24., 24.]])
+</code></pre>
+<p>We could think of the axes in <code>s</code> as representing row vectors (<span class="math inline">\(V^*\)</span>) and the axes in <code>t</code> as representing column vectors (<span class="math inline">\(V\)</span>).</p>
+<p>We could also do this using <a href="https://en.wikipedia.org/wiki/Einstein_notation">Einstein notation</a>. Basically, whenever an index appears twice in an expression, it means to sum over that index while multiplying together the respective components (just like a dot product on those two axes).</p>
+<pre class="python" data-exports="both" data-session="yes"><code>s = np.ones((2, 3, 4))
+t = np.ones((4, 3, 2))
+
+np.einsum('ija, bji -&gt; ab', s, t)
+</code></pre>
+<pre class="example"><code>array([[6., 6., 6., 6.],
+       [6., 6., 6., 6.],
+       [6., 6., 6., 6.],
+       [6., 6., 6., 6.]])
+</code></pre>
+<p>Einstein summations are a convenient way to do lots of different kinds of tensor computations. <a href="https://rockt.github.io/2018/04/30/einsum">Here</a> are a bunch of great examples.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>That’s all for now! For anyone reading, I hope you found it informative. Tensors can be hard to get started on, but once you see the idea, I think you’ll find them a pleasure to work with.</p>
+  </section>
+  
+</article>
+
+
+        <!-- Post Footer -->
+        <div>
+
+        </div>
+
+    
+  </div>
+  
+  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
+
+        <!-- Post Header  -->
+<div class="Subhead">
+  <div class="Subhead-heading">
+      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/bayesian-topic-modeling/">Bayesian Topic Modeling</a></h2>
+  </div>
+  <div class="Subhead-description">
+    
+      <a href="../tags/MCMC/">MCMC</a>, <a href="../tags/NLP/">NLP</a>, <a href="../tags/data-science/">data-science</a>, <a href="../tags/bayesian/">bayesian</a>, <a href="../tags/python/">python</a>
+    
+    <div class="float-md-right" style="text-align=right">
+      Published: January 30, 2019
+      
+    </div>
+  </div>
+</div>
+
+<article>
+  
+  <div id="toc" class="Box mb-3">
+    <h1>Table of Contents</h1>
+    <ul class="incremental">
+<li><a href="#some-simple-generative-examples">Some Simple Generative Examples</a><ul class="incremental">
+<li><a href="#unigram-model">Unigram Model</a></li>
+<li><a href="#mixture-of-unigrams">Mixture of Unigrams</a></li>
+<li><a href="#latent-dirichlet-allocation">Latent Dirichlet Allocation</a></li>
+</ul></li>
+<li><a href="#the-dirichlet-distribution">The Dirichlet Distribution</a></li>
+<li><a href="#the-full-model">The Full Model</a><ul class="incremental">
+<li><a href="#data-preparation">Data Preparation</a></li>
+<li><a href="#the-unigram-model">The Unigram Model</a></li>
+<li><a href="#mixture-of-unigrams-naive-bayes">Mixture of Unigrams (Naive Bayes)</a></li>
+<li><a href="#latent-dirichlet-allocation-1">Latent Dirichlet Allocation</a></li>
+</ul></li>
+<li><a href="#references">References</a></li>
+</ul>
+  </div>
+  
+  
+  <section id="content" class="pb-2 mb-4 border-bottom">
+    <p>Imagine we have some collection of documents. They could be novels, or tweets, or financial reports—just any collection of text. We want an algorithm that can discover what they are about, and we would like our algorithm to do it automatically, without any hints. (That is, we want our algorithm to be <em>unsupervised</em>.) We will look at several models that probabilistically assign words to topics using <a href="https://en.wikipedia.org/wiki/Bayes'_theorem">Bayes’ Theorem</a>. They are all <a href="https://en.wikipedia.org/wiki/Bayesian_network">Bayesian Graphical Models</a>.</p>
+<p>The basic problem in statistics is to infer some unobservable value from observable instances of it. In our case, we want to infer the <em>topics</em> of a document from the actual words in the document. We want to be able to infer that our document is about “colors” if we observe “red” and “green” and “blue”.</p>
+<p>Bayes’ Theorem allows us to do this. It allows us to infer probabilities concerning the unobserved value from the observations that we can make. It allows us to reason backwards in some sense. So, when constructing a Bayesian model, it is helpful to <em>think</em> backwards. Instead of first asking how words are distributed to topics and topics to documents, we will ask how we could <em>generate</em> a document if we already knew these distributions. To construct our model, we will first reason from the unknown values to the known values so that we know how to do the converse when the time comes.</p>
+<h1 id="some-simple-generative-examples">Some Simple Generative Examples</h1>
+<p>In all of our models, we are going make a simplfying assumption. We will assume that all of the words in a document occur independently of whatever words came before or come after; that is, a document will just be a “bag of words.” We’ll see that even with ignoring word-order, we can still infer pretty accurately what a document might be about.</p>
+<p>Let’s start with a very simple example: 1 document with 1 topic and 2 words in our vocabulary.</p>
+<p>(Some definitions: The “vocabulary” is just the set of unique words that occur in all of the documents together, the “corpus.” We’ll refer to a word in the vocabulary as just a “word” and some instance of a word in a document as a “token.”)</p>
+<p>Let’s say our two words are “blue” and “red”, and that the probability of any given word (any token) being “red” is <span class="math inline">\(\phi\)</span>: <span class="math inline">\(P(W = red) = \phi\)</span>. This is the same as saying our random variable of tokens <span class="math inline">\(W\)</span> has a Bernoulli distribution with parameter <span class="math inline">\(\phi\)</span>: <span class="math inline">\(W \sim Bernoulli(\phi)\)</span>.</p>
+<p>The distribution looks like this:</p>
+<pre class="ipython" data-exports="both"><code>x = [0, 1]
+pmf = st.bernoulli.pmf(x, 0.3)
+
+plt.stem(x, pmf)
+plt.xticks([0,1])
+plt.ylim(0,1)
+plt.xlim(-0.5, 1.5)
+</code></pre>
+<div class="RESULTS drawer">
+<pre class="example"><code>(-0.5, 1.5)
+</code></pre>
+</div>
+<figure><img src="../images/bernoulli.png" alt="Bernoulli pmf" /></figure>
+
+<p>Here, 1 represents “red” and 0 represents “blue” (or not-“red”).</p>
+<p>And here is how we could generate a document with this model:</p>
+<pre class="ipython" data-exports="both"><code>coding = {0 : &quot;blue&quot;, 1 : &quot;red&quot;}
+W = 50  # number of tokens in the document
+tokens = st.bernoulli.rvs(0.3, size = W)  # choose the tokens
+print(' '.join(str(w) for w in [coding[i] for i in tokens]))
+</code></pre>
+<pre class="example"><code>blue blue red blue red blue blue red red blue blue blue blue blue blue blue blue red blue blue blue blue blue blue blue blue blue red red blue blue blue blue blue blue red blue blue red blue red blue red blue blue blue blue blue red blue
+</code></pre>
+<h2 id="unigram-model">Unigram Model</h2>
+<p>For the general model, we will also choose the distribution of words within the topic randomly. That is, we will assign a probability distribution to <span class="math inline">\(\phi\)</span>.</p>
+<p>The <a href="https://en.wikipedia.org/wiki/Beta_distribution">beta distribution</a> is a natural choice. Since its support is <span class="math inline">\([0,1]\)</span> it can represent randomly chosen probabilities (values between 0 and 1). It is also conceptually convenient being the <a href="https://en.wikipedia.org/wiki/Conjugate_prior">conjugate prior</a> of the Bernoulli distribution, which allows us to make a more explicit connection between its parameters and the parameters of its Bernoulli distribution.</p>
+<p>The model is now:</p>
+<p><span class="math inline">\(\phi \sim Beta(\beta_0, \beta_1)\)</span></p>
+<p><span class="math inline">\(W \sim Bernoulli(\phi)\)</span></p>
+<p>where <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> are the “shape parameters” of the beta distribution. We can think of them as the assumed counts of each word, or the “pseudo-counts.” Let’s see how different values of these parameters affect the shape of the distribution.</p>
+<pre class="ipython" data-exports="both"><code>beta_0 = [0.8, 1, 2, 10]
+beta_1 = [0.8, 1, 2, 10]
+
+x = np.array(np.linspace(0, 1, 1000))
+
+f, axarr = plt.subplots(len(beta_0), len(beta_1), sharex='all', sharey='none')
+
+for i in range(len(beta_0)):
+    for j in range(len(beta_1)):
+        a = beta_0[i]
+        b = beta_1[j]
+        y = st.beta(a, b).pdf(x)
+        axarr[i, j].plot(x, y)
+        axarr[i, j].axes.yaxis.set_ticklabels([])
+        axarr[i, j].set_title(r'$\beta_0 =$ ' + str(a) + r', $\beta_1 =$ ' + str(b))
+
+f.subplots_adjust(hspace=0.3)
+f.suptitle(r'Beta Distributions for $\theta$', fontsize=20)
+</code></pre>
+<pre class="example"><code>Text(0.5, 0.98, 'Beta Distributions for $\\theta$')
+</code></pre>
+<figure><img src="../images/beta.png" alt="a grid of six beta pdfs for various parameters" /></figure>
+
+<p>Values near 0 will favor “blue” and values near 1 will favor “red”. We can choose <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> to generate the kinds of documents we like. (The notation is a bit backwards here: <span class="math inline">\(\beta_0\)</span> is the <em>pseudo-count</em> for “red”, whose probability is toward 1, on the right of the graph. So <span class="math inline">\(\beta_0 &gt; \beta_1\)</span> means more “red”s, and vice versa.)</p>
+<p>Let’s generate some documents with this expanded model. We’ll set <span class="math inline">\(\beta_0 = 0.8\)</span> and <span class="math inline">\(\beta_1 = 0.8\)</span>. We would expect most of our documents to favor one word or the other, but overall to occur equally often.</p>
+<pre class="ipython" data-exports="both"><code>beta_0 = 0.8
+beta_1 = 0.8
+
+thetas = st.beta.rvs(beta_0, beta_1, size = 6)
+
+W = 10  # number of tokens in each document
+
+for t in thetas:
+    print('Theta: ', t)
+    tokens = st.bernoulli.rvs(t, size = W)
+    print('Document: ' + ' '.join(str(w) for w in [coding[i] for i in tokens]) + '\n')
+</code></pre>
+<pre class="example"><code>Theta:  0.2376299911870814
+Document: blue red blue blue red red blue blue blue blue
+
+Theta:  0.768902025579346
+Document: red red red red blue red red red blue red
+
+Theta:  0.6339386112711662
+Document: red blue red blue red blue blue blue red blue
+
+Theta:  0.889248394241369
+Document: red red red blue red red red red red red
+
+Theta:  0.7522981849896823
+Document: red red red red blue blue red red red red
+
+Theta:  0.18416659985533126
+Document: blue red red blue blue blue red red blue blue
+</code></pre>
+<p>(We could also assign a distribution to W, the number of tokens in each document. (Blei 2003) uses a Poisson distribution.)</p>
+<p>Let’s look at a couple more.</p>
+<h2 id="mixture-of-unigrams">Mixture of Unigrams</h2>
+<p>Here, we’ll also choose a single topic for each document, from among two. To simplify things, we’ll also assume the topics generate distinct words and that the proportions of words in topics are similar, that is, that they have the same shape parameters. We’ll see later that is a good assumption when using inference models.</p>
+<p>Distribution of topics to documents: <span class="math inline">\(\theta \sim Beta(\alpha_0, \alpha_1)\)</span></p>
+<p>Distribution of words to Topic 0: <span class="math inline">\(\phi_0 \sim Beta(\beta_0, \beta_1)\)</span></p>
+<p>Distribution of words to Topic 1: <span class="math inline">\(\phi_1 \sim Beta(\beta_0, \beta_1)\)</span></p>
+<p>The topics: <span class="math inline">\(T \sim Bernoulli(\theta)\)</span></p>
+<p>Words from Topic 0: <span class="math inline">\(W_1 \sim Bernoulli(\phi_0)\)</span></p>
+<p>Words from Topic 1: <span class="math inline">\(W_2 \sim Bernoulli(\phi_1)\)</span></p>
+<pre class="ipython" data-exports="both"><code>coding_0 = {0:'blue', 1:'red'}  # words in topic 0
+coding_1 = {0:'dogs', 1:'cats'}  # words in topic 1
+
+D = 15  # number of documents in corpus
+W = 10  # number of tokens in each document
+
+alpha_0, alpha_1 = 1, 1.5
+beta_0, beta_1 = 0.8, 0.8
+
+theta = st.beta.rvs(alpha_0, alpha_1, size = 1)[0]  # choose a distribution of topics to documents
+phi_0 = st.beta.rvs(beta_0, beta_1, size = 1)[0] # choose distribution of words in topic 0
+phi_1 = st.beta.rvs(beta_0, beta_1, size = 1)[0] # choose distribution of words in topic 1
+
+topics = st.bernoulli.rvs(theta, size = D)  # choose a topic for each document
+
+print('Theta: {:.3f}  Phi_0: {:.3f}  Phi_1: {:.3f}'.format(theta, phi_0, phi_1))
+for i in range(D):
+    if topics[i] == 0:
+        tokens = st.bernoulli.rvs(phi_0, size = W)
+        print('Document: ' + ' '.join(str(w) 
+              for w in [coding_0[i] for i in tokens]))
+    else:
+        tokens = st.bernoulli.rvs(phi_1, size = W)
+        print('Document: ' + ' '.join(str(w) 
+              for w in [coding_1[i] for i in tokens]))
+</code></pre>
+<pre class="example"><code>Theta: 0.114  Phi_0: 0.973  Phi_1: 0.637
+Document: red red red red red red red red red red
+Document: red red red blue red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: dogs dogs cats cats cats cats cats dogs cats dogs
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: red red blue red red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+</code></pre>
+<h2 id="latent-dirichlet-allocation">Latent Dirichlet Allocation</h2>
+<p>This time, instead of choosing a single topic for each document, we’ll choose a topic for each word. This will make our model much more flexible and its behavior more realistic.</p>
+<p>Distribution of topics <strong>within</strong> documents: <span class="math inline">\(\theta \sim Beta(\alpha_0, \alpha_1)\)</span></p>
+<p>Distribution of words to Topic 0: <span class="math inline">\(\phi_0 \sim Beta(\beta_0, \beta_1)\)</span></p>
+<p>Distribution of words to Topic 1: <span class="math inline">\(\phi_1 \sim Beta(\beta_0, \beta_1)\)</span></p>
+<p>The topics: <span class="math inline">\(T \sim Bernoulli(\theta)\)</span></p>
+<p>Words from Topic 0: <span class="math inline">\(W_1 \sim Bernoulli(\phi_0)\)</span></p>
+<p>Words from Topic 1: <span class="math inline">\(W_2 \sim Bernoulli(\phi_1)\)</span></p>
+<pre class="ipython" data-exports="both"><code>coding_0 = {0:'blue', 1:'red'}  # words in topic 0
+coding_1 = {0:'dogs', 1:'cats'}  # words in topic 1
+
+D = 15
+W = 10  # number of tokens in each document
+
+alpha_0, alpha_1 = 1, 1.5
+beta_0, beta_1 = 0.8, 0.8
+
+theta = st.beta.rvs(alpha_0, alpha_1, size = 1)[0]  # choose a distribution of topics to documents
+phi_0 = st.beta.rvs(beta_0, beta_1, size = 1)[0]  # choose distribution of words in topic 0
+phi_1 = st.beta.rvs(beta_0, beta_1, size = 1)[0]  # choose distribution of words in topic 1
+
+print('Theta: {:.3f}  Phi_0: {:.3f}  Phi_1: {:.3f}'.format(theta, phi_0, phi_1))
+for i in range(D):
+    print('Document: ', end='')
+    topics = st.bernoulli.rvs(theta, size=W)  # choose topics for each word
+    for j in range(W):
+        if topics[j] == 0:
+            token = st.bernoulli.rvs(phi_0, size=1)[0]  # choose a word from topic 0
+            print(coding_0[token], end=' ')
+        else:
+            token = st.bernoulli.rvs(phi_1, size=1)[0]  # choose a word from topic 1
+            print(coding_1[token], end=' ')
+    print() 
+</code></pre>
+<pre class="example"><code>Theta: 0.384  Phi_0: 0.127  Phi_1: 0.028
+Document: dogs blue blue blue dogs blue dogs blue blue blue 
+Document: blue dogs blue blue dogs dogs dogs dogs blue cats 
+Document: blue dogs blue blue blue dogs red dogs blue blue 
+Document: dogs dogs red dogs dogs blue dogs blue blue blue 
+Document: blue dogs dogs blue blue dogs red dogs dogs red 
+Document: dogs blue blue red dogs blue dogs blue blue blue 
+Document: blue blue blue dogs blue dogs blue dogs dogs blue 
+Document: dogs red dogs red dogs blue dogs dogs blue blue 
+Document: dogs dogs blue dogs blue dogs blue blue blue dogs 
+Document: dogs blue blue blue blue red blue blue dogs dogs 
+Document: dogs dogs blue red dogs dogs blue blue blue blue 
+Document: blue blue blue red dogs blue blue blue blue red 
+Document: blue blue blue dogs blue dogs red dogs blue dogs 
+Document: dogs blue blue dogs dogs dogs blue dogs dogs blue 
+Document: dogs dogs dogs red blue dogs red dogs dogs dogs 
+</code></pre>
+<h1 id="the-dirichlet-distribution">The Dirichlet Distribution</h1>
+<p>Before we go on, we need to generalize our model a bit to be able to handle arbitrary numbers of words and topics, instead of being limited to just two. The multivariate generalization of the Bernoulli distribution is the <a href="https://en.wikipedia.org/wiki/Categorical_distribution">categorical distribution</a>, which simply gives a probability to each of some number of categories. The generalization of the beta distribution is a little trickier. It is called the <a href="https://en.wikipedia.org/wiki/Dirichlet_distribution">Dirichlet distribution</a>. And just like samples from the beta distribution will give parameters for a Bernoulli RV, samples from the Dirichlet distribution will give parameters for the categorical RV.</p>
+<p>Let’s recall the two requirements for some set of <span class="math inline">\(p\)</span>’s to be probability parameters to a categorical distribution. First, they have to sum to 1: <span class="math inline">\(p_0 + p_1 + \cdots + p_v = 1\)</span>. This means they form a <a href="https://en.wikipedia.org/wiki/Hyperplane">hyperplane</a> in <span class="math inline">\(v\)</span>-dimensional space. Second, they all have to be non-negative: <span class="math inline">\(p_i \geq 0\)</span>. This means they all lie in the first quadrant (or <a href="https://en.wikipedia.org/wiki/Orthant">orthant</a>, more precisely). The geometric object that satisfies these two requirements is a <a href="https://en.wikipedia.org/wiki/Simplex#The_standard_simplex">simplex</a>. In the case of two variables it will be a line-segment and in the case of three variables it will be a triangle.</p>
+<p>As sampled from the distribution, these values will form <a href="https://en.wikipedia.org/wiki/Barycentric_coordinate_system">barycentric coordinates</a> on the simplex. This just means that the coordinates tell you how far the point is from the center of the simplex, instead of how far it is from the origin, like with Cartesian coordinates.</p>
+<p>The 3-dimensional Dirichlet returns barycentric coordinates on the 2-simplex, a triangle. We can visualize the surface of the Dirichlet pdf as existing over a triangle; that is, its domain is the simplex.</p>
+<pre class="ipython" data-exports="both"><code>import simplex_plots as sp
+# from https://gist.github.com/tboggs/8778945
+
+alphas = [[0.999, 0.999, 0.999], [1, 2, 1], [1, 2, 3], 
+          [2, 0.999, 1], [10, 3, 4], [0.999, 1, 1]]
+
+fig = plt.figure(figsize=(12, 8))
+fig.suptitle('The Dirichlet Distribution', fontsize=16)
+for i, a in enumerate(alphas):
+    plt.subplot(2, len(alphas)/2, i + 1)
+    sp.draw_pdf_contours(sp.Dirichlet(a), border=True, cmap='Blues')
+    title = r'$\alpha = $ = ({0[0]:.3f}, {0[1]:.3f}, {0[2]:.3f})'.format(a)
+    plt.title(title, fontdict={'fontsize': 14})
+</code></pre>
+<figure><img src="../images/dirichlet.png" alt="various dirichlet pdfs" /></figure>
+
+<p>Each corner of the triangle will favor a particular category (a word or a topic), just like either side of the domain of the beta distribution favored a category.</p>
+<p>As in the upper left picture, whenever all of the entries in <span class="math inline">\(\alpha\)</span> are equal, we call the distribution “symmetric,” and whenever they are all less then 1, we call the distribution “sparse.” Distributions that are both symmetric and sparse are often used as priors when inferring a topic model, symmetry because we don’t <em>a priori</em> have any reason to favor one unknown category over another, and sparsity to encourage our categories to be distinct.</p>
+<p>Now let’s start developing our models.</p>
+<h1 id="the-full-model">The Full Model</h1>
+<h2 id="data-preparation">Data Preparation</h2>
+<p>First we’ll make up a corpus and put it into an encoding that our models can use. To simplify things, we’ll let all of our documents have the same number of tokens and flatten the encoded data structure.</p>
+<pre class="ipython" data-exports="both"><code>from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_extraction.text import CountVectorizer
+
+corpus = [
+    'Red blue green. Green blue blue? Red, red, blue, yellow.',
+    'Car light red stop. Stop car. Car drive green, yellow.',
+    'Car engine gas stop! Battery engine drive, car. Electric, gas.',
+    'Watt, volt, volt, amp. Battery, watt, volt, electric volt charge. ',
+]
+
+tokenizer = CountVectorizer(lowercase=True).build_analyzer()
+encoder = LabelEncoder()
+
+corpus_tokenized = np.array([tokenizer(doc) for doc in corpus])  # assign a number to each word
+encoder.fit(corpus_tokenized.ravel())
+vocab = list(encoder.classes_)  # the vocabulary
+
+# The number of documents and their length
+D, W = corpus_tokenized.shape
+# The number of words in the vocabulary
+V = len(vocab)
+
+# Flatten and encode the corpus, and create an index.
+data = corpus_tokenized.ravel()
+data = encoder.transform(data)
+data_index = np.repeat(np.arange(D), W)
+</code></pre>
+<p>Now a couple of diagnostic functions.</p>
+<pre class="ipython" data-exports="both"><code>def print_top_words(vocab, phis, n):
+    '''Prints the top words occuring within a topic.'''
+    for i, p in enumerate(phis):
+        z = list(zip(vocab, p))
+        z.sort(key = lambda x: x[1], reverse=True)
+        z = z[0:n]
+
+        for word, percent in z:
+            print(f'Topic: {i:2}  Word: {word:10}  Percent: {percent:0.3f}')
+
+        print()
+
+def print_corpus_topics(corpus_tokenized, zs):
+    '''Prints the corpus together with the topic assigned to each word.'''
+    for d in range(zs.shape[0]):  # the document index
+        for w in range(zs.shape[1]):  # the word index
+            print(f'({corpus_tokenized[d, w]}, {zs[d, w]})', end=' ')
+        print('\n')
+</code></pre>
+<h2 id="the-unigram-model">The Unigram Model</h2>
+<p>In this model, words from every document are drawn from a single categorical distribution.</p>
+<p>Distribution of words in a document: <span class="math inline">\(\phi \sim Dir(\vec{\beta})\)</span>, where <span class="math inline">\(\vec{\beta}\)</span> is a vector of shape parameters</p>
+<p>Distribution of tokens: <span class="math inline">\(W \sim Cat(\vec{\phi})\)</span></p>
+<p><a href="https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">Markov-Chain Monte Carlo</a> is a technique for sampling a model to discover its posterior parameters statistically. When models become complex, it is often the case that analytic solutions for the parameters are intractable. We will use the <a href="https://docs.pymc.io/">PyMC3</a> package.</p>
+<p>First we describe the model.</p>
+<pre class="ipython" data-exports="both"><code># Pseudo-counts for each vocab word occuring in the documents.
+beta = np.ones(V)
+
+with pm.Model() as unigram_model:
+
+    # Distribution of word-types in the corpus.
+    phi = pm.Dirichlet('phi', a = beta)
+
+    # The distribution of words.
+    w = pm.Categorical('w', p = phi, observed = data)
+</code></pre>
+<p>Next we sample the model to create the posterior distribution.</p>
+<pre class="ipython" data-exports="both"><code>with unigram_model:
+    draw = 5000
+    unigram_trace = pm.sample(5000, tune=1000, chains=4, progressbar=False)
+</code></pre>
+<p>And now we can see what the model determined the proportion of each word in the corpus was.</p>
+<pre class="ipython" data-exports="both"><code>print_top_words(vocab, [unigram_trace.get_values('phi')[draw-1]], len(vocab))
+</code></pre>
+<pre class="example"><code>Topic:  0  Word: red         Percent: 0.150
+Topic:  0  Word: watt        Percent: 0.145
+Topic:  0  Word: car         Percent: 0.117
+Topic:  0  Word: green       Percent: 0.080
+Topic:  0  Word: battery     Percent: 0.073
+Topic:  0  Word: volt        Percent: 0.068
+Topic:  0  Word: yellow      Percent: 0.067
+Topic:  0  Word: drive       Percent: 0.059
+Topic:  0  Word: electric    Percent: 0.054
+Topic:  0  Word: gas         Percent: 0.053
+Topic:  0  Word: stop        Percent: 0.048
+Topic:  0  Word: blue        Percent: 0.030
+Topic:  0  Word: engine      Percent: 0.025
+Topic:  0  Word: charge      Percent: 0.021
+Topic:  0  Word: light       Percent: 0.011
+Topic:  0  Word: amp         Percent: 0.002
+</code></pre>
+<h2 id="mixture-of-unigrams-naive-bayes">Mixture of Unigrams (Naive Bayes)</h2>
+<p>In this model, each document is assigned a topic and each topic has its own distribution of words.</p>
+<p>Distribution of topics to documents: <span class="math inline">\(\vec{\theta} \sim Dirichlet(\vec{\alpha})\)</span></p>
+<p>Distribution of words to topics: <span class="math inline">\(\vec{\phi} \sim Dirichlet(\vec{\beta})\)</span></p>
+<p>The topics: <span class="math inline">\(T \sim Categorical(\vec{\theta})\)</span></p>
+<p>The tokens: <span class="math inline">\(W \sim Categorical(\vec{\phi})\)</span></p>
+<pre class="ipython" data-exports="both"><code># Number of topics    
+K = 3
+
+# Pseudo-counts for topics and words.
+alpha = np.ones(K)*0.8
+beta = np.ones(V)*0.8
+
+with pm.Model() as naive_model:
+    # Global topic distribution
+    theta = pm.Dirichlet(&quot;theta&quot;, a=alpha)
+
+    # Word distributions for K topics
+    phi = pm.Dirichlet(&quot;phi&quot;, a=beta, shape=(K, V))
+
+    # Topic of documents
+    z = pm.Categorical(&quot;z&quot;, p=theta, shape=D)
+
+    # Words in documents
+    p = phi[z][data_index]
+    w = pm.Categorical(&quot;w&quot;, p=p, observed=data)
+</code></pre>
+<pre class="ipython" data-exports="both"><code>with naive_model:
+    draw = 5000
+    naive_trace = pm.sample(draw, tune=1000, chains=4, progressbar=False)
+</code></pre>
+<pre class="ipython" data-exports="both"><code>print_top_words(vocab, naive_trace['phi'][draw-1], 5)
+</code></pre>
+<pre class="example"><code>Topic:  0  Word: drive       Percent: 0.177
+Topic:  0  Word: car         Percent: 0.166
+Topic:  0  Word: red         Percent: 0.126
+Topic:  0  Word: blue        Percent: 0.108
+Topic:  0  Word: green       Percent: 0.086
+
+Topic:  1  Word: car         Percent: 0.238
+Topic:  1  Word: green       Percent: 0.192
+Topic:  1  Word: watt        Percent: 0.180
+Topic:  1  Word: blue        Percent: 0.070
+Topic:  1  Word: red         Percent: 0.045
+
+Topic:  2  Word: volt        Percent: 0.161
+Topic:  2  Word: car         Percent: 0.123
+Topic:  2  Word: engine      Percent: 0.113
+Topic:  2  Word: electric    Percent: 0.094
+Topic:  2  Word: gas         Percent: 0.081
+</code></pre>
+<h2 id="latent-dirichlet-allocation-1">Latent Dirichlet Allocation</h2>
+<p>In this model, each word is assigned a topic and topics are distributed varyingly within each document.</p>
+<p>Distribution of topics within documents: <span class="math inline">\(\vec{\theta} \sim Dirichlet(\vec{\alpha})\)</span></p>
+<p>Distribution of words to topics: <span class="math inline">\(\vec{\phi} \sim Dirichlet(\vec{\beta})\)</span></p>
+<p>The topics: <span class="math inline">\(T \sim Categorical(\vec{\theta})\)</span></p>
+<p>The tokens: <span class="math inline">\(W \sim Categorical(\vec{\phi})\)</span></p>
+<pre class="ipython" data-exports="both"><code># Number of topics    
+K = 3
+
+# Pseudo-counts. Sparse to encourage separation.
+alpha = np.ones((1, K))*0.5
+beta = np.ones((1, V))*0.5
+
+with pm.Model() as lda_model:
+    # Distribution of topics within each document
+    theta = pm.Dirichlet(&quot;theta&quot;, a=alpha, shape=(D, K))
+
+    # Distribution of words within each topic
+    phi = pm.Dirichlet(&quot;phi&quot;, a=beta, shape=(K, V))
+
+    # The topic for each word
+    z = pm.Categorical(&quot;z&quot;, p=theta, shape=(W, D))
+
+    # Words in documents
+    p = phi[z].reshape((D*W, V))
+    w = pm.Categorical(&quot;w&quot;, p=p, observed=data)
+</code></pre>
+<pre class="ipython" data-exports="both"><code>with lda_model:
+    draw = 5000
+    lda_trace = pm.sample(draw, tune=1000, chains=4, progressbar=False)
+
+print_top_words(tokens, lda_trace.get_values('phi')[draw-1], 4)
+</code></pre>
+<p>At the cost of some complexity, we can rewrite our model to handle a corpus with documents of varying lengths.</p>
+<pre class="ipython" data-exports="both"><code>alpha = np.ones([D, K])*0.5  # prior weights for the topics in each document (pseudo-counts)
+beta  = np.ones([K, V])*0.5  # prior weights for the vocab words in each topic (pseudo-counts)
+
+sequence_data = np.reshape(np.array(data), (D,W))
+N = np.repeat(W, D)  # this model needs a list of document lengths
+
+with pm.Model() as sequence_model:
+
+    # distribution of the topics occuring in a particular document
+    theta   = pm.Dirichlet('theta', a=alpha, shape=(D, K))
+
+    # distribution of the vocab words occuring in a particular topic
+    phi     = pm.Dirichlet('phi', a=beta, shape=(K, V))
+
+    # the topic for a particular word in a particular document: shape = (D, N[d])
+    # theta[d] is the vector of category probabilities for each topic in 
+    # document d.
+    z = [pm.Categorical('z_{}'.format(d), p = theta[d], shape=N[d])
+          for d in range(D)]
+
+    # the word occuring at position n, in a particular document d: shape = (D, N[d]) 
+    # z[d] is the vector of topics for document d
+    # z[d][n] is the topic for word n in document d
+    # phi[z[d][n]] is the distribution of words for topic z[d][n]
+    # [d][n] is the n-th word observed in document d
+    w = [pm.Categorical('w_{}_{}'.format(d, n), p=phi[z[d][n]],
+                        observed = sequence_data[d][n])
+         for d in range(D) for n in range(N[d])]
+
+with sequence_model:
+    draw = 5000
+    sequence_trace = pm.sample(draw, tune=1000, chains=4, progressbar=False)
+
+print_top_words(tokens, sequence_trace.get_values('phi')[4999], 4)
+</code></pre>
+<p>And here we can see what topic the model assigned to each token in the corpus.</p>
+<pre class="ipython" data-exports="both"><code>zs = [sequence_trace.get_values('z_{}'.format(d))[draw-1] for d in range(D)]
+zs = np.array(zs)
+
+print_corpus_topics(corpus_tokenized, zs)
+</code></pre>
+<pre class="example"><code>(red, 2) (blue, 0) (green, 0) (green, 0) (blue, 0) (blue, 0) (red, 2) (red, 0) (blue, 0) (yellow, 0) 
+
+(car, 1) (light, 2) (red, 1) (stop, 1) (stop, 1) (car, 1) (car, 1) (drive, 1) (green, 2) (yellow, 1) 
+
+(car, 1) (engine, 1) (gas, 1) (stop, 1) (battery, 1) (engine, 1) (drive, 1) (car, 0) (electric, 1) (gas, 1) 
+
+(watt, 0) (volt, 0) (volt, 0) (amp, 1) (battery, 1) (watt, 0) (volt, 0) (electric, 0) (volt, 0) (charge, 0) 
+
+</code></pre>
+<p>Since we chose to distribute words among three topics, we can examine the distributions of these topics to each document on a simplex. Below, each triangle represents a document and each corner represents a topic. Whenever the sampled points cluster at a corner, that means our model decided that that document was predominantly about the corresponding topic.</p>
+<pre class="ipython" data-exports="both"><code>with sequence_model:
+    pps = pm.sample_posterior_predictive(sequence_trace, vars=[theta], samples=1000, progressbar=False)
+
+var = pps['theta']
+thetas = sequence_trace['theta'][4999]
+nthetas = thetas.shape[0]
+
+blue = sns.color_palette('Blues_r')[0]
+fig = plt.figure()
+fig.suptitle('Distribution of Topics to Documents', fontsize=16)
+for i, ts in enumerate(thetas):
+    plt.subplot(2, nthetas/2, i + 1)
+    sp.plot_points(var[:,i], color=blue, marker='o', alpha=0.1, markersize=3)
+    title = r'$\theta_{0}$ = ({1[0]:.3f}, {1[1]:.3f}, {1[2]:.3f})'.format(i,ts)
+    plt.title(title, fontdict={'fontsize': 14})
+</code></pre>
+<figure><img src="../images/distribution.png" alt="random sample of documents in the dirichlet model" /></figure>
+
+<p>That’s all for now!</p>
+<h1 id="references">References</h1>
+<p>Blei, David M, Andrew Y Ng and Michael I Jordan. 2003. “Latent dirichlet allocation.” Journal of machine Learning research.</p>
+<p><a href="https://stackoverflow.com/questions/31473459/pymc3-how-to-implement-latent-dirichlet-allocation" class="uri">https://stackoverflow.com/questions/31473459/pymc3-how-to-implement-latent-dirichlet-allocation</a></p>
+<p><a href="https://github.com/junpenglao/Planet_Sakaar_Data_Science/blob/master/PyMC3QnA/discourse_2314.ipynb" class="uri">https://github.com/junpenglao/Planet_Sakaar_Data_Science/blob/master/PyMC3QnA/discourse_2314.ipynb</a></p>
+  </section>
+  
+</article>
+
+
+        <!-- Post Footer -->
+        <div>
+
+        </div>
+
+    
+  </div>
+  
+
+<!-- Pagination -->
+<nav class="paginate-container" aria-label="Pagination">
+  <div class="pagination">
+    
+    <span class="previous_page disabled">⮜ Older</span>
+    
+
+    
+    <a class="next_page text-gray-dark" rel="newer" aria-label="Newer Posts" href="../">Newer ⮞</a>
+    
+  </div>
+</nav>
+
+  
+</div>
+
+
+          </div>
+          
+          <div id="right" class="ml-2 px-3 pb-3 text-gray bg-white">
+            <div id="side">
+              <div>
+                <h1>Tags</h1>
+                <a style="font-size: 110%" href="../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../tags/category-theory/">category-theory</a> <a style="font-size: 100%" href="../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../tags/cql/">cql</a> <a style="font-size: 110%" href="../tags/data-science/">data-science</a> <a style="font-size: 100%" href="../tags/engrams/">engrams</a> <a style="font-size: 110%" href="../tags/finance/">finance</a> <a style="font-size: 100%" href="../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../tags/investing/">investing</a> <a style="font-size: 100%" href="../tags/julia/">julia</a> <a style="font-size: 100%" href="../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../tags/memory/">memory</a> <a style="font-size: 100%" href="../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../tags/numpy/">numpy</a> <a style="font-size: 100%" href="../tags/python/">python</a> <a style="font-size: 110%" href="../tags/R/">R</a> <a style="font-size: 100%" href="../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../tags/review/">review</a> <a style="font-size: 100%" href="../tags/sage/">sage</a> <a style="font-size: 100%" href="../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../tags/talk/">talk</a> <a style="font-size: 100%" href="../tags/tensors/">tensors</a> <a style="font-size: 100%" href="../tags/vectors/">vectors</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="border p-3 bg-white text-gray">
+  Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.
+</footer>
+
+        
+      </div>
+  </body>
+</html>
