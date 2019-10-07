@@ -250,7 +250,7 @@ v^*(w) = v_1 x + v_2 y
 <p>In the standard basis, let <span class="math inline">\(v^*\)</span> be given by <span class="math inline">\(\begin{bmatrix}1 &amp; 2\end{bmatrix}\)</span>. Its family of lines will then be <span class="math inline">\(x + 2 y = k\)</span>. Now let <span class="math inline">\(w\)</span> be given by <span class="math inline">\(\begin{bmatrix}2 &amp; 1\end{bmatrix}\)</span>, and count how many lines <span class="math inline">\(w\)</span> crosses through:</p>
 <figure><img src="../../images/covectors.jpg" alt="Left: Drawing of v and v^*. Right: Drawing of v^* and w." /></figure>
 
-<p>It’s exactly the same as $v<sup>*</sup>(w) = 2 + 2(1) = 4$! I think that’s pretty cool.</p>
+<p>It’s exactly the same as <span class="math inline">\(v^*(w) = 2 + 2(1) = 4\)</span>! I think that’s pretty cool.</p>
 <h2 id="the-dual-basis">The Dual Basis</h2>
 <p>Okay, so what about bases in <span class="math inline">\(V^*\)</span>? We’d like to have a basis for <span class="math inline">\(V^*\)</span> that is the “best fit” for whatever basis we have in <span class="math inline">\(V\)</span>. This turns out to be the basis given by: <span class="math display">\[
 e^i(e_j) =
@@ -264,7 +264,7 @@ e^i(e_j) =
 2\end{bmatrix} = 1 + 4 = 5\]</span></p>
 <p><span class="math display">\[v'^\top v' = \begin{bmatrix} 4 &amp; 1\end{bmatrix}\begin{bmatrix}4 \\
 1\end{bmatrix} = 16 + 1 = 17\]</span></p>
-<p>This is no good. We get two different values for <span class="math inline">\(\bar v^*(\bar w)\)</span> depending on which basis we use, but the values of a function on a vector space shouldn’t depend on the basis.$ The trouble is that the dual of <span class="math inline">\((e'_i)\)</span> isn’t the transpose of those basis vectors (they don’t satisfy the bi-orthogonality property), so the duals of those vectors represented in it won’t be the transposes of those vectors either.</p>
+<p>This is no good. We get two different values for <span class="math inline">\(\bar v^*(\bar w)\)</span> depending on which basis we use, but the values of a function on a vector space shouldn’t depend on the basis. The trouble is that the dual of <span class="math inline">\((e'_i)\)</span> isn’t the transpose of those basis vectors (they don’t satisfy the bi-orthogonality property), so the duals of those vectors represented in it won’t be the transposes of those vectors either.</p>
 <p>This <em>will</em> be true for <a href="https://en.wikipedia.org/wiki/Orthonormality">orthonormal</a> bases, however. The standard basis <span class="math inline">\((e_i)\)</span> <em>is</em> orthonormal, and the duals of the vectors represented in it will in fact be those transposes.</p>
 <p><span class="math display">\[ \formbox{v^* = v^\top \text{for any vector } v \text{ written in an orthonormal basis.}} \]</span></p>
 <h2 id="formulas-1">Formulas</h2>
