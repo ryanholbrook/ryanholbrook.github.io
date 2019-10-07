@@ -151,7 +151,7 @@ In the standard basis, let $v^*$ be given by $\begin{bmatrix}1 & 2\end{bmatrix}$
 <figure><img src="/images/covectors.jpg" alt="Left: Drawing of v and v^*. Right: Drawing of v^* and w." /></figure>
 #+end_export
 
-It's exactly the same as $v^*(w) = 2 + 2(1) = 4$! I think that's pretty cool.
+It's exactly the same as \(v^*(w) = 2 + 2(1) = 4\)! I think that's pretty cool.
 
 ** The Dual Basis
 Okay, so what about bases in $V^*$? We'd like to have a basis for $V^*$ that is the "best fit" for whatever basis we have in $V$. This turns out to be the basis given by:
@@ -172,7 +172,7 @@ Let's look at formulas for changing bases now. If we have a vector $v$ in $V$ wr
 \[v'^\top v' = \begin{bmatrix} 4 & 1\end{bmatrix}\begin{bmatrix}4 \\
 1\end{bmatrix} = 16 + 1 = 17\]
 
-This is no good. We get two different values for $\bar v^*(\bar w)$ depending on which basis we use, but the values of a function on a vector space shouldn't depend on the basis.$ The trouble is that the dual of $(e'_i)$ isn't the transpose of those basis vectors (they don't satisfy the bi-orthogonality property), so the duals of those vectors represented in it won't be the transposes of those vectors either.
+This is no good. We get two different values for $\bar v^*(\bar w)$ depending on which basis we use, but the values of a function on a vector space shouldn't depend on the basis. The trouble is that the dual of $(e'_i)$ isn't the transpose of those basis vectors (they don't satisfy the bi-orthogonality property), so the duals of those vectors represented in it won't be the transposes of those vectors either.
 
 This /will/ be true for [[https://en.wikipedia.org/wiki/Orthonormality][orthonormal]] bases, however. The standard basis $(e_i)$ /is/ orthonormal, and the duals of the vectors represented in it will in fact be those transposes.
 
