@@ -174,3 +174,4 @@ This turns out to be:
 #+name: shear
 [[file:/images/shear.gif]]
 
+* Resources

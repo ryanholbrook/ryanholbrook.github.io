@@ -132,6 +132,7 @@ main = hakyll $ do
 
             makeItem ""
                 >>= loadAndApplyTemplate "templates/sitemap.xml" sitemapCtx
+                >>= cleanUrls
 
     match "templates/*" $ compile templateBodyCompiler
 
