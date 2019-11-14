@@ -159,7 +159,6 @@
 <li><a href="#example">Example</a></li>
 <li><a href="#example-1">Example</a></li>
 </ul></li>
-<li><a href="#resources">Resources</a></li>
 </ul>
   </div>
   
@@ -237,9 +236,9 @@ d_1 &amp; 0   \\
 </figure>
 <p>Note that the determinant of this matrix is -1, which means that it <em>reverses</em> orientation. But its columns are still orthonormal, and so it too is an isometry.</p>
 <h1 id="decomposing-matricies-into-primitives">Decomposing Matricies into Primitives</h1>
-<p>The <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) will factor any matrix <span class="math inline">\(A\)</span> having real entries like this:</p>
+<p>The <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) will factor any matrix <span class="math inline">\(A\)</span> having like this:</p>
 <p><span class="math display">\[ A = U \Sigma V^* \]</span></p>
-<p>The matrices <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> are both orthogonal matrices, which means each one will be either a reflection or a rotation. The matrix <span class="math inline">\(\Sigma\)</span> is a diagonal matrix with non-negative entries, which means that it is a scaling transform. (The <span class="math inline">\(*\)</span> on the <span class="math inline">\(V\)</span> is the <a href="https://en.wikipedia.org/wiki/Conjugate_transpose">conjugate-transpose</a> operator, which just means ordinary <a href="https://en.wikipedia.org/wiki/Transpose">transpose</a> when <span class="math inline">\(V\)</span> doesn’t contain any imaginary numbers. So for us, <span class="math inline">\(V^* = V^\top\)</span>.) Now with the SVD we can rewrite any linear transformation as:</p>
+<p>We are working with real matricies, so <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> will both be orthogonal matrices. This means each of these will be either a reflection or a rotation, depending on the pattern of signs in its entries. The matrix <span class="math inline">\(\Sigma\)</span> is a diagonal matrix with non-negative entries, which means that it is a scaling transform. (The <span class="math inline">\(*\)</span> on the <span class="math inline">\(V\)</span> is the <a href="https://en.wikipedia.org/wiki/Conjugate_transpose">conjugate-transpose</a> operator, which just means ordinary <a href="https://en.wikipedia.org/wiki/Transpose">transpose</a> when <span class="math inline">\(V\)</span> doesn’t contain any imaginary entries. So, for us, <span class="math inline">\(V^* = V^\top\)</span>.) Now with the SVD we can rewrite any linear transformation as:</p>
 <ol>
 <li><span class="math inline">\(V^*\)</span>: Rotate/Reflect</li>
 <li><span class="math inline">\(\Sigma\)</span>: Scale</li>
@@ -269,6 +268,7 @@ d_1 &amp; 0   \\
 <img src="../../images/rot-scale-ref.gif" title="rot-scale-ref" alt="The transformation applied to the unit circle" /><figcaption>The transformation applied to the unit circle</figcaption>
 </figure>
 <h2 id="example-1">Example</h2>
+<p>And here is a <a href="https://en.wikipedia.org/wiki/Shear_mapping">shear transform</a>, represented as: rotation, scale, rotation.</p>
 <span class="math display">\[\begin{bmatrix}
 1.0 &amp; 1.0 \\
 0.0 &amp; 1.0
@@ -286,7 +286,6 @@ d_1 &amp; 0   \\
 <figure>
 <img src="../../images/shear.gif" title="shear" alt="A shearing transform" /><figcaption>A shearing transform</figcaption>
 </figure>
-<h1 id="resources">Resources</h1>
   </section>
   
 </article>
