@@ -1,7 +1,7 @@
 ---
 title: "Visualizing Linear Transformations"
 published: November 12, 2019
-tags: tutorial, linear-algebra, matrix-decomposition, geometry, sage
+tags: tutorial, linear-algebra, matrix-decomposition, geometry
 usetoc: true
 ---
 
@@ -46,6 +46,7 @@ For instance, here is the effect on a vector of this matrix:
 \end{bmatrix}\]
 
 #+caption: A vector, scaled.
+#+attr_html: :width 400px
 #+name: vector-scaled
 [[file:/images/vector-scaled.png]]
 
@@ -175,3 +176,5 @@ This turns out to be:
 [[file:/images/shear.gif]]
 
 * Resources
+
+
