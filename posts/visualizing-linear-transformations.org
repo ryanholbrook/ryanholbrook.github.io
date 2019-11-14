@@ -55,7 +55,6 @@ It will shrink a vector by a factor of 0.75 along the x-axis and stretch a vecto
 If we think about all the vectors of length 1 as being the points of the [[https://en.wikipedia.org/wiki/Unit_circle][unit circle]], then we can get an idea of how the transformation will affect any vector. We can see a scaling as a continous transformation beginning at the [[https://en.wikipedia.org/wiki/Identity_matrix][identity matrix]].
 
 #+caption: The unit circle, scaled
-#+attr_html: :width 400px
 #+name: circle-scaled
 [[file:/images/scaling.gif]]
 
