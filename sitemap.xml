@@ -8,6 +8,15 @@
 
 
   <url>
+    <loc>https://mathformachines.com/posts/eigenvalues-and-singular-values/</loc>
+    
+    <lastmod>2019-11-15</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://mathformachines.com/posts/visualizing-linear-transformations/</loc>
     
     <lastmod>2019-11-12</lastmod>
