@@ -1,12 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset
-  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml"
-  xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
-  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
-  xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"
->
+<?xml version="1.0" encoding="UTF-8" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
     <loc>https://mathformachines.com</loc>
     <changefreq>daily</changefreq>
@@ -15,7 +8,25 @@
 
 
   <url>
-    <loc>https://mathformachines.com/posts/bayes-and-means/index.html</loc>
+    <loc>https://mathformachines.com/posts/eigenvalues-and-singular-values/</loc>
+    
+    <lastmod>2019-11-15</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mathformachines.com/posts/visualizing-linear-transformations/</loc>
+    
+    <lastmod>2019-11-12</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mathformachines.com/posts/bayes-and-means/</loc>
     
     <lastmod>2019-10-04</lastmod>
     
@@ -24,7 +35,7 @@
   </url>
 
   <url>
-    <loc>https://mathformachines.com/posts/investmentsim/index.html</loc>
+    <loc>https://mathformachines.com/posts/investmentsim/</loc>
     
     <lastmod>2019-09-11</lastmod>
     
@@ -33,7 +44,7 @@
   </url>
 
   <url>
-    <loc>https://mathformachines.com/posts/introduction-to-categories/index.html</loc>
+    <loc>https://mathformachines.com/posts/introduction-to-categories/</loc>
     
     <lastmod>2019-06-22</lastmod>
     
@@ -42,7 +53,7 @@
   </url>
 
   <url>
-    <loc>https://mathformachines.com/posts/retirement-formula/index.html</loc>
+    <loc>https://mathformachines.com/posts/retirement-formula/</loc>
     
     <lastmod>2019-05-15</lastmod>
     
@@ -51,7 +62,7 @@
   </url>
 
   <url>
-    <loc>https://mathformachines.com/posts/permitted-and-forbidden-sets/index.html</loc>
+    <loc>https://mathformachines.com/posts/permitted-and-forbidden-sets/</loc>
     
     <lastmod>2019-04-08</lastmod>
     
@@ -60,7 +71,7 @@
   </url>
 
   <url>
-    <loc>https://mathformachines.com/posts/change-of-basis-for-vectors-and-covectors/index.html</loc>
+    <loc>https://mathformachines.com/posts/change-of-basis-for-vectors-and-covectors/</loc>
     
     <lastmod>2019-03-18</lastmod>
     
@@ -69,7 +80,7 @@
   </url>
 
   <url>
-    <loc>https://mathformachines.com/posts/a-tour-of-tensors/index.html</loc>
+    <loc>https://mathformachines.com/posts/a-tour-of-tensors/</loc>
     
     <lastmod>2019-02-05</lastmod>
     
@@ -78,7 +89,7 @@
   </url>
 
   <url>
-    <loc>https://mathformachines.com/posts/bayesian-topic-modeling/index.html</loc>
+    <loc>https://mathformachines.com/posts/bayesian-topic-modeling/</loc>
     
     <lastmod>2019-01-30</lastmod>
     
@@ -89,14 +100,14 @@
 
 
   <url>
-    <loc>https://mathformachines.com/./about/index.html</loc>
+    <loc>https://mathformachines.com/./about/</loc>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://mathformachines.com/./archive/index.html</loc>
+    <loc>https://mathformachines.com/./archive/</loc>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
