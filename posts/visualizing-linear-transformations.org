@@ -24,7 +24,7 @@ It turns out that all linear maps in \(\mathbb{R}^2\) can be factored into just 
 
 #+caption: The unit circle, rotated, reflected, and scaled.
 #+name: primitives
-[[file:./images/primitives.png]]
+[[file:/images/primitives.png]]
 
 * Three Primitive Transformations
 
