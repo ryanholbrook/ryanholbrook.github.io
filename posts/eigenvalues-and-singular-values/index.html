@@ -1,0 +1,331 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Understanding Eigenvalues and Singular Values</title>
+    <link href="https://fonts.googleapis.com/css?family=Merriweather:400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro&display=swap" rel="stylesheet"> 
+    <link href="https://unpkg.com/primer/build/build.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style.css" />
+      <!-- Syntax highlighting -->
+  <link rel="stylesheet" href="../../css/github.css" />
+  <script src="../../scripts/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+      </head>
+  <body class="bg-gray-dark">
+    <div class="container-xxl h-100 my-3">
+      <div class="box-shadow-large bg-gray">
+
+        <header id="header" class="bg-white">
+
+  <div class="p-4" style="text-align: center">
+
+    <a class="title" href="../../">
+      Math for Machines
+    </a>
+
+  </div>
+  
+  <nav class="UnderlineNav UnderlineNav--right px-2 border-top">
+    <div class="UnderlineNav-body">
+      <a class="UnderlineNav-item " href="../../about/">
+        <span>About</span>
+      </a>
+      <a class="UnderlineNav-item " href="../../archive/">
+        <span>Archive</span>
+      </a>
+    </div>
+  </nav>
+
+
+  <!-- Scripts -->
+  <!-- Enable MathJax -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        "HTML-CSS": { scale: 90, linebreaks: { automatic: true } },
+        SVG: { linebreaks: { automatic:true } },
+    });
+    MathJax.Hub.Config({ TeX: { extensions: ["color.js"] }});
+    MathJax.Hub.Config({
+        TeX: {
+            Macros: {
+                formbox: ["\\bbox[15px, border:1px solid Gray]{#1}", 1],
+            }
+        }
+    });
+  </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-133546767-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-133546767-1', { 'optimize_id': 'GTM-T3XD3JM'});
+  </script>
+
+</header>
+
+        
+        <div id="holy">
+
+          <div id="left" class="mr-2 px-3 pb-3 text-gray bg-white">
+            <div id="side">
+              <div>
+                <h1>Recent Posts</h1>
+                <ul>
+    
+        <li>
+          <a href="../../posts/eigenvalues-and-singular-values/">Understanding Eigenvalues and Singular Values</a>
+        </li>
+    
+        <li>
+          <a href="../../posts/visualizing-linear-transformations/">Visualizing Linear Transformations</a>
+        </li>
+    
+        <li>
+          <a href="../../posts/bayes-and-means/">What I'm Reading 1: Bayes and Means</a>
+        </li>
+    
+        <li>
+          <a href="../../posts/investmentsim/">investmentsim - an R Package for Simulating Investment Portfolios</a>
+        </li>
+    
+        <li>
+          <a href="../../posts/introduction-to-categories/">Talk: An Introduction to Categories with Haskell and Databases</a>
+        </li>
+    
+        <li>
+          <a href="../../posts/retirement-formula/">A Somewhat Better Retirement Formula</a>
+        </li>
+    
+        <li>
+          <a href="../../posts/permitted-and-forbidden-sets/">Journal Review: Permitted and Forbidden Sets in STLNs</a>
+        </li>
+    
+        <li>
+          <a href="../../posts/change-of-basis-for-vectors-and-covectors/">Change of Basis for Vectors and Covectors</a>
+        </li>
+    
+        <li>
+          <a href="../../posts/a-tour-of-tensors/">A Tour of Tensors</a>
+        </li>
+    
+        <li>
+          <a href="../../posts/bayesian-topic-modeling/">Bayesian Topic Modeling</a>
+        </li>
+    
+</ul>
+
+              </div>
+            </div>
+          </div>
+            
+          <div class="my-2">
+          <div role="main" id="main">
+  <div class="rounded-2 box-shadow-medium pb-3 px-4 bg-white">
+    <!-- Post Header  -->
+<div class="Subhead">
+  <div class="Subhead-heading">
+      <h2 class="mt-3 mb-1"><a id="post-title" href="../../posts/eigenvalues-and-singular-values/">Understanding Eigenvalues and Singular Values</a></h2>
+  </div>
+  <div class="Subhead-description">
+    
+      <a href="../../tags/tutorial/">tutorial</a>, <a href="../../tags/linear-algebra/">linear-algebra</a>, <a href="../../tags/eigenvalues/">eigenvalues</a>, <a href="../../tags/singular-values/">singular-values</a>
+    
+    <div class="float-md-right" style="text-align=right">
+      Published: November 15, 2019
+      
+    </div>
+  </div>
+</div>
+
+<article>
+  
+  <div id="toc" class="Box mb-3">
+    <h1>Table of Contents</h1>
+    <ul class="incremental">
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#eigenvalues-and-eigenvectors">Eigenvalues and Eigenvectors</a></li>
+<li><a href="#singular-values-and-singular-vectors">Singular Values and Singular Vectors</a></li>
+<li><a href="#matrix-approximation-with-svd">Matrix Approximation with SVD</a></li>
+</ul>
+  </div>
+  
+  
+  <section id="content" class="pb-2 mb-4 border-bottom">
+    <h1 id="introduction">Introduction</h1>
+<p>What are eigenvalues? What are singular values? They both describe the behavior of a matrix on a certain set of vectors. The difference is this: The eigenvectors of a matrix describe the directions of its <em>invariant</em> action. The singular vectors of a matrix describe the directions of its <em>maximum</em> action. And the corresponding eigen- and singular values describe the magnitude of that action.</p>
+<p>They are defined this way. A scalar <span class="math inline">\(\lambda\)</span> is an <strong><a href="https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors">eigenvalue</a></strong> of a linear transformation <span class="math inline">\(A\)</span> if there is a vector <span class="math inline">\(v\)</span> such that <span class="math inline">\(A v = \lambda v\)</span>, and <span class="math inline">\(v\)</span> is called an <strong>eigenvector</strong> of <span class="math inline">\(\lambda\)</span>. A scalar <span class="math inline">\(\sigma\)</span> is a <strong><a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value</a></strong> of <span class="math inline">\(A\)</span> if there are (unit) vectors <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> such that <span class="math inline">\(A v = \sigma u\)</span> and <span class="math inline">\(A^* u = \sigma v\)</span>, where <span class="math inline">\(A^*\)</span> is the <a href="https://en.wikipedia.org/wiki/Conjugate_transpose">conjugate transpose</a> of <span class="math inline">\(A\)</span>; the vectors <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are <strong>singular vectors</strong>. The vector <span class="math inline">\(u\)</span> is called a <strong>left</strong> singular vector and <span class="math inline">\(v\)</span> a <strong>right</strong> singular vector.</p>
+<h1 id="eigenvalues-and-eigenvectors">Eigenvalues and Eigenvectors</h1>
+<p>That eigenvectors give the directions of invariant action is obvious from the definition. The definition says that when <span class="math inline">\(A\)</span> acts on an eigenvector, it just multiplies it by a constant, the corresponding eigenvalue. In other words, when a linear transformation acts on one of its eigenvectors, it shrinks the vector or stretches it and reverses its direction if <span class="math inline">\(\lambda\)</span> is negative, but never changes the direction otherwise. The action is invariant.</p>
+<p>Take this matrix, for instance:</p>
+<p><span class="math display">\[ A = \begin{bmatrix}
+0 &amp; 2 \\
+2 &amp; 0
+\end{bmatrix} \]</span></p>
+<figure>
+<img src="../../images/eigen-circle-1.png" title="eigen-circle-1" alt="Eigenvectors of A" width="400" /><figcaption>Eigenvectors of <span class="math inline">\(A\)</span></figcaption>
+</figure>
+<p>We can see how the transformation just stretches the red vector by a factor of 2, while the blue vector it stretches but also reflects over the origin.</p>
+<p>And this matrix:</p>
+<p><span class="math display">\[ A = \begin{bmatrix}
+1 &amp; \frac{1}{3} \\
+\frac{4}{3} &amp; 1
+\end{bmatrix} \]</span></p>
+<figure>
+<img src="../../images/eigen-circle-2.png" title="eigen-circle-2" alt="Eigenvectors of A" width="400" /><figcaption>Eigenvectors of <span class="math inline">\(A\)</span></figcaption>
+</figure>
+<p>It stretches the red vector and shrinks the blue vector, but reverses neither.</p>
+<p>The point is that in every case, when a matrix acts on one of its eigenvectors, the action is always in a parallel direction.</p>
+<h1 id="singular-values-and-singular-vectors">Singular Values and Singular Vectors</h1>
+<p>This invariant direction does not necessarily give the transformation’s direction of <em>greatest effect</em>, however. You can see that in the previous example. But say <span class="math inline">\(\sigma_1\)</span> is the <em>largest</em> singular value of <span class="math inline">\(A\)</span> with right singular vector <span class="math inline">\(v\)</span>. Then <span class="math inline">\(v\)</span> is a solution to</p>
+<p><span class="math display">\[ \operatorname*{argmax}_{x, ||x||=1} ||A x|| \]</span></p>
+<p>In other words, <span class="math inline">\( ||A v|| = \sigma_1 \)</span> is at least as big as <span class="math inline">\( ||A x|| \)</span> for any other unit vector <span class="math inline">\(x\)</span>. It’s not necessarily the case that <span class="math inline">\(A v\)</span> is parallel to <span class="math inline">\(v\)</span>, though.</p>
+<p>Compare the eigenvectors of the matrix in the last example to its singular vectors:</p>
+<figure>
+<img src="../../images/singular-circle-1.png" title="singular-circle-1" alt="Singular vectors of A" width="400" /><figcaption>Singular vectors of <span class="math inline">\(A\)</span></figcaption>
+</figure>
+<p>The directions of maximum effect will be exactly the semi-axes of the ellipse, the ellipse which is the image of the unit circle under <span class="math inline">\(A\)</span>.</p>
+<p>Let’s extend this idea to 3-dimensional space to get a better idea of what’s going on. Consider this transformation:</p>
+<p><span class="math display">\[A = \begin{bmatrix}
+\frac{3}{2} \, \sqrt{2} &amp; -\sqrt{2} &amp; 0 \\
+\frac{3}{2} \, \sqrt{2} &amp; \sqrt{2} &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>This will have the effect of transforming the unit sphere into an <a href="https://en.wikipedia.org/wiki/Ellipsoid">ellipsoid</a>:</p>
+<figure>
+<img src="../../images/transform3d-0.png" title="transform3d-0" alt="The unit sphere transformed into an ellipsoid." width="800" /><figcaption>The unit sphere transformed into an ellipsoid.</figcaption>
+</figure>
+<p>Its singular values are 3, 2, and 1. You can see how they again form the semi-axes of the resulting figure.</p>
+<figure>
+<img src="../../images/transform3d-1.png" title="transform3d-1" alt="The singular vectors as semi-axes in the ellipsoid." width="800" /><figcaption>The singular vectors as semi-axes in the ellipsoid.</figcaption>
+</figure>
+<h1 id="matrix-approximation-with-svd">Matrix Approximation with SVD</h1>
+<p>Now, the <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) will tell us what <span class="math inline">\(A\)</span>’s singular values are:</p>
+<p><span class="math display">\[ A = U \Sigma V^* = 
+\begin{bmatrix}
+\frac{\sqrt{2}}{2} &amp; -\frac{\sqrt{2}}{2} &amp; 0.0 \\
+\frac{\sqrt{2}}{2} &amp; \frac{\sqrt{2}}{2} &amp; 0.0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+3 &amp; 0 &amp; 0 \\
+0 &amp; 2 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>The diagonal entries of the matrix <span class="math inline">\(\Sigma\)</span> are the singular values of <span class="math inline">\(A\)</span>. We can obtain a lower-dimensional approximation to <span class="math inline">\(A\)</span> by setting one or more of its singular values to 0.</p>
+<p>For instance, say we set the largest singular value, 3, to 0. We then get this matrix:</p>
+<p><span class="math display">\[ A_1 = \begin{bmatrix}
+\frac{\sqrt{2}}{2} &amp; -\frac{\sqrt{2}}{2} &amp; 0.0 \\
+\frac{\sqrt{2}}{2} &amp; \frac{\sqrt{2}}{2} &amp; 0.0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+0 &amp; 0 &amp; 0 \\
+0 &amp; 2 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} = \begin{bmatrix}
+0 &amp; -\frac{\sqrt{2}}{2} &amp; 0 \\
+0 &amp; \frac{\sqrt{2}}{2} &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>which transforms the unit sphere like this:</p>
+<figure>
+<img src="../../images/ellipse-2.png" title="ellipse-2" alt="The transformation with the largest singular value set to 0." width="400" /><figcaption>The transformation with the largest singular value set to 0.</figcaption>
+</figure>
+<p>The resulting figure now lives in a 2-dimensional space. Further, the largest singular value of <span class="math inline">\(A_1\)</span> is now 2. Set it to 0:</p>
+<p><span class="math display">\[ A_2 = \begin{bmatrix}
+\frac{\sqrt{2}}{2} &amp; -\frac{\sqrt{2}}{2} &amp; 0.0 \\
+\frac{\sqrt{2}}{2} &amp; \frac{\sqrt{2}}{2} &amp; 0.0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} = \begin{bmatrix}
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>And we get a 1-dimensional figure, and a final largest singular value of 1:</p>
+<figure>
+<img src="../../images/ellipse-1.png" title="ellipse-1" alt="The transformation with the two largest singular values set to 0." width="400" /><figcaption>The transformation with the two largest singular values set to 0.</figcaption>
+</figure>
+<p>This is the point: Each set of singular vectors will form an <a href="https://en.wikipedia.org/wiki/Orthonormal_basis">orthonormal basis</a> for some <a href="https://en.wikipedia.org/wiki/Linear_subspace">linear subspace</a> of <span class="math inline">\(\mathbb{R}^n\)</span>. A singular value and its singular vectors give the direction of maximum action among all directions orthogonal to the singular vectors of any larger singular value.</p>
+<p>This has important applications. There are many problems in statistics and machine learning that come down to finding a <a href="https://en.wikipedia.org/wiki/Low-rank_approximation">low-rank approximation</a> to some matrix at hand. <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">Principal component analysis</a> is a problem of this kind. It says: approximate some matrix <span class="math inline">\(X\)</span> of observations with a number of its uncorrelated components of maximum variance. This problem is solved by computing its singular value decomposition and setting some of its smallest singular values to 0.</p>
+<figure>
+<img src="../../images/approximations.png" title="approximations" alt="Low-rank approximations of A." width="1000" /><figcaption>Low-rank approximations of <span class="math inline">\(A\)</span>.</figcaption>
+</figure>
+  </section>
+  
+</article>
+
+  </div>
+</div>
+
+<!-- Pagination -->
+<nav class="paginate-container" aria-label="Pagination">
+  <div class="pagination">
+    
+    <a class="previous_page text-gray-dark" rel="previous" aria-label="Previous Page" href="../../posts/visualizing-linear-transformations/">⮜ Previous</a>
+    
+
+    
+    <span class="next_page disabled">Next ⮞</span>
+    
+  </div>
+</nav>
+
+<!-- Talkyard Comments -->
+<div class="container-m">
+  <div class="rounded-2 box-shadow-medium px-2 py-1 bg-white">
+    <script>talkyardServerUrl='https://comments-for-mathformachines-com.talkyard.net';</script>
+    <script async defer src="https://c1.ty-cdn.net/-/talkyard-comments.min.js"></script>
+    <!-- You can specify a per page discussion id on the next line, if your URLs might change. -->
+    <div class="talkyard-comments" data-discussion-id style="margin-top: 45px;">
+      <noscript>Please enable Javascript to view comments.</noscript>
+      <p style="margin-top: 25px; opacity: 0.9; font-size: 96%">Comments powered by
+        <a href="https://www.talkyard.io">Talkyard</a>.</p>
+    </div>
+  </div>
+</div>
+
+          </div>
+          
+          <div id="right" class="ml-2 px-3 pb-3 text-gray bg-white">
+            <div id="side">
+              <div>
+                <h1>Tags</h1>
+                <a style="font-size: 106%" href="../../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../../tags/category-theory/">category-theory</a> <a style="font-size: 100%" href="../../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../../tags/cql/">cql</a> <a style="font-size: 106%" href="../../tags/data-science/">data-science</a> <a style="font-size: 100%" href="../../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../../tags/engrams/">engrams</a> <a style="font-size: 106%" href="../../tags/finance/">finance</a> <a style="font-size: 100%" href="../../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../../tags/investing/">investing</a> <a style="font-size: 100%" href="../../tags/julia/">julia</a> <a style="font-size: 113%" href="../../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../../tags/memory/">memory</a> <a style="font-size: 100%" href="../../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../../tags/numpy/">numpy</a> <a style="font-size: 100%" href="../../tags/python/">python</a> <a style="font-size: 106%" href="../../tags/R/">R</a> <a style="font-size: 100%" href="../../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../../tags/review/">review</a> <a style="font-size: 100%" href="../../tags/sage/">sage</a> <a style="font-size: 100%" href="../../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../../tags/talk/">talk</a> <a style="font-size: 100%" href="../../tags/tensors/">tensors</a> <a style="font-size: 106%" href="../../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../../tags/vectors/">vectors</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="border p-3 bg-white text-gray">
+  Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.
+</footer>
+
+        
+      </div>
+  </body>
+</html>
