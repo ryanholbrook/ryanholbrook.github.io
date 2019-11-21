@@ -8,6 +8,15 @@
 
 
   <url>
+    <loc>https://mathformachines.com/posts/least-squares-with-the-mp-inverse/</loc>
+    
+    <lastmod>2019-11-21</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://mathformachines.com/posts/eigenvalues-and-singular-values/</loc>
     
     <lastmod>2019-11-15</lastmod>
