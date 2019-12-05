@@ -166,7 +166,9 @@ mainContext tags =
   in
   defaultContext
   <> simplePostContext
-  <> listField "post-list" -- display 10 most recent posts
+  <> listField "archive-list" --display all posts
+       simplePostContext postList
+  <> listField "recent-list" -- display 10 most recent posts
        simplePostContext (take 10 <$> postList)
   <> tagCloudField "alltags" 100 120 tags
 
