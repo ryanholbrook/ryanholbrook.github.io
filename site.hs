@@ -276,3 +276,17 @@ cleanUrls :: Item String -> Compiler (Item String)
 cleanUrls = relativizeUrls
             >=> cleanIndexUrls
             >=> cleanIndexHtmls
+
+------------
+-- RSS Feeds
+
+mainFeedConfiguration :: FeedConfiguration
+mainFeedConfiguration = FeedConfiguration
+  { feedTitle = ""
+  , feedDescription = ""
+  , feedAuthorName = ""
+  , feedAuthorEmail = ""
+  , feedRoot = ""
+  }
+
+rlangFeedConfiguration :: FeedConfiguration
