@@ -56,7 +56,12 @@ If we think about all the vectors of length 1 as being the points of the [[https
 
 #+caption: The unit circle, scaled
 #+name: circle-scaled
-[[file:/images/scaling.gif]]
+#+BEGIN_EXPORT html
+<video autoplay loop mutued playsinline>
+  <source src="./images/scaling.webm" type="video/webm">
+  <source src="./images/scaling.mp4" type="video/mp4">
+</video>
+#+END_EXPORT
 
 If one of the diagonal entries is 0, then it will collapse the circle on the other axis.
 
@@ -69,7 +74,12 @@ This is an example of a [[https://en.wikipedia.org/wiki/Rank_(linear_algebra)][r
 
 #+caption: The unit circle, collapsed onto the y-axis
 #+name: circle-collapsed
-[[file:/images/collapsed.gif]]
+#+BEGIN_EXPORT html
+<video autoplay loop mutued playsinline>
+  <source src="./images/collapsed.webm" type="video/webm">
+  <source src="./images/collapsed.mp4" type="video/mp4">
+</video>
+#+END_EXPORT
 
 ** Rotation
 A *rotation transformation* $Ref$ is given by a matrix:
@@ -89,7 +99,13 @@ And the unit circle gets mapped onto itself.
 
 #+caption: The unit circle, rotated by $3\pi/4$
 #+name: circle-rotated
-[[file:/images/rotation.gif]]
+#+BEGIN_EXPORT html
+<video autoplay loop mutued playsinline>
+  <source src="./images/rotation.webm" type="video/webm">
+  <source src="./images/rotation.mp4" type="video/mp4">
+</video>
+#+END_EXPORT
+
 
 It shouldn't be too hard to convince ourselves that the matrix we've written down is the one we want. Take some unit vector and write its coordinates like $(\cos\gamma, \sin\gamma)$. Multiply it by $Ref(\theta)$ to get $(\cos\gamma \cos\theta - \sin\gamma \sin\theta, \cos\gamma \sin\theta + \sin\gamma \cos\theta)$. But by a [[https://en.wikipedia.org/wiki/List_of_trigonometric_identities#Angle_sum_and_difference_identities][trigonometric identity]], this is exactly the vector $(\cos(\gamma + \theta), \sin(\gamma + \theta))$, which is our vector rotated by $\theta$.
 
@@ -112,7 +128,13 @@ And the unit circle gets mapped onto itself.
 
 #+caption: The unit circle, reflected over $\pi/4$
 #+name: circle-reflected
-[[file:/images/reflection.gif]]
+#+BEGIN_EXPORT html
+<video autoplay loop mutued playsinline>
+  <source src="./images/reflection.webm" type="video/webm">
+  <source src="./images/reflection.mp4" type="video/mp4">
+</video>
+#+END_EXPORT
+
 
 Note that the determinant of this matrix is -1, which means that it /reverses/ orientation. But its columns are still orthonormal, and so it too is an isometry.
 
@@ -152,7 +174,13 @@ This turns out to be:
 
 #+caption: The transformation applied to the unit circle
 #+name: rot-scale-ref
-[[file:/images/rot-scale-ref.gif]]
+#+BEGIN_EXPORT html
+<video autoplay loop mutued playsinline>
+  <source src="./images/rot-scale-ref.webm" type="video/webm">
+  <source src="./images/rot-scale-ref.mp4" type="video/mp4">
+</video>
+#+END_EXPORT
+
 
 ** Example
 
@@ -174,4 +202,10 @@ And here is a [[https://en.wikipedia.org/wiki/Shear_mapping][shear transform]], 
 
 #+caption: A shearing transform
 #+name: shear
-[[file:/images/shear.gif]]
+#+BEGIN_EXPORT html
+<video autoplay loop mutued playsinline>
+  <source src="./images/shear.webm" type="video/webm">
+  <source src="./images/shear.mp4" type="video/mp4">
+</video>
+#+END_EXPORT
+

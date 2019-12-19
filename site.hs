@@ -13,12 +13,12 @@ import           Text.Pandoc.Options
 main :: IO ()
 main = hakyll $ do
     match ("images/*" .||. "files/*" .||. "scripts/*") $ do
-        route   idRoute
-        compile copyFileCompiler
+      route idRoute
+      compile copyFileCompiler
 
     match "css/*" $ do
-        route   idRoute
-        compile compressCssCompiler
+      route idRoute
+      compile compressCssCompiler
 
     -- Build tags and create a page for each tag
     tags <- sortTagsBy caseInsensitiveTags <$>
@@ -204,7 +204,7 @@ postsPageIdBy10 n = fromFilePath $
   else show n ++ "/index.html"
 
 grouperBy10 :: MonadMetadata m => [Identifier] -> m [[Identifier]]
-grouperBy10 = fmap (paginateEvery 5) . sortRecentFirst
+grouperBy10 = fmap (paginateEvery 3) . sortRecentFirst
 
 -- Pagination for Post pages
 withRelatedPost ::

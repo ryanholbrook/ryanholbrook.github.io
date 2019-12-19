@@ -132,9 +132,15 @@ just like we had before.
 
 In an [[file:/posts/visualizing-linear-transformations/][earlier post]], we saw how we could use the SVD to visualize a matrix as a sequence of geometric transformations. Here is the matrix $A$ followed by $A^{-1}$, acting on the unit circle:
 
-#+caption: $A$ followed by $A^{-1}$ on the unit circle
-#+name: invertible-equation
-[[file:./images/invertible-equation.gif]]
+#+CAPTION: $A$ followed by $A^{-1}$ on the unit circle
+#+NAME: invertible-equation
+#+BEGIN_EXPORT html
+<video autoplay loop mutued playsinline>
+  <source src="./images/invertible-equation.webm" type="video/webm">
+  <source src="./images/invertible-equation.mp4" type="video/mp4">
+</video>
+#+END_EXPORT
+
 
 The inverse matrix $A^{-1}$ reverses exactly the action of $A$. The matrix $A$ will map any circle to a unique ellipse, with no overlap. So, $A^{-1}$ can map ellipses back to those same circles without any ambiguity. We don't "lose information" by applying $A$.
 
@@ -203,9 +209,14 @@ This is the Moore-Penrose inverse of $A$.
 
 Like we did for the invertible matrix before, let's get an idea of what $A$ and $A^+$ are doing geometrically. Here they are acting on the unit circle:
 
-#+caption: $A$ followed by $A^+$ on the unit circle
 #+name: dependent-equation
-[[file:./images/dependent-equation.gif]]
+#+BEGIN_EXPORT html
+<video autoplay loop mutued playsinline>
+  <source src="./images/dependent-equation.webm" type="video/webm">
+  <source src="./images/dependent-equation.mp4" type="video/mp4">
+</video>
+#+END_EXPORT
+# #+HTML: <figcaption>$A$ followed by $A^+$ on the unit circle</figcaption>
 
 Notice how $A$ now collapses the circle onto a one-dimensional space. This is a consequence of it having dependent columns. For matricies with dependent columns, its image will be of lesser dimension than the space it's mapping into. Another way of saying this is that it has a non-trivial [[https://en.wikipedia.org/wiki/Kernel_(linear_algebra)][null space]]. It "zeroes out" some of the dimensions in its domain during the transformation.
 

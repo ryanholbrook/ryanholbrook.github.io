@@ -92,8 +92,8 @@ img {
 }
 
 video {
-    width: 100%!important;
-    height: auto!important
+    width: 100%;
+    height: auto
 }
 
 .video-container {
@@ -112,6 +112,14 @@ video {
     left: 0;
     width: 100%;
     height: 100%
+}
+
+video[playsinline] {
+    max-width: 400px;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto
 }
 
 table {
