@@ -14,9 +14,7 @@
   <link rel="stylesheet" href="../../css/github.css" />
   <script src="../../scripts/highlight.pack.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
-  
-
-      </head>
+  </head>
   <body class="bg-gray-dark">
     <div class="container-xxl h-100 my-3">
       <div class="box-shadow-large bg-gray">
@@ -50,7 +48,9 @@
         "HTML-CSS": { scale: 90, linebreaks: { automatic: true } },
         SVG: { linebreaks: { automatic:true } },
     });
-    MathJax.Hub.Config({ TeX: { extensions: ["color.js"] }});
+    MathJax.Hub.Config({
+        TeX: { extensions: ["color.js"] }
+    });
     MathJax.Hub.Config({
         TeX: {
             Macros: {
@@ -59,7 +59,7 @@
         }
     });
   </script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntil=onload">
   </script>
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -252,9 +252,11 @@ A = \begin{bmatrix}
 \end{bmatrix} \]</span></p>
 <p>just like we had before.</p>
 <p>In an <a href="../../posts/visualizing-linear-transformations/">earlier post</a>, we saw how we could use the SVD to visualize a matrix as a sequence of geometric transformations. Here is the matrix <span class="math inline">\(A\)</span> followed by <span class="math inline">\(A^{-1}\)</span>, acting on the unit circle:</p>
-<figure>
-<img src="./images/invertible-equation.gif" title="invertible-equation" alt="A followed by A^{-1} on the unit circle" /><figcaption><span class="math inline">\(A\)</span> followed by <span class="math inline">\(A^{-1}\)</span> on the unit circle</figcaption>
-</figure>
+<video autoplay loop mutued playsinline>
+  <source src="./images/invertible-equation.webm" type="video/webm">
+  <source src="./images/invertible-equation.mp4" type="video/mp4">
+</video>
+
 <p>The inverse matrix <span class="math inline">\(A^{-1}\)</span> reverses exactly the action of <span class="math inline">\(A\)</span>. The matrix <span class="math inline">\(A\)</span> will map any circle to a unique ellipse, with no overlap. So, <span class="math inline">\(A^{-1}\)</span> can map ellipses back to those same circles without any ambiguity. We don’t “lose information” by applying <span class="math inline">\(A\)</span>.</p>
 <h1 id="constructing-mp-inverses-with-the-svd">Constructing MP-Inverses with the SVD</h1>
 <p>We can in fact do basically the same thing for <em>any</em> matrix, not just the invertible ones. The SVD always exists, so for some matrix <span class="math inline">\(A\)</span>, first write</p>
@@ -304,9 +306,11 @@ A = \begin{bmatrix}
 1/4 &amp; 1/4 \end{bmatrix} \]</span></p>
 <p>This is the Moore-Penrose inverse of <span class="math inline">\(A\)</span>.</p>
 <p>Like we did for the invertible matrix before, let’s get an idea of what <span class="math inline">\(A\)</span> and <span class="math inline">\(A^+\)</span> are doing geometrically. Here they are acting on the unit circle:</p>
-<figure>
-<img src="./images/dependent-equation.gif" title="dependent-equation" alt="A followed by A^+ on the unit circle" /><figcaption><span class="math inline">\(A\)</span> followed by <span class="math inline">\(A^+\)</span> on the unit circle</figcaption>
-</figure>
+<video autoplay loop mutued playsinline>
+  <source src="./images/dependent-equation.webm" type="video/webm">
+  <source src="./images/dependent-equation.mp4" type="video/mp4">
+</video>
+
 <p>Notice how <span class="math inline">\(A\)</span> now collapses the circle onto a one-dimensional space. This is a consequence of it having dependent columns. For matricies with dependent columns, its image will be of lesser dimension than the space it’s mapping into. Another way of saying this is that it has a non-trivial <a href="https://en.wikipedia.org/wiki/Kernel_(linear_algebra)">null space</a>. It “zeroes out” some of the dimensions in its domain during the transformation.</p>
 <p>What if <span class="math inline">\(A\)</span> were the coefficient matrix of a system of equations? We might have:</p>
 <p><span class="math display">\[ \left\{ \begin{align*}

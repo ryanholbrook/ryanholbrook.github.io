@@ -14,9 +14,7 @@
   <link rel="stylesheet" href="../../css/github.css" />
   <script src="../../scripts/highlight.pack.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
-  
-
-      </head>
+  </head>
   <body class="bg-gray-dark">
     <div class="container-xxl h-100 my-3">
       <div class="box-shadow-large bg-gray">
@@ -50,7 +48,9 @@
         "HTML-CSS": { scale: 90, linebreaks: { automatic: true } },
         SVG: { linebreaks: { automatic:true } },
     });
-    MathJax.Hub.Config({ TeX: { extensions: ["color.js"] }});
+    MathJax.Hub.Config({
+        TeX: { extensions: ["color.js"] }
+    });
     MathJax.Hub.Config({
         TeX: {
             Macros: {
@@ -59,7 +59,7 @@
         }
     });
   </script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntil=onload">
   </script>
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -199,18 +199,22 @@ d_1 &amp; 0   \\
 </figure>
 <p>It will shrink a vector by a factor of 0.75 along the x-axis and stretch a vector by a factor of 1.25 along the y-axis.</p>
 <p>If we think about all the vectors of length 1 as being the points of the <a href="https://en.wikipedia.org/wiki/Unit_circle">unit circle</a>, then we can get an idea of how the transformation will affect any vector. We can see a scaling as a continous transformation beginning at the <a href="https://en.wikipedia.org/wiki/Identity_matrix">identity matrix</a>.</p>
-<figure>
-<img src="../../images/scaling.gif" title="circle-scaled" alt="The unit circle, scaled" /><figcaption>The unit circle, scaled</figcaption>
-</figure>
+<video autoplay loop mutued playsinline>
+  <source src="./images/scaling.webm" type="video/webm">
+  <source src="./images/scaling.mp4" type="video/mp4">
+</video>
+
 <p>If one of the diagonal entries is 0, then it will collapse the circle on the other axis.</p>
 <p><span class="math display">\[D = \begin{bmatrix}
 0 &amp; 0 \\
 0 &amp; 1.25 \\
 \end{bmatrix}\]</span></p>
 <p>This is an example of a <a href="https://en.wikipedia.org/wiki/Rank_(linear_algebra)">rank-deficient</a> matrix. It maps every vector onto the y-axis, and so its image has a dimension less than the dimension of the full space.</p>
-<figure>
-<img src="../../images/collapsed.gif" title="circle-collapsed" alt="The unit circle, collapsed onto the y-axis" /><figcaption>The unit circle, collapsed onto the y-axis</figcaption>
-</figure>
+<video autoplay loop mutued playsinline>
+  <source src="./images/collapsed.webm" type="video/webm">
+  <source src="./images/collapsed.mp4" type="video/mp4">
+</video>
+
 <h2 id="rotation">Rotation</h2>
 <p>A <strong>rotation transformation</strong> <span class="math inline">\(Ref\)</span> is given by a matrix: <span class="math display">\[Ref(\theta) = \begin{bmatrix}
 \cos(\theta) &amp; -\sin(\theta) \\
@@ -221,9 +225,11 @@ d_1 &amp; 0   \\
 <img src="../../images/vector-rotated.png" title="vector-rotated" alt="A vector, rotated by 3\pi/4" width="400" /><figcaption>A vector, rotated by <span class="math inline">\(3\pi/4\)</span></figcaption>
 </figure>
 <p>And the unit circle gets mapped onto itself.</p>
-<figure>
-<img src="../../images/rotation.gif" title="circle-rotated" alt="The unit circle, rotated by 3\pi/4" /><figcaption>The unit circle, rotated by <span class="math inline">\(3\pi/4\)</span></figcaption>
-</figure>
+<video autoplay loop mutued playsinline>
+  <source src="./images/rotation.webm" type="video/webm">
+  <source src="./images/rotation.mp4" type="video/mp4">
+</video>
+
 <p>It shouldn’t be too hard to convince ourselves that the matrix we’ve written down is the one we want. Take some unit vector and write its coordinates like <span class="math inline">\((\cos\gamma, \sin\gamma)\)</span>. Multiply it by <span class="math inline">\(Ref(\theta)\)</span> to get <span class="math inline">\((\cos\gamma \cos\theta - \sin\gamma \sin\theta, \cos\gamma \sin\theta + \sin\gamma \cos\theta)\)</span>. But by a <a href="https://en.wikipedia.org/wiki/List_of_trigonometric_identities#Angle_sum_and_difference_identities">trigonometric identity</a>, this is exactly the vector <span class="math inline">\((\cos(\gamma + \theta), \sin(\gamma + \theta))\)</span>, which is our vector rotated by <span class="math inline">\(\theta\)</span>.</p>
 <p>A rotation should preserve not only orientations, but also distances. Now, recall that the determinant for a <span class="math inline">\(2\times 2\)</span> matrix <span class="math inline">\(\begin{bmatrix} a &amp; b \\ c &amp; d \end{bmatrix}\)</span> is <span class="math inline">\(a d - b c\)</span>. So a rotation matrix will have determinant <span class="math inline">\(\cos^2(\theta) + \sin^2(\theta)\)</span>, which, by the <a href="https://en.wikipedia.org/wiki/Pythagorean_trigonometric_identity">Pythagorean identity</a>, is equal to 1. This, together with the fact that its columns are <a href="https://en.wikipedia.org/wiki/Orthonormality">orthonormal</a> means that it does preserve both. It is a kind of <a href="https://en.wikipedia.org/wiki/Orthogonal_matrix">orthogonal matrix</a>, which is a kind of <a href="https://en.wikipedia.org/wiki/Isometry">isometry</a>.</p>
 <h2 id="reflection">Reflection</h2>
@@ -235,9 +241,11 @@ d_1 &amp; 0   \\
 <img src="../../images/vector-reflected.png" title="vector-reflected" alt="A vector, reflected over a line at angle \pi/4." width="400" /><figcaption>A vector, reflected over a line at angle <span class="math inline">\(\pi/4\)</span>.</figcaption>
 </figure>
 <p>And the unit circle gets mapped onto itself.</p>
-<figure>
-<img src="../../images/reflection.gif" title="circle-reflected" alt="The unit circle, reflected over \pi/4" /><figcaption>The unit circle, reflected over <span class="math inline">\(\pi/4\)</span></figcaption>
-</figure>
+<video autoplay loop mutued playsinline>
+  <source src="./images/reflection.webm" type="video/webm">
+  <source src="./images/reflection.mp4" type="video/mp4">
+</video>
+
 <p>Note that the determinant of this matrix is -1, which means that it <em>reverses</em> orientation. But its columns are still orthonormal, and so it too is an isometry.</p>
 <h1 id="decomposing-matricies-into-primitives">Decomposing Matricies into Primitives</h1>
 <p>The <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) will factor any matrix <span class="math inline">\(A\)</span> having like this:</p>
@@ -268,9 +276,11 @@ d_1 &amp; 0   \\
 <li><span class="math inline">\(\Sigma\)</span>: Scale x-coordinate by <span class="math inline">\(d_1 = 2\)</span> and y-coordinate by <span class="math inline">\(d_2 = 1\)</span>.</li>
 <li><span class="math inline">\(U\)</span>: Reflect over the line with angle <span class="math inline">\(-\frac{3\pi}{8}\)</span>.</li>
 </ol>
-<figure>
-<img src="../../images/rot-scale-ref.gif" title="rot-scale-ref" alt="The transformation applied to the unit circle" /><figcaption>The transformation applied to the unit circle</figcaption>
-</figure>
+<video autoplay loop mutued playsinline>
+  <source src="./images/rot-scale-ref.webm" type="video/webm">
+  <source src="./images/rot-scale-ref.mp4" type="video/mp4">
+</video>
+
 <h2 id="example-1">Example</h2>
 <p>And here is a <a href="https://en.wikipedia.org/wiki/Shear_mapping">shear transform</a>, represented as: rotation, scale, rotation.</p>
 <span class="math display">\[\begin{bmatrix}
@@ -287,9 +297,11 @@ d_1 &amp; 0   \\
 -0.85 &amp; 0.53
 \end{bmatrix}
 \]</span>
-<figure>
-<img src="../../images/shear.gif" title="shear" alt="A shearing transform" /><figcaption>A shearing transform</figcaption>
-</figure>
+<video autoplay loop mutued playsinline>
+  <source src="./images/shear.webm" type="video/webm">
+  <source src="./images/shear.mp4" type="video/mp4">
+</video>
+
   </section>
   
 </article>
