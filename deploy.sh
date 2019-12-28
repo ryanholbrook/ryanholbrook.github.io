@@ -10,16 +10,17 @@ git checkout develop
 stack exec site clean
 stack exec site build
 
+# Optimize media
+cp optimize.sh images/optimize.sh
+cd images
+./optimize.sh
+
 # Get previous files
 git fetch --all
 git checkout -b master --track origin/master
 
 # Overwrite existing files with new files
 cp -a _site/. .
-
-# Optimize media
-cp optimize.sh _site/images
-_site/images/optimize.sh
 
 # Commit
 git add -A
