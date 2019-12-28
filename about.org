@@ -5,3 +5,5 @@ title: About
 This is the website of *Ryan Holbrook*. You can contact me at [[mailto:ryanholbrook@gmail.com][ryan@mathformachines.com]].
 
 I'm looking for work as a *Data Scientist*, either remote or in the Oklahoma City area.
+
+I am on [[https://twitter.com/ryanpholbrook][Twitter]] and [[https://github.com/ryanholbrook][GitHub]].
