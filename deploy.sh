@@ -17,6 +17,10 @@ git checkout -b master --track origin/master
 # Overwrite existing files with new files
 cp -a _site/. .
 
+# Optimize media
+cp optimize.sh _site/images
+_site/images/optimize.sh
+
 # Commit
 git add -A
 git commit -m "Publish."
