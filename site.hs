@@ -59,7 +59,6 @@ main = hakyll $ do
                    (\item -> loadBody ((itemIdentifier item)
                                        { identifierVersion = Just "toc"}))
               <> mainContext tags
-
         in
         pandocMainCompiler
           >>= loadAndApplyTemplate "templates/post-body.html" postContext
@@ -109,7 +108,6 @@ main = hakyll $ do
                     <> constField "title" "Math for Machines"
                     <> paginateContext paginateBy10 page
                     <> mainContext tags
-
             makeItem ""
                 >>= loadAndApplyTemplate "templates/index.html" indexCtx
                 >>= loadAndApplyTemplate "templates/default.html" indexCtx
@@ -129,12 +127,13 @@ main = hakyll $ do
                   ctx
                   <> listField "posts" ctx (return posts)
                   <> listField "pages" ctx (return pages)
-
             makeItem ""
                 >>= loadAndApplyTemplate "templates/sitemap.xml" sitemapCtx
                 >>= cleanUrls
 
-    match "templates/*" $ compile templateBodyCompiler
+    -- Build templates
+    match "templates/*" $
+      compile templateBodyCompiler
 
 --------------------------------------------------------------------------------
 
