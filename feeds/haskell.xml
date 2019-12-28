@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>Math for Machines</title>
+        <link>https://mathformachines.com</link>
+        <description><![CDATA[A blog about data science and machine learning, with a lot of math.]]></description>
+        <atom:link href="https://mathformachines.com/feeds/haskell.xml" rel="self"
+                   type="application/rss+xml" />
+        <lastBuildDate>Sat, 22 Jun 2019 00:00:00 UT</lastBuildDate>
+        <item>
+    <title>Talk: An Introduction to Categories with Haskell and Databases</title>
+    <link>https://mathformachines.com/posts/introduction-to-categories/index.html</link>
+    <description><![CDATA[<p>About a month ago, I gave an introductory talk on some applications of category theory. I tried to draw connections between the category of types in Haskell and the use of categories in <a href="https://www.categoricaldata.net/">CQL</a>, a new query language founded on category theory.</p>
+<p><strong>Description:</strong> Category theory is the language of structure and composition. It is the language of composeable and coherent systems. It has been applied to neural networks and chemical networks, classical mechanics and quantum. It is pervasive in functional programming. If you’ve ever used a functor or a monad or a parametric type, you have used category theory. Recently, it’s been applied to database design as well.</p>
+<p>This talk will be an introduction to category theory through Haskell and database programming. We will look at how similarities between the two can be expressed in categories, and how the benefits of safety and abstraction that functional programmers enjoy can be had by database users, too.</p>
+<div class="video-container"><iframe src="https://www.youtube-nocookie.com/embed/sJrVKZULiLU" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+]]></description>
+    <pubDate>Sat, 22 Jun 2019 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/introduction-to-categories/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+
+    </channel>
+</rss>

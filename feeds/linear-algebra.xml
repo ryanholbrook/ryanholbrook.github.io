@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>Math for Machines</title>
+        <link>https://mathformachines.com</link>
+        <description><![CDATA[A blog about data science and machine learning, with a lot of math.]]></description>
+        <atom:link href="https://mathformachines.com/feeds/linear-algebra.xml" rel="self"
+                   type="application/rss+xml" />
+        <lastBuildDate>Mon, 18 Mar 2019 00:00:00 UT</lastBuildDate>
+        <item>
+    <title>Change of Basis for Vectors and Covectors</title>
+    <link>https://mathformachines.com/posts/change-of-basis-for-vectors-and-covectors/index.html</link>
+    <description><![CDATA[<blockquote>
+<p>We share a philosophy about linear algebra: we think basis-free, we write basis-free, but when the chips are down we close the office door and compute with matrices like fury.</p>
+</blockquote>
+<p><a href="https://mathoverflow.net/questions/11669/what-is-the-difference-between-matrix-theory-and-linear-algebra/19923">Irving Kaplansky</a></p>
+<p>Often, the first step in analyzing a problem is to <em>transform</em> it into something more amenable to our analysis. We would like the <em>representation</em> of our problem to reflect as naturally as possible whatever features of it we are most interested in. We might normalize data through a scaling transform, for instance, to eliminate spurious differences among like quantities. Or we might rotate data to align some of its salient dimensions with the coordinate axes, simplifying computations. Many matrix decompositions take the form <span class="math inline">\(M = BNA\)</span>. When <span class="math inline">\(B\)</span> and <span class="math inline">\(A\)</span> are non-singular, we can think of <span class="math inline">\(N\)</span> as being a simpler representation of <span class="math inline">\(M\)</span> under coordinate transforms <span class="math inline">\(B\)</span> and <span class="math inline">\(A\)</span>. The <a href="https://en.wikipedia.org/wiki/Eigendecomposition_of_a_matrix">spectral decomposition</a> and the <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> are of this form.</p>
+<p>All of these kinds of coordinate transformations are <em>linear</em> transformations. Linear coordinate transformations come about from operations on basis vectors that leave any vectors represented by them <a href="https://en.wikipedia.org/wiki/Active_and_passive_transformation">unchanged</a>. They are, in other words, a change of basis.</p>
+<p>This post came about from my frustration at not finding simple formulas for these transformations with simple explanations to go along with them. So here, I tried to give a simple exposition of coordinate transformations for vectors in vector spaces along with transformations of their cousins, the covectors in the dual space. I’ll get into matrices and some applications in a future post.</p>
+<h1 id="vectors">Vectors</h1>
+<h2 id="example---part-1">Example - Part 1</h2>
+<p>Let’s go through an example to see how it works. (I’ll assume the field is <span class="math inline">\(\mathbb{R}\)</span> throughout.)</p>
+<p>Let <span class="math inline">\(e\)</span> be the standard basis in <span class="math inline">\(\mathbb{R}^2\)</span> and let <span class="math inline">\(e&#39;\)</span> be another basis where <span class="math display">\[
+\begin{array}{cc}
+e&#39;_1 = \frac12 e_1, &amp; e&#39;_2 = -e_1 + 2 e_2
+\end{array}
+\]</span> So we have written the basis <span class="math inline">\(e&#39;\)</span> in terms of the standard basis <span class="math inline">\(e\)</span>. As vectors they look like this:</p>
+<figure><img src="/images/bases.jpg" alt="Drawing of the basis vectors e_1, e_2, and e'_1, e'_2"/></figure>
+
+<p>And each will induce its own coordinate system, indicating the angle and orientation of each axis, and each axis’ unit of measure.</p>
+<figure><img src="/images/coordinates.jpg" alt="Drawing of basis vectors and the coordinates they induce."></figure>
+
+<p>We can write any vector in <span class="math inline">\(\mathbb{R}^2\)</span> as a linear combination of these basis elements.</p>
+<p><span class="math display">\[\begin{array}{cc}
+v = e_1 + 2 e_2, &amp; w&#39; = 5 e&#39;_1 + \frac12 e&#39;_2
+\end{array}\]</span></p>
+<figure><img src="/images/vectors.jpg" alt="Drawing of vectors in two coordinate systems."></figure>
+
+<p>We call the coefficients on the basis elements the <strong>coordinates</strong> of the vector in that basis. So, in basis <span class="math inline">\(e\)</span> the vector <span class="math inline">\(v\)</span> has coordinates <span class="math inline">\((1, 2)\)</span>, and in basis <span class="math inline">\(e&#39;\)</span> the vector <span class="math inline">\(w&#39;\)</span> has coordinates <span class="math inline">\((5, \frac12)\)</span>.</p>
+<h2 id="formulas">Formulas</h2>
+<p>The choice of basis is just a choice of representation. The vector itself should stay the same. So the question is – how can we rewrite a vector in a <em>different</em> basis without changing the vector itself?</p>
+<p>Let’s establish some notation. First, whenever we are talking about a vector in the abstract, let’s write <span class="math inline">\(\mathbf{v}\)</span>, and whenever we are talking about a vector represented in some basis let’s write <span class="math inline">\(v\)</span>. So the same vector <span class="math inline">\(\mathbf{v}\)</span> might have two different basis representations <span class="math inline">\(v\)</span> and <span class="math inline">\(v&#39;\)</span>, which nevertheless all stand for the same vector: <span class="math inline">\(\mathbf{v} = v = v&#39;\)</span>. However, when we write <span class="math inline">\(e\)</span> for a basis, we mean a list of vectors <span class="math inline">\(e_i\)</span> that form a basis in some vector space <span class="math inline">\(V\)</span>. So, <span class="math inline">\(v = v&#39;\)</span> always, but in general <span class="math inline">\(e \neq e&#39;\)</span>.</p>
+<p>Our basis elements let’s index with subscripts (like <span class="math inline">\(e_1\)</span>), and coordinates let’s index with superscripts (like <span class="math inline">\(v^1\)</span>). This will help us keep track of which one we’re working with. Also, let’s write basis elements as row vectors, and coordinates as column vectors. This way we can write a vector as a matrix product of the basis elements and the coordinates:</p>
+<p><span class="math display">\[v = \begin{bmatrix} e_1 &amp; e_2 \end{bmatrix}\begin{bmatrix}v^1 \\
+v^2\end{bmatrix} = v^1 e_1 + v^2 e_2
+\]</span></p>
+<p>Now we can also write the transformation given above of <span class="math inline">\(e\)</span> into <span class="math inline">\(e&#39;\)</span> using matrix multiplication:</p>
+<p><span class="math display">\[e&#39; = \begin{bmatrix}e&#39;_1&amp; e&#39;_2\end{bmatrix} = \begin{bmatrix}e_1&amp;  e_2\end{bmatrix}\begin{bmatrix}
+\frac12 &amp; -1 \\
+0 &amp; 2 
+\end{bmatrix} = \begin{bmatrix}\frac12 e_1 &amp; -e_1 + 2 e_2\end{bmatrix}\]</span></p>
+<p>The <span class="math inline">\(2 \times 2\)</span> matrix used in that transformation is called the <strong>transformation matrix</strong> from the basis <span class="math inline">\(e\)</span> to the basis <span class="math inline">\(e&#39;\)</span>.</p>
+<p>The general formula is</p>
+<p><span class="math display">\[\formbox{e&#39; = e A}\]</span></p>
+<p>where <span class="math inline">\(A\)</span> is the transformation matrix. We can use this <em>same</em> matrix to transform coordinate vectors, but we shouldn’t necessarily expect that we can use the same formula. The bases and the coordinates are playing different roles here: the basis elements are vectors that describe the coordinate system, while the coordinates are scalars that describe a vector’s position in that system.</p>
+<p>Let’s think about how this should work. Generally we write <span class="math inline">\(v = v^1 e_1 + v^2 e_2 \cdots + v^n e_n\)</span>. If we make some new basis <span class="math inline">\(e&#39;\)</span> by multiplying all the <span class="math inline">\(e_i\)</span>’s by 2, say, and <em>also</em> multiplied all the <span class="math inline">\(v_j\)</span>’s by 2, then we would end up with a vector <em>four times</em> the size of the original. Instead, we should have multiplied all the <span class="math inline">\(v_j\)</span>’s by <span class="math inline">\(\frac12\)</span>, the inverse of 2, and then we would have <span class="math inline">\(v&#39; = v\)</span>, as needed. The vector must be the same in either basis.</p>
+<p>So, if we change the <span class="math inline">\(e\)</span>’s by some factor then, the <span class="math inline">\(v\)</span>’s need to change in the <em>inverse</em> manner to maintain equality. This suggests that to change <span class="math inline">\(v\)</span> into a representation <span class="math inline">\(v&#39;\)</span> in basis <span class="math inline">\(e&#39;\)</span> we should use instead</p>
+<p><span class="math display">\[\formbox{v&#39; = A^{-1} v}\]</span></p>
+<p>(We’ll prove it a little bit later.)</p>
+<p>The fact that basis elements change in one way (<span class="math inline">\(e&#39; = e A\)</span>) while coordinates change in the inverse way (<span class="math inline">\(v&#39; = A^{-1} v\)</span>), is why we sometimes call the basis elements <strong>covariant</strong> and the vector coordinates <strong>contravariant</strong>, and distinguish them with the position of their indices.</p>
+<h2 id="example---part-2">Example - Part 2</h2>
+<p>Let’s go back to our example. Using our formula, we get</p>
+<p><span class="math display">\[
+v&#39; = \begin{bmatrix}2 &amp; 1 \\
+0 &amp; \frac12 \end{bmatrix} \begin{bmatrix}1 \\
+2\end{bmatrix} = \begin{bmatrix}4 \\
+1\end{bmatrix}
+\]</span></p>
+<p>But what about <span class="math inline">\(w&#39;\)</span>? Well, since its representation is in <span class="math inline">\(e&#39;\)</span>, to convert in the opposite direction, to <span class="math inline">\(e\)</span>, we need to use the transformation that’s the inverse of <span class="math inline">\(A^{-1}\)</span>, namely, <span class="math inline">\(A\)</span>.</p>
+<p><span class="math display">\[
+w = \begin{bmatrix}\frac12 &amp; -1 \\
+0 &amp; 1 \end{bmatrix} \begin{bmatrix}5 \\
+\frac12\end{bmatrix} = \begin{bmatrix}2 \\
+1\end{bmatrix}
+\]</span></p>
+<p>And now we have:</p>
+<figure><img src="/images/transformed.jpg" alt="Drawing of vectors v, v', w, and w'." /></figure>
+
+<p>Each vector is unchanged after a change of basis.</p>
+<h1 id="covectors">Covectors</h1>
+<p>Recall the <a href="https://en.wikipedia.org/wiki/Inner_product_space">inner product</a> on a vector space.</p>
+<p>We might ask, given some vector <span class="math inline">\(v\)</span> how does an inner product vary as we range over vectors <span class="math inline">\(w\)</span>? In this case, we could think of <span class="math inline">\(\langle v, \cdot\rangle\)</span> as a function of vectors in <span class="math inline">\(V\)</span> whose outputs are scalars. In fact, these sorts of functions themselves form a vector space, called the <strong>dual space</strong> of <span class="math inline">\(V\)</span>, which we write <span class="math inline">\(V^*\)</span>. The members of <span class="math inline">\(V^*\)</span> are called <strong>linear functionals</strong> or <strong>covectors</strong>. The covector given by <span class="math inline">\(\langle v, \cdot\rangle\)</span> we denote <span class="math inline">\(v^*\)</span>.</p>
+<p>We’ve been working with vectors in <span class="math inline">\(\mathbb{R}^n\)</span>, and in <span class="math inline">\(\mathbb{R}^n\)</span> the (canonical) inner product is the <a href="https://en.wikipedia.org/wiki/Dot_product">dot product</a>. This means that if we denote the covectors in <span class="math inline">\(V^*\)</span> as <em>rows</em> and the vectors in <span class="math inline">\(V\)</span> as <em>columns</em> (as usual), then we can write</p>
+<p><span class="math display">\[
+v^*(w) = \begin{bmatrix} v_1 &amp; \cdots &amp; v_n\end{bmatrix}\begin{bmatrix}w^1 \\
+\vdots\\
+w^n\end{bmatrix} = v_1 w^1 + \cdots + v_n w^n
+\]</span></p>
+<p>So, the covectors are functions <span class="math inline">\(\mathbb{R}^n \to \mathbb{R}\)</span>, but we can do computations with them just like we do with vectors, using matrix multiplication. We still write the indices of the row vectors as subscripts and the indices of the column vectors as superscripts.</p>
+<p>If we can think about vectors in <span class="math inline">\(\mathbb{R}^n\)</span> as arrows, how should we think about covectors? To simplify things, let’s restrict our attention to the two-dimensional case. Now, consider the action of a covector <span class="math inline">\(v^*\)</span> on some unknown vector <span class="math inline">\(w = \begin{bmatrix}x&amp; y\end{bmatrix}^\top\)</span> in <span class="math inline">\(\mathbb{R}^2\)</span>:</p>
+<p><span class="math display">\[
+v^*(w) = v_1 x + v_2 y
+\]</span></p>
+<p>Now if we look at the level sets of this function, <span class="math inline">\(v_1 x + v_2 y = k\)</span>, it should start to look familiar…</p>
+<p>It’s a family of <a href="https://en.wikipedia.org/wiki/Linear_equation#Two-point_form">lines</a>!</p>
+<p>And to find out the value of <span class="math inline">\(v^*(w)\)</span> we just count how many lines of <span class="math inline">\(v^*\)</span> the vector <span class="math inline">\(w\)</span> passes through (including maybe “fractional” valued lines – <span class="math inline">\(k\)</span> doesn’t have to just be an integer). More generally, the covectors of <span class="math inline">\(\mathbb{R}^n\)</span> can be thought of as <a href="https://en.wikipedia.org/wiki/Hyperplane">hyperplanes</a>, and the value of <span class="math inline">\(v^*(w)\)</span> can be determined by how many hyperplanes of <span class="math inline">\(v^*\)</span> the vector <span class="math inline">\(w\)</span> passes through. And furthermore, the vector <span class="math inline">\(v\)</span> will be the <a href="https://en.wikipedia.org/wiki/Normal_(geometry)">normal</a> vector to the hyperplanes given by <span class="math inline">\(v^*\)</span>, that is, they are perpendicular.</p>
+<h2 id="example---part-3">Example - Part 3</h2>
+<p>In the standard basis, let <span class="math inline">\(v^*\)</span> be given by <span class="math inline">\(\begin{bmatrix}1 &amp; 2\end{bmatrix}\)</span>. Its family of lines will then be <span class="math inline">\(x + 2 y = k\)</span>. Now let <span class="math inline">\(w\)</span> be given by <span class="math inline">\(\begin{bmatrix}2 &amp; 1\end{bmatrix}\)</span>, and count how many lines <span class="math inline">\(w\)</span> crosses through:</p>
+<figure><img src="/images/covectors.jpg" alt="Left: Drawing of v and v^*. Right: Drawing of v^* and w." /></figure>
+
+<p>It’s exactly the same as <span class="math inline">\(v^*(w) = 2 + 2(1) = 4\)</span>! I think that’s pretty cool.</p>
+<h2 id="the-dual-basis">The Dual Basis</h2>
+<p>Okay, so what about bases in <span class="math inline">\(V^*\)</span>? We’d like to have a basis for <span class="math inline">\(V^*\)</span> that is the “best fit” for whatever basis we have in <span class="math inline">\(V\)</span>. This turns out to be the basis given by: <span class="math display">\[
+e^i(e_j) =
+\begin{cases}
+  1 &amp; \text{if } i = j\\
+  0 &amp; \text{if } i \ne j
+\end{cases}\]</span></p>
+<p>where <span class="math inline">\((e_j)\)</span> is a basis in <span class="math inline">\(V\)</span>. Or sometimes people write instead <span class="math inline">\(e^i(e_j) = \delta^i_j\)</span>, where <span class="math inline">\(\delta^i_j\)</span> is the <a href="https://en.wikipedia.org/wiki/Kronecker_delta">Kronecker delta</a>. We call this basis <span class="math inline">\((e^i)\)</span> the <strong>dual basis</strong> of <span class="math inline">\((e_j)\)</span>. You can see that a basis and its dual have a kind of “bi-orthogonality” property that turns out to be very convenient.</p>
+<p>Let’s look at formulas for changing bases now. If we have a vector <span class="math inline">\(v\)</span> in <span class="math inline">\(V\)</span> written as a column, how can we find the corresponding vector <span class="math inline">\(v^*\)</span> in <span class="math inline">\(V^*\)</span>? The obvious thing to do would be to take the transposition of <span class="math inline">\(v\)</span>. This will not always work. Recall the definitions of <span class="math inline">\(v, v&#39;, w\)</span> and <span class="math inline">\(w&#39;\)</span> from the <em>first section</em>, and consider:</p>
+<p><span class="math display">\[v^\top v = \begin{bmatrix} 1 &amp; 2\end{bmatrix}\begin{bmatrix}1 \\
+2\end{bmatrix} = 1 + 4 = 5\]</span></p>
+<p><span class="math display">\[v&#39;^\top v&#39; = \begin{bmatrix} 4 &amp; 1\end{bmatrix}\begin{bmatrix}4 \\
+1\end{bmatrix} = 16 + 1 = 17\]</span></p>
+<p>This is no good. We get two different values for <span class="math inline">\(\bar v^*(\bar w)\)</span> depending on which basis we use, but the values of a function on a vector space shouldn’t depend on the basis. The trouble is that the dual of <span class="math inline">\((e&#39;_i)\)</span> isn’t the transpose of those basis vectors (they don’t satisfy the bi-orthogonality property), so the duals of those vectors represented in it won’t be the transposes of those vectors either.</p>
+<p>This <em>will</em> be true for <a href="https://en.wikipedia.org/wiki/Orthonormality">orthonormal</a> bases, however. The standard basis <span class="math inline">\((e_i)\)</span> <em>is</em> orthonormal, and the duals of the vectors represented in it will in fact be those transposes.</p>
+<p><span class="math display">\[ \formbox{v^* = v^\top \text{for any vector } v \text{ written in an orthonormal basis.}} \]</span></p>
+<h2 id="formulas-1">Formulas</h2>
+<p>The next question is, if we perform a change of basis in <span class="math inline">\(V\)</span>, what is the corresponding change in <span class="math inline">\(V^*\)</span>? Let’s use the same reasoning that we did before. For a vector <span class="math inline">\(w\)</span> in <span class="math inline">\(\mathbb{R}\)</span> and a covector <span class="math inline">\(v^*\)</span>, we have</p>
+<p><span class="math display">\[
+v^*(w) = v_1 w^1 + \cdots + v_n w^n
+\]</span></p>
+<p>And so, like before, if we change the values of the <span class="math inline">\(w_j\)</span>’s, the values of the <span class="math inline">\(v^i\)</span>’s should change in the inverse manner to preserve equality. But <span class="math inline">\(w\)</span> changes as <span class="math inline">\(w&#39; = A^{-1} w\)</span>, so <span class="math inline">\(v^*\)</span> must change as <span class="math inline">\(v&#39;^* = v^* A\)</span>. And its basis (the dual basis) must change as <em>its</em> inverse: <span class="math inline">\(e&#39;^* = A^{-1} e^*\)</span>.</p>
+<p><span class="math display">\[\formbox{\begin{align}
+e&#39;^* &amp;= A^{-1} e^*\\
+v&#39;^* &amp;= v^* A
+\end{align}}\]</span></p>
+<p>Notice that this time the basis vectors are playing the <strong>contravariant</strong> part, while the coordinates are playing the <strong>covariant</strong> part with respect to the original vector space.</p>
+<h2 id="example---part-4">Example - Part 4</h2>
+<p>Lets continue our example. Since <span class="math inline">\(e\)</span> is the standard basis, it is orthonormal, and we can therefore find the duals of <span class="math inline">\(v\)</span> and <span class="math inline">\(w\)</span> by taking transposes. We can then apply our formula to find the duals of <span class="math inline">\(v&#39;^*\)</span> and <span class="math inline">\(w&#39;^*\)</span>.</p>
+<span class="math display">\[\begin{align}
+v&#39;^*(x, y) &amp;= \begin{bmatrix}1 &amp; 2\end{bmatrix}\begin{bmatrix}\frac12 &amp; -1\\
+0 &amp; 2\end{bmatrix}\begin{bmatrix}x\\
+y\end{bmatrix}\\
+&amp;= \begin{bmatrix}\frac12 &amp; 3\end{bmatrix}\begin{bmatrix}x\\
+y\end{bmatrix}\\
+&amp;= \frac12 x + 3y\\
+\\
+w&#39;^*(x, y) &amp;= \begin{bmatrix}2 &amp; 1\end{bmatrix}\begin{bmatrix}\frac12 &amp; -1\\
+0 &amp; 2\end{bmatrix}\begin{bmatrix}x\\
+y\end{bmatrix}\\
+&amp;= \begin{bmatrix}1 &amp; 0\end{bmatrix}\begin{bmatrix}x\\
+y\end{bmatrix}\\
+&amp;= 2x + 2y
+\end{align}
+\]</span>
+<p>The duals too are unchanged after a change of basis.</p>
+<figure><img src="/images/covectors2.jpg" alt="Left: Drawing of $v^*$ and $w^*$. Right: Drawing of $v'^*$ and $w'^*$." /></figure>
+
+<h1 id="summary-of-formulas">Summary of Formulas</h1>
+<p><span class="math display">\[\formbox{\begin{array}{llr} 
+e&#39;   &amp;= e A      &amp; &amp;(1)\\ 
+v&#39;   &amp;= A^{-1} v &amp; &amp;(2)\\
+e&#39;^* &amp;= A^{-1} e &amp; &amp;(3)\\
+v&#39;^* &amp;= v A      &amp; &amp;(4)
+\end{array} }\]</span></p>
+<p>Suppose <span class="math inline">\((1)\)</span>, that <span class="math inline">\(e&#39; = e A\)</span>, where <span class="math inline">\(A\)</span> is a non-singular matrix.</p>
+<p><strong>Proof of (2):</strong> We know <span class="math inline">\(e v = e&#39; v&#39;\)</span>. Now</p>
+<p><span class="math display">\[
+e&#39; v&#39; = e v = e A A^{-1} v = e&#39; (A^{-1} v)
+\]</span></p>
+<p>But then it must be that <span class="math inline">\(v&#39; = A^{-1} v\)</span> since basis representations are unique.</p>
+<p><strong>Proof of (4):</strong> We also know <span class="math inline">\(v&#39;^* w&#39; = v^* w\)</span> for all vectors <span class="math inline">\(w\)</span>. But then</p>
+<p><span class="math display">\[
+v&#39;^* w&#39; = v^* w = v^* w = v^* A A^{-1} w = (v^* A) w&#39;
+\]</span></p>
+<p>for all <span class="math inline">\(w&#39;\)</span>. So, <span class="math inline">\(v&#39;^* = v^* A\)</span>.</p>
+<p><strong>Proof of (3):</strong> Lastly,</p>
+<p><span class="math display">\[
+v&#39;^* e&#39;^* = v^* e^* = v^* A A^{-1} e^* = v&#39;^* A^{-1} e^*
+\]</span></p>
+<p>for all <span class="math inline">\(w&#39;\)</span>. So, <span class="math inline">\(e&#39;^* = A^{-1}e^*\)</span>. <strong>QED</strong></p>]]></description>
+    <pubDate>Mon, 18 Mar 2019 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/change-of-basis-for-vectors-and-covectors/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+<item>
+    <title>Understanding Eigenvalues and Singular Values</title>
+    <link>https://mathformachines.com/posts/eigenvalues-and-singular-values/index.html</link>
+    <description><![CDATA[<h1 id="introduction">Introduction</h1>
+<p>What are eigenvalues? What are singular values? They both describe the behavior of a matrix on a certain set of vectors. The difference is this: The eigenvectors of a matrix describe the directions of its <em>invariant</em> action. The singular vectors of a matrix describe the directions of its <em>maximum</em> action. And the corresponding eigen- and singular values describe the magnitude of that action.</p>
+<p>They are defined this way. A scalar <span class="math inline">\(\lambda\)</span> is an <strong><a href="https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors">eigenvalue</a></strong> of a linear transformation <span class="math inline">\(A\)</span> if there is a vector <span class="math inline">\(v\)</span> such that <span class="math inline">\(A v = \lambda v\)</span>, and <span class="math inline">\(v\)</span> is called an <strong>eigenvector</strong> of <span class="math inline">\(\lambda\)</span>. A scalar <span class="math inline">\(\sigma\)</span> is a <strong><a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value</a></strong> of <span class="math inline">\(A\)</span> if there are (unit) vectors <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> such that <span class="math inline">\(A v = \sigma u\)</span> and <span class="math inline">\(A^* u = \sigma v\)</span>, where <span class="math inline">\(A^*\)</span> is the <a href="https://en.wikipedia.org/wiki/Conjugate_transpose">conjugate transpose</a> of <span class="math inline">\(A\)</span>; the vectors <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are <strong>singular vectors</strong>. The vector <span class="math inline">\(u\)</span> is called a <strong>left</strong> singular vector and <span class="math inline">\(v\)</span> a <strong>right</strong> singular vector.</p>
+<h1 id="eigenvalues-and-eigenvectors">Eigenvalues and Eigenvectors</h1>
+<p>That eigenvectors give the directions of invariant action is obvious from the definition. The definition says that when <span class="math inline">\(A\)</span> acts on an eigenvector, it just multiplies it by a constant, the corresponding eigenvalue. In other words, when a linear transformation acts on one of its eigenvectors, it shrinks the vector or stretches it and reverses its direction if <span class="math inline">\(\lambda\)</span> is negative, but never changes the direction otherwise. The action is invariant.</p>
+<p>Take this matrix, for instance:</p>
+<p><span class="math display">\[ A = \begin{bmatrix}
+0 &amp; 2 \\
+2 &amp; 0
+\end{bmatrix} \]</span></p>
+<figure>
+<img src="/images/eigen-circle-1.png" title="eigen-circle-1" alt="Eigenvectors of A" width="400" /><figcaption>Eigenvectors of <span class="math inline">\(A\)</span></figcaption>
+</figure>
+<p>We can see how the transformation just stretches the red vector by a factor of 2, while the blue vector it stretches but also reflects over the origin.</p>
+<p>And this matrix:</p>
+<p><span class="math display">\[ A = \begin{bmatrix}
+1 &amp; \frac{1}{3} \\
+\frac{4}{3} &amp; 1
+\end{bmatrix} \]</span></p>
+<figure>
+<img src="/images/eigen-circle-2.png" title="eigen-circle-2" alt="Eigenvectors of A" width="400" /><figcaption>Eigenvectors of <span class="math inline">\(A\)</span></figcaption>
+</figure>
+<p>It stretches the red vector and shrinks the blue vector, but reverses neither.</p>
+<p>The point is that in every case, when a matrix acts on one of its eigenvectors, the action is always in a parallel direction.</p>
+<h1 id="singular-values-and-singular-vectors">Singular Values and Singular Vectors</h1>
+<p>This invariant direction does not necessarily give the transformation’s direction of <em>greatest effect</em>, however. You can see that in the previous example. But say <span class="math inline">\(\sigma_1\)</span> is the <em>largest</em> singular value of <span class="math inline">\(A\)</span> with right singular vector <span class="math inline">\(v\)</span>. Then <span class="math inline">\(v\)</span> is a solution to</p>
+<p><span class="math display">\[ \operatorname*{argmax}_{x, ||x||=1} ||A x|| \]</span></p>
+<p>In other words, <span class="math inline">\( ||A v|| = \sigma_1 \)</span> is at least as big as <span class="math inline">\( ||A x|| \)</span> for any other unit vector <span class="math inline">\(x\)</span>. It’s not necessarily the case that <span class="math inline">\(A v\)</span> is parallel to <span class="math inline">\(v\)</span>, though.</p>
+<p>Compare the eigenvectors of the matrix in the last example to its singular vectors:</p>
+<figure>
+<img src="/images/singular-circle-1.png" title="singular-circle-1" alt="Singular vectors of A" width="400" /><figcaption>Singular vectors of <span class="math inline">\(A\)</span></figcaption>
+</figure>
+<p>The directions of maximum effect will be exactly the semi-axes of the ellipse, the ellipse which is the image of the unit circle under <span class="math inline">\(A\)</span>.</p>
+<p>Let’s extend this idea to 3-dimensional space to get a better idea of what’s going on. Consider this transformation:</p>
+<p><span class="math display">\[A = \begin{bmatrix}
+\frac{3}{2} \, \sqrt{2} &amp; -\sqrt{2} &amp; 0 \\
+\frac{3}{2} \, \sqrt{2} &amp; \sqrt{2} &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>This will have the effect of transforming the unit sphere into an <a href="https://en.wikipedia.org/wiki/Ellipsoid">ellipsoid</a>:</p>
+<figure>
+<img src="/images/transform3d-0.png" title="transform3d-0" alt="The unit sphere transformed into an ellipsoid." width="800" /><figcaption>The unit sphere transformed into an ellipsoid.</figcaption>
+</figure>
+<p>Its singular values are 3, 2, and 1. You can see how they again form the semi-axes of the resulting figure.</p>
+<figure>
+<img src="/images/transform3d-1.png" title="transform3d-1" alt="The singular vectors as semi-axes in the ellipsoid." width="800" /><figcaption>The singular vectors as semi-axes in the ellipsoid.</figcaption>
+</figure>
+<h1 id="matrix-approximation-with-svd">Matrix Approximation with SVD</h1>
+<p>Now, the <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) will tell us what <span class="math inline">\(A\)</span>’s singular values are:</p>
+<p><span class="math display">\[ A = U \Sigma V^* = 
+\begin{bmatrix}
+\frac{\sqrt{2}}{2} &amp; -\frac{\sqrt{2}}{2} &amp; 0.0 \\
+\frac{\sqrt{2}}{2} &amp; \frac{\sqrt{2}}{2} &amp; 0.0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+3 &amp; 0 &amp; 0 \\
+0 &amp; 2 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>The diagonal entries of the matrix <span class="math inline">\(\Sigma\)</span> are the singular values of <span class="math inline">\(A\)</span>. We can obtain a lower-dimensional approximation to <span class="math inline">\(A\)</span> by setting one or more of its singular values to 0.</p>
+<p>For instance, say we set the largest singular value, 3, to 0. We then get this matrix:</p>
+<p><span class="math display">\[ A_1 = \begin{bmatrix}
+\frac{\sqrt{2}}{2} &amp; -\frac{\sqrt{2}}{2} &amp; 0.0 \\
+\frac{\sqrt{2}}{2} &amp; \frac{\sqrt{2}}{2} &amp; 0.0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+0 &amp; 0 &amp; 0 \\
+0 &amp; 2 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} = \begin{bmatrix}
+0 &amp; -\frac{\sqrt{2}}{2} &amp; 0 \\
+0 &amp; \frac{\sqrt{2}}{2} &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>which transforms the unit sphere like this:</p>
+<figure>
+<img src="/images/ellipse-2.png" title="ellipse-2" alt="The transformation with the largest singular value set to 0." width="400" /><figcaption>The transformation with the largest singular value set to 0.</figcaption>
+</figure>
+<p>The resulting figure now lives in a 2-dimensional space. Further, the largest singular value of <span class="math inline">\(A_1\)</span> is now 2. Set it to 0:</p>
+<p><span class="math display">\[ A_2 = \begin{bmatrix}
+\frac{\sqrt{2}}{2} &amp; -\frac{\sqrt{2}}{2} &amp; 0.0 \\
+\frac{\sqrt{2}}{2} &amp; \frac{\sqrt{2}}{2} &amp; 0.0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} = \begin{bmatrix}
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>And we get a 1-dimensional figure, and a final largest singular value of 1:</p>
+<figure>
+<img src="/images/ellipse-1.png" title="ellipse-1" alt="The transformation with the two largest singular values set to 0." width="400" /><figcaption>The transformation with the two largest singular values set to 0.</figcaption>
+</figure>
+<p>This is the point: Each set of singular vectors will form an <a href="https://en.wikipedia.org/wiki/Orthonormal_basis">orthonormal basis</a> for some <a href="https://en.wikipedia.org/wiki/Linear_subspace">linear subspace</a> of <span class="math inline">\(\mathbb{R}^n\)</span>. A singular value and its singular vectors give the direction of maximum action among all directions orthogonal to the singular vectors of any larger singular value.</p>
+<p>This has important applications. There are many problems in statistics and machine learning that come down to finding a <a href="https://en.wikipedia.org/wiki/Low-rank_approximation">low-rank approximation</a> to some matrix at hand. <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">Principal component analysis</a> is a problem of this kind. It says: approximate some matrix <span class="math inline">\(X\)</span> of observations with a number of its uncorrelated components of maximum variance. This problem is solved by computing its singular value decomposition and setting some of its smallest singular values to 0.</p>
+<figure>
+<img src="/images/approximations.png" title="approximations" alt="Low-rank approximations of A." width="1000" /><figcaption>Low-rank approximations of <span class="math inline">\(A\)</span>.</figcaption>
+</figure>]]></description>
+    <pubDate>Fri, 15 Nov 2019 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/eigenvalues-and-singular-values/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+<item>
+    <title>Least Squares with the Moore-Penrose Inverse</title>
+    <link>https://mathformachines.com/posts/least-squares-with-the-mp-inverse/index.html</link>
+    <description><![CDATA[<h1 id="introduction">Introduction</h1>
+<p>The <strong><a href="https://en.wikipedia.org/wiki/Invertible_matrix">inverse</a></strong> of a matrix <span class="math inline">\(A\)</span> is another matrix <span class="math inline">\(A^{-1}\)</span> that has this property:</p>
+<span class="math display">\[\begin{align*}
+A A^{-1} &amp;= I \\
+A^{-1} A &amp;= I
+\end{align*}
+\]</span>
+<p>where <span class="math inline">\(I\)</span> is the <em>identity matrix</em>. This is a nice property for a matrix to have, because then we can work with it in equations just like we might with ordinary numbers. For instance, to solve some <a href="https://en.wikipedia.org/wiki/System_of_linear_equations">linear system of equations</a> <span class="math display">\[ A x = b \]</span> we can just multiply the inverse of <span class="math inline">\(A\)</span> to both sides <span class="math display">\[ x = A^{-1} b \]</span> and then we have some unique solution vector <span class="math inline">\(x\)</span>. Again, this is just like we would do if we were trying to solve a real-number equation like <span class="math inline">\(a x = b\)</span>.</p>
+<p>Now, a matrix has an inverse whenever it is square and its rows are linearly independent. But not every system of equations we might care about will give us a matrix that satisfies these properties. The coefficient matrix <span class="math inline">\(A\)</span> would fail to be invertible if the system did not have the same number of equations as unknowns (<span class="math inline">\(A\)</span> is not square), or if the system had dependent equations (<span class="math inline">\(A\)</span> has dependent rows).</p>
+<p><a href="https://en.wikipedia.org/wiki/Generalized_inverse">Generalized inverses</a> are meant to solve this problem. They are meant to solve equations like <span class="math inline">\(A x = b\)</span> in the “best way possible” when <span class="math inline">\(A^{-1}\)</span> fails to exist. There are many kinds of generalized inverses, each with its own “best way.” (They can be used to solve <a href="https://en.wikipedia.org/wiki/Tikhonov_regularization">ridge regression</a> problems, for instance.)</p>
+<p>The most common is the <strong><a href="https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse">Moore-Penrose inverse</a></strong>, or sometimes just the <strong>pseudoinverse</strong>. It solves the <a href="https://en.wikipedia.org/wiki/Ordinary_least_squares">least-squares</a> problem for linear systems, and therefore will give us a solution <span class="math inline">\(\hat{x}\)</span> so that <span class="math inline">\(A \hat{x}\)</span> is as close as possible in ordinary <a href="https://en.wikipedia.org/wiki/Euclidean_distance">Euclidean distance</a> to the vector <span class="math inline">\(b\)</span>.</p>
+<p>The notation for the Moore-Penrose inverse is <span class="math inline">\(A^+\)</span> instead of <span class="math inline">\(A^{-1}\)</span>. If <span class="math inline">\(A\)</span> is invertible, then in fact <span class="math inline">\(A^+ = A^{-1}\)</span>, and in that case the solution to the least-squares problem is the same as the ordinary solution (<span class="math inline">\(A^+ b = A^{-1} b\)</span>). So, the MP-inverse is strictly more general than the ordinary inverse: we can always use it and it will always give us the same solution as the ordinary inverse whenever the ordinary inverse exists.</p>
+<p>We will look at how we can construct the Moore-Penrose inverse using the SVD. This turns out to be an easy extension to constructing the ordinary matrix inverse with the SVD. We will then see how solving a least-squares problem is just as easy as solving an ordinary equation.</p>
+<h1 id="example---system-with-an-invertible-matrix">Example - System with an Invertible Matrix</h1>
+<p>First let’s recall how to solve a system whose coefficient matrix is invertible. In this case, we have the same number of equations as unknowns and the equations are all independent. Then <span class="math inline">\(A^{-1}\)</span> exists and we can find a unique solution for <span class="math inline">\(x\)</span> by multiplying <span class="math inline">\(A^{-1}\)</span> on both sides.</p>
+<p>For instance, say we have</p>
+<p><span class="math display">\[ \left\{\begin{align*}
+x_1 - \frac{1}{2}x_2 &amp;= 1 \\
+-\frac{1}{2} x_1 + x_2 &amp;= -1
+\end{align*}\right. \]</span></p>
+<p>Then</p>
+<p><span class="math display">\[ \begin{array}{c c}
+A = \begin{bmatrix}
+1 &amp; -1/2 \\
+-1/2 &amp; 1
+\end{bmatrix},
+&amp;A^{-1} = \begin{bmatrix}
+4/3 &amp; 2/3 \\
+2/3 &amp; 4/3
+\end{bmatrix} \end{array} \]</span></p>
+<p>and</p>
+<p><span class="math display">\[x = A^{-1}b = \begin{bmatrix}
+4/3 &amp; 2/3 \\
+2/3 &amp; 4/3
+\end{bmatrix} \begin{bmatrix}
+1 \\ 
+-1
+\end{bmatrix} = \begin{bmatrix}
+2/3 \\
+-2/3
+\end{bmatrix}
+\]</span></p>
+<p>So <span class="math inline">\(x_1 = \frac{2}{3}\)</span> and <span class="math inline">\(x_2 = -\frac{2}{3}\)</span>.</p>
+<h1 id="constructing-inverses-with-the-svd">Constructing Inverses with the SVD</h1>
+<p>The <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) gives us an intuitive way constructing an inverse matrix. We will be able to see how the geometric transforms of <span class="math inline">\(A^{-1}\)</span> undo the transforms of <span class="math inline">\(A\)</span>.</p>
+<p>The SVD says that for any matrix <span class="math inline">\(A\)</span>,</p>
+<p><span class="math display">\[ A = U \Sigma V^* \]</span></p>
+<p>where <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> are orthogonal matricies and <span class="math inline">\(\Sigma\)</span> is a diagonal matrix.</p>
+<p>Now, if <span class="math inline">\(A\)</span> is invertible, we can use its SVD to find <span class="math inline">\(A^{-1}\)</span> like so:</p>
+<p><span class="math display">\[ A^{-1} = V \Sigma^{-1} U^* \]</span></p>
+<p>If we have the SVD of <span class="math inline">\(A\)</span>, we can construct its inverse by swapping the orthogonal matrices <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> and finding the inverse of <span class="math inline">\(\Sigma\)</span>. Since <span class="math inline">\(\Sigma\)</span> is diagonal, we can do this by just taking reciprocals of its diagonal entries.</p>
+<h2 id="example">Example</h2>
+<p>Let’s look at our earlier matrix again:</p>
+<p><span class="math display">\[ A = \begin{bmatrix}
+1 &amp; -1/2 \\
+-1/2 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>It has SVD</p>
+<p><span class="math display">\[ A = U \Sigma V^* = \begin{bmatrix}
+\sqrt{2}/2 &amp; -\sqrt{2}/2 \\
+\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \begin{bmatrix}
+3/2 &amp; 0 \\
+0 &amp; 1/2
+\end{bmatrix} \begin{bmatrix}
+\sqrt{2}/2 &amp; \sqrt{2}/2 \\
+-\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \]</span></p>
+<p>And so,</p>
+<p><span class="math display">\[ A^{-1} = V \Sigma^{-1} U^* = \begin{bmatrix}
+\sqrt{2}/2 &amp; -\sqrt{2}/2 \\
+\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \begin{bmatrix}
+2/3 &amp; 0 \\
+0 &amp; 2
+\end{bmatrix} \begin{bmatrix}
+\sqrt{2}/2 &amp; \sqrt{2}/2 \\
+-\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \]</span></p>
+<p>and after multiplying everything out, we get</p>
+<p><span class="math display">\[ A^{-1} = \begin{bmatrix}
+4/3 &amp; 2/3 \\
+2/3 &amp; 4/3
+\end{bmatrix} \]</span></p>
+<p>just like we had before.</p>
+<p>In an <a href="/posts/visualizing-linear-transformations/">earlier post</a>, we saw how we could use the SVD to visualize a matrix as a sequence of geometric transformations. Here is the matrix <span class="math inline">\(A\)</span> followed by <span class="math inline">\(A^{-1}\)</span>, acting on the unit circle:</p>
+<video autoplay loop mutued playsinline>
+  <source src="./images/invertible-equation.webm" type="video/webm">
+  <source src="./images/invertible-equation.mp4" type="video/mp4">
+</video>
+
+<p>The inverse matrix <span class="math inline">\(A^{-1}\)</span> reverses exactly the action of <span class="math inline">\(A\)</span>. The matrix <span class="math inline">\(A\)</span> will map any circle to a unique ellipse, with no overlap. So, <span class="math inline">\(A^{-1}\)</span> can map ellipses back to those same circles without any ambiguity. We don’t “lose information” by applying <span class="math inline">\(A\)</span>.</p>
+<h1 id="constructing-mp-inverses-with-the-svd">Constructing MP-Inverses with the SVD</h1>
+<p>We can in fact do basically the same thing for <em>any</em> matrix, not just the invertible ones. The SVD always exists, so for some matrix <span class="math inline">\(A\)</span>, first write</p>
+<p><span class="math display">\[ A = U \Sigma V^* \]</span></p>
+<p>And then find the MP-inverse by</p>
+<p><span class="math display">\[ A^+ = V \Sigma^+ U^* \]</span></p>
+<p>Now, the matrix <span class="math inline">\(A\)</span> might not be invertible. If it is not square, then, to find <span class="math inline">\(\Sigma^+\)</span>, we need to take the transpose of <span class="math inline">\(\Sigma\)</span> to make sure all the dimensions are conformable in the multiplication. It <span class="math inline">\(A\)</span> is singular (dependent rows), then <span class="math inline">\(\Sigma\)</span> will have 0’s on its diagaonal, so we need to make sure only take reciprocals of the non-zero entries.</p>
+<p>Summarizing, to find the Moore-Penrose inverse of a matrix <span class="math inline">\(A\)</span>:</p>
+<ol>
+<li>Find the Singular Value Decomposition: <span class="math inline">\(A = U \Sigma V^*\)</span> (using <a href="https://www.rdocumentation.org/packages/base/versions/3.6.1/topics/svd">R</a> or <a href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.svd.html">Python</a>, if you like).</li>
+<li>Find <span class="math inline">\(\Sigma^+\)</span> by transposing <span class="math inline">\(\Sigma\)</span> and taking the reciprocal of all its non-zero diagonal entries.</li>
+<li>Compute <span class="math inline">\(A^+ = V \Sigma^+ U^*\)</span></li>
+</ol>
+<h2 id="example---an-inconsistent-system">Example - An Inconsistent System</h2>
+<p>Let’s find the MP-inverse of a singular matrix. Let’s take</p>
+<p><span class="math display">\[A = \begin{bmatrix}
+1 &amp; 1 \\
+1 &amp; 1
+\end{bmatrix}
+\]</span></p>
+<p>Because the rows of this matrix are linearly dependent, <span class="math inline">\(A^{-1}\)</span> does not exist. But we can still find the more general MP-inverse by following the procedure above.</p>
+<p>So, first we find the SVD of <span class="math inline">\(A\)</span>:</p>
+<p><span class="math display">\[ A = U \Sigma V^* = \begin{bmatrix}
+\sqrt{2}/2 &amp; -\sqrt{2}/2 \\
+\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \begin{bmatrix}
+2 &amp; 0 \\
+0 &amp; 0
+\end{bmatrix} \begin{bmatrix}
+\sqrt{2}/2 &amp; \sqrt{2}/2 \\
+-\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \]</span></p>
+<p>Then we apply the procedure above to find <span class="math inline">\(A^+\)</span>:</p>
+<p><span class="math display">\[ A^+ = V \Sigma^+ U^* = \begin{bmatrix}
+\sqrt{2}/2 &amp; -\sqrt{2}/2 \\
+\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \begin{bmatrix}
+1/2 &amp; 0 \\
+0 &amp; 0
+\end{bmatrix} \begin{bmatrix}
+\sqrt{2}/2 &amp; \sqrt{2}/2 \\
+-\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \]</span></p>
+<p>And now we multiply everything out to get:</p>
+<p><span class="math display">\[ A^+ = \begin{bmatrix}
+1/4 &amp; 1/4 \\
+1/4 &amp; 1/4 \end{bmatrix} \]</span></p>
+<p>This is the Moore-Penrose inverse of <span class="math inline">\(A\)</span>.</p>
+<p>Like we did for the invertible matrix before, let’s get an idea of what <span class="math inline">\(A\)</span> and <span class="math inline">\(A^+\)</span> are doing geometrically. Here they are acting on the unit circle:</p>
+<video autoplay loop mutued playsinline>
+  <source src="./images/dependent-equation.webm" type="video/webm">
+  <source src="./images/dependent-equation.mp4" type="video/mp4">
+</video>
+
+<p>Notice how <span class="math inline">\(A\)</span> now collapses the circle onto a one-dimensional space. This is a consequence of it having dependent columns. For matricies with dependent columns, its image will be of lesser dimension than the space it’s mapping into. Another way of saying this is that it has a non-trivial <a href="https://en.wikipedia.org/wiki/Kernel_(linear_algebra)">null space</a>. It “zeroes out” some of the dimensions in its domain during the transformation.</p>
+<p>What if <span class="math inline">\(A\)</span> were the coefficient matrix of a system of equations? We might have:</p>
+<p><span class="math display">\[ \left\{ \begin{align*}
+x_1 + x_2 &amp;= b_1 \\
+x_1 + x_2 &amp;= b_2
+\end{align*} \right. \]</span></p>
+<p>for some <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span>.</p>
+<p>Now, unless <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span> are equal, this system won’t have an exact solution for <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>. It will be <em>inconsistent</em>. But, with <span class="math inline">\(A^+\)</span>, we can still find values for <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> that minimize the distance between <span class="math inline">\(A x\)</span> and <span class="math inline">\(b\)</span>. More specifically, let <span class="math inline">\(\hat{x} = A^{+}b\)</span>. Then <span class="math inline">\(\hat{x}\)</span> will minimize <span class="math inline">\(|| b - A x ||^2  \)</span>, the <em>squared error</em>, and <span class="math inline">\( \hat{b} = A \hat{x} = A A^{+} x \)</span> is the closest we can come to <span class="math inline">\(b\)</span>. (The vector <span class="math inline">\(b - A \hat{x}\)</span> is sometimes called the <strong><a href="https://en.wikipedia.org/wiki/Residual_(numerical_analysis)">residual</a></strong> vector.)</p>
+<p>We have</p>
+<p><span class="math display">\[ \hat{x} = A^{+} b = \begin{bmatrix}
+1/4 (b_1 + b_2) \\
+1/4 (b_1 + b_2) \end{bmatrix} \]</span></p>
+<p>so <span class="math inline">\(x_1 = \frac{1}{4} (b_1 + b_2)\)</span> and <span class="math inline">\(x_2 = \frac{1}{4} (b_1 + b_2)\)</span>. And the closest we can get to <span class="math inline">\(b\)</span> is</p>
+<p><span class="math display">\[ \hat{b} = A \hat{x} = \begin{bmatrix}
+1/2 (b_1 + b_2) \\
+1/2 (b_1 + b_2) \end{bmatrix} \]</span></p>
+<p>In other words, if we have to make <span class="math inline">\(x_1 + x_2\)</span> as close as possible to two different values <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span>, the best we can do is to choose <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> so as to get the average of <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span>.</p>
+<figure>
+<img src="./images/least-squares.png" title="least-squares" alt="The vector b = (1, 3) and its orthogonal projection \hat{b} = (2, 2)." width="400" /><figcaption>The vector <span class="math inline">\(b = (1, 3)\)</span> and its orthogonal projection <span class="math inline">\(\hat{b} = (2, 2)\)</span>.</figcaption>
+</figure>
+<p>Or we could think about this problem geometrically. In order for there to be a solution to <span class="math inline">\(A x = b\)</span>, the vector <span class="math inline">\(b\)</span> has to reside in the image of <span class="math inline">\(A\)</span>. The image of <span class="math inline">\(A\)</span> is the span of its columns, which is all vectors like <span class="math inline">\(c(1, 1)\)</span> for a scalar <span class="math inline">\(c\)</span>. This is just the line through the origin in the picture above. But <span class="math inline">\(b = (b_1, b_2)\)</span> is not on that line if <span class="math inline">\(b_1 \neq b_2\)</span>, and so instead we minimize the distance between the two with its orthogonal projection <span class="math inline">\(\hat b\)</span>. The error or residual is the difference <span class="math inline">\(\epsilon = b - \hat{b}\)</span>.</p>]]></description>
+    <pubDate>Thu, 21 Nov 2019 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/least-squares-with-the-mp-inverse/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+<item>
+    <title>Visualizing Linear Transformations</title>
+    <link>https://mathformachines.com/posts/visualizing-linear-transformations/index.html</link>
+    <description><![CDATA[<h1 id="introduction">Introduction</h1>
+<p>Say <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span> are <a href="https://en.wikipedia.org/wiki/Vector_space">vector spaces</a> with scalars in some <a href="https://en.wikipedia.org/wiki/Field_(mathematics)">field</a> <span class="math inline">\(\mathbb{F}\)</span> (the real numbers, maybe). A <strong><a href="https://en.wikipedia.org/wiki/Linear_map">linear map</a></strong> is a function <span class="math inline">\(T : V \rightarrow W \)</span> satisfying two conditions:</p>
+<ul>
+<li><strong>additivity</strong> <span class="math inline">\(T(x + y) = T x + T y\)</span> for all <span class="math inline">\(x, y \in V\)</span></li>
+<li><strong>homogeneity</strong> <span class="math inline">\(T(c x) = c (T x)\)</span> for all <span class="math inline">\(c \in \mathbb{F} \)</span> and all <span class="math inline">\(x \in V\)</span></li>
+</ul>
+<p>
+
+<p>Defining a linear map this way just ensures that anything that acts like a vector in <span class="math inline">\(V\)</span> also acts like a vector in <span class="math inline">\(W\)</span> after you map it over. It means that the map preserves all the structure of a vector space after it’s applied.</p>
+<p>It’s a simple definition – which is good – but doesn’t speak much to the imagination. Since linear algebra is possibly the <a href="https://math.stackexchange.com/questions/256682/why-study-linear-algebra">most useful</a> and <a href="https://math.stackexchange.com/questions/256682/why-study-linear-algebra">most ubiquitous</a> of all the branches of mathematics, we’d like to have some intuition about what linear maps are so we have some idea of what we’re doing <a href="https://en.wikipedia.org/wiki/Linear_regression">when</a> <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">we</a> <a href="https://en.wikipedia.org/wiki/Backpropagation">use</a> <a href="https://en.wikipedia.org/wiki/Mapreduce">it</a>. Though not all vectors live there, the <a href="https://en.wikipedia.org/wiki/Euclidean_space">Euclidean plane</a> <span class="math inline">\(\mathbb{R}^2\)</span> is certainly the easiest to visualize, and the way we <a href="https://en.wikipedia.org/wiki/Euclidean_distance">measure distance</a> there is very similar to the way we <a href="https://en.wikipedia.org/wiki/Root-mean-square_deviation">measure error</a> in statistics, so we can feel that our intuitions will carry over.</p>
+<p>It turns out that all linear maps in <span class="math inline">\(\mathbb{R}^2\)</span> can be factored into just a few primitive geometric operations: <a href="https://en.wikipedia.org/wiki/Scaling_(geometry)">scaling</a>, <a href="https://en.wikipedia.org/wiki/Rotation_(mathematics)">rotation</a>, and <a href="https://en.wikipedia.org/wiki/Reflection_(mathematics)">reflection</a>. This isn’t the only way to factor these maps, but I think it’s the easiest to understand. (We could get by <a href="https://en.wikipedia.org/wiki/Cartan%E2%80%93Dieudonn%C3%A9_theorem">without rotations</a>, in fact.)</p>
+<figure>
+<img src="/images/primitives.png" title="primitives" alt="The unit circle, rotated, reflected, and scaled." /><figcaption>The unit circle, rotated, reflected, and scaled.</figcaption>
+</figure>
+<h1 id="three-primitive-transformations">Three Primitive Transformations</h1>
+<h2 id="scaling">Scaling</h2>
+<p>A (non-uniform) <strong>scaling transformation</strong> <span class="math inline">\(D\)</span> in <span class="math inline">\(\mathbb{R}^2\)</span> is given by a <a href="https://en.wikipedia.org/wiki/Diagonal_matrix">diagonal matrix</a>:</p>
+<p><span class="math display">\[Scl(d1, d2) = \begin{bmatrix}
+d_1 &amp; 0   \\
+0   &amp; d_2 \\
+\end{bmatrix}\]</span></p>
+<p>where <span class="math inline">\(d_1\)</span> and <span class="math inline">\(d_2\)</span> are non-negative. The transformation has the effect of stretching or shrinking a vector along each coordinate axis, and, so long as <span class="math inline">\(d_1\)</span> and <span class="math inline">\(d_2\)</span> are positive, it will also preserve the <a href="https://en.wikipedia.org/wiki/Orientation_(vector_space)">orientation</a> of vectors after mapping because in this case <span class="math inline">\(\det(D) = d_1 d_2 &gt; 0\)</span>.</p>
+<p>For instance, here is the effect on a vector of this matrix: <span class="math display">\[D = \begin{bmatrix}
+0.75 &amp; 0 \\
+0    &amp; 1.25 \\
+\end{bmatrix}\]</span></p>
+<figure>
+<img src="/images/vector-scaled.png" title="vector-scaled" alt="A vector, scaled." width="400" /><figcaption>A vector, scaled.</figcaption>
+</figure>
+<p>It will shrink a vector by a factor of 0.75 along the x-axis and stretch a vector by a factor of 1.25 along the y-axis.</p>
+<p>If we think about all the vectors of length 1 as being the points of the <a href="https://en.wikipedia.org/wiki/Unit_circle">unit circle</a>, then we can get an idea of how the transformation will affect any vector. We can see a scaling as a continous transformation beginning at the <a href="https://en.wikipedia.org/wiki/Identity_matrix">identity matrix</a>.</p>
+<video autoplay loop mutued playsinline>
+  <source src="./images/scaling.webm" type="video/webm">
+  <source src="./images/scaling.mp4" type="video/mp4">
+</video>
+
+<p>If one of the diagonal entries is 0, then it will collapse the circle on the other axis.</p>
+<p><span class="math display">\[D = \begin{bmatrix}
+0 &amp; 0 \\
+0 &amp; 1.25 \\
+\end{bmatrix}\]</span></p>
+<p>This is an example of a <a href="https://en.wikipedia.org/wiki/Rank_(linear_algebra)">rank-deficient</a> matrix. It maps every vector onto the y-axis, and so its image has a dimension less than the dimension of the full space.</p>
+<video autoplay loop mutued playsinline>
+  <source src="./images/collapsed.webm" type="video/webm">
+  <source src="./images/collapsed.mp4" type="video/mp4">
+</video>
+
+<h2 id="rotation">Rotation</h2>
+<p>A <strong>rotation transformation</strong> <span class="math inline">\(Ref\)</span> is given by a matrix: <span class="math display">\[Ref(\theta) = \begin{bmatrix}
+\cos(\theta) &amp; -\sin(\theta) \\
+\sin(\theta) &amp; \cos(\theta) \\
+\end{bmatrix}\]</span></p>
+<p>This transformation will have the effect of rotating a vector counter-clockwise by an angle <span class="math inline">\(\theta\)</span>, when <span class="math inline">\(\theta\)</span> is positive, and clockwise by <span class="math inline">\(\theta\)</span> when <span class="math inline">\(\theta\)</span> is negative.</p>
+<figure>
+<img src="/images/vector-rotated.png" title="vector-rotated" alt="A vector, rotated by 3\pi/4" width="400" /><figcaption>A vector, rotated by <span class="math inline">\(3\pi/4\)</span></figcaption>
+</figure>
+<p>And the unit circle gets mapped onto itself.</p>
+<video autoplay loop mutued playsinline>
+  <source src="./images/rotation.webm" type="video/webm">
+  <source src="./images/rotation.mp4" type="video/mp4">
+</video>
+
+<p>It shouldn’t be too hard to convince ourselves that the matrix we’ve written down is the one we want. Take some unit vector and write its coordinates like <span class="math inline">\((\cos\gamma, \sin\gamma)\)</span>. Multiply it by <span class="math inline">\(Ref(\theta)\)</span> to get <span class="math inline">\((\cos\gamma \cos\theta - \sin\gamma \sin\theta, \cos\gamma \sin\theta + \sin\gamma \cos\theta)\)</span>. But by a <a href="https://en.wikipedia.org/wiki/List_of_trigonometric_identities#Angle_sum_and_difference_identities">trigonometric identity</a>, this is exactly the vector <span class="math inline">\((\cos(\gamma + \theta), \sin(\gamma + \theta))\)</span>, which is our vector rotated by <span class="math inline">\(\theta\)</span>.</p>
+<p>A rotation should preserve not only orientations, but also distances. Now, recall that the determinant for a <span class="math inline">\(2\times 2\)</span> matrix <span class="math inline">\(\begin{bmatrix} a &amp; b \\ c &amp; d \end{bmatrix}\)</span> is <span class="math inline">\(a d - b c\)</span>. So a rotation matrix will have determinant <span class="math inline">\(\cos^2(\theta) + \sin^2(\theta)\)</span>, which, by the <a href="https://en.wikipedia.org/wiki/Pythagorean_trigonometric_identity">Pythagorean identity</a>, is equal to 1. This, together with the fact that its columns are <a href="https://en.wikipedia.org/wiki/Orthonormality">orthonormal</a> means that it does preserve both. It is a kind of <a href="https://en.wikipedia.org/wiki/Orthogonal_matrix">orthogonal matrix</a>, which is a kind of <a href="https://en.wikipedia.org/wiki/Isometry">isometry</a>.</p>
+<h2 id="reflection">Reflection</h2>
+<p>A <strong>reflection</strong> in <span class="math inline">\(\mathbb{R}^2\)</span> can be described with matricies like: <span class="math display">\[Ref(\theta) = \begin{bmatrix}
+\cos(2\theta) &amp; \sin(2\theta) \\
+\sin(2\theta) &amp; -\cos(2\theta) \\
+\end{bmatrix}\]</span> where the reflection is through a line crossing the origin and forming an angle <span class="math inline">\(\theta\)</span> with the x-axis.</p>
+<figure>
+<img src="/images/vector-reflected.png" title="vector-reflected" alt="A vector, reflected over a line at angle \pi/4." width="400" /><figcaption>A vector, reflected over a line at angle <span class="math inline">\(\pi/4\)</span>.</figcaption>
+</figure>
+<p>And the unit circle gets mapped onto itself.</p>
+<video autoplay loop mutued playsinline>
+  <source src="./images/reflection.webm" type="video/webm">
+  <source src="./images/reflection.mp4" type="video/mp4">
+</video>
+
+<p>Note that the determinant of this matrix is -1, which means that it <em>reverses</em> orientation. But its columns are still orthonormal, and so it too is an isometry.</p>
+<h1 id="decomposing-matricies-into-primitives">Decomposing Matricies into Primitives</h1>
+<p>The <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) will factor any matrix <span class="math inline">\(A\)</span> having like this:</p>
+<p><span class="math display">\[ A = U \Sigma V^* \]</span></p>
+<p>We are working with real matricies, so <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> will both be orthogonal matrices. This means each of these will be either a reflection or a rotation, depending on the pattern of signs in its entries. The matrix <span class="math inline">\(\Sigma\)</span> is a diagonal matrix with non-negative entries, which means that it is a scaling transform. (The <span class="math inline">\(*\)</span> on the <span class="math inline">\(V\)</span> is the <a href="https://en.wikipedia.org/wiki/Conjugate_transpose">conjugate-transpose</a> operator, which just means ordinary <a href="https://en.wikipedia.org/wiki/Transpose">transpose</a> when <span class="math inline">\(V\)</span> doesn’t contain any imaginary entries. So, for us, <span class="math inline">\(V^* = V^\top\)</span>.) Now with the SVD we can rewrite any linear transformation as:</p>
+<ol>
+<li><span class="math inline">\(V^*\)</span>: Rotate/Reflect</li>
+<li><span class="math inline">\(\Sigma\)</span>: Scale</li>
+<li><span class="math inline">\(U\)</span>: Rotate/Reflect</li>
+</ol>
+<h2 id="example">Example</h2>
+<p><span class="math display">\[\begin{bmatrix}
+0.5 &amp; 1.5 \\
+1.5 &amp; 0.5
+\end{bmatrix} \approx \begin{bmatrix}
+-0.707 &amp; -0.707 \\
+-0.707 &amp; 0.707
+\end{bmatrix} \begin{bmatrix}
+2.0 &amp; 0.0 \\
+0.0 &amp; 1.0
+\end{bmatrix} \begin{bmatrix}
+-0.707 &amp; -0.707 \\
+0.707 &amp; -0.707
+\end{bmatrix} \]</span></p>
+<p>This turns out to be:</p>
+<ol>
+<li><span class="math inline">\(V^*\)</span>: Rotate clockwise by <span class="math inline">\(\theta = \frac{3 \pi}{4}\)</span>.</li>
+<li><span class="math inline">\(\Sigma\)</span>: Scale x-coordinate by <span class="math inline">\(d_1 = 2\)</span> and y-coordinate by <span class="math inline">\(d_2 = 1\)</span>.</li>
+<li><span class="math inline">\(U\)</span>: Reflect over the line with angle <span class="math inline">\(-\frac{3\pi}{8}\)</span>.</li>
+</ol>
+<video autoplay loop mutued playsinline>
+  <source src="./images/rot-scale-ref.webm" type="video/webm">
+  <source src="./images/rot-scale-ref.mp4" type="video/mp4">
+</video>
+
+<h2 id="example-1">Example</h2>
+<p>And here is a <a href="https://en.wikipedia.org/wiki/Shear_mapping">shear transform</a>, represented as: rotation, scale, rotation.</p>
+<span class="math display">\[\begin{bmatrix}
+1.0 &amp; 1.0 \\
+0.0 &amp; 1.0
+\end{bmatrix} \approx \begin{bmatrix}
+0.85 &amp; -0.53 \\
+0.53 &amp; 0.85
+\end{bmatrix} \begin{bmatrix}
+1.62 &amp; 0.0 \\
+0.0 &amp; 0.62
+\end{bmatrix} \begin{bmatrix}
+0.53 &amp; 0.85 \\
+-0.85 &amp; 0.53
+\end{bmatrix}
+\]</span>
+<video autoplay loop mutued playsinline>
+  <source src="./images/shear.webm" type="video/webm">
+  <source src="./images/shear.mp4" type="video/mp4">
+</video>
+]]></description>
+    <pubDate>Tue, 12 Nov 2019 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/visualizing-linear-transformations/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+
+    </channel>
+</rss>

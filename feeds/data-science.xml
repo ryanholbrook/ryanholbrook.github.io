@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>Math for Machines</title>
+        <link>https://mathformachines.com</link>
+        <description><![CDATA[A blog about data science and machine learning, with a lot of math.]]></description>
+        <atom:link href="https://mathformachines.com/feeds/data-science.xml" rel="self"
+                   type="application/rss+xml" />
+        <lastBuildDate>Fri, 04 Oct 2019 00:00:00 UT</lastBuildDate>
+        <item>
+    <title>What I'm Reading 1: Bayes and Means</title>
+    <link>https://mathformachines.com/posts/bayes-and-means/index.html</link>
+    <description><![CDATA[<h1 id="bayesian-aggregation">Bayesian Aggregation</h1>
+<p>Yang, Y., &amp; Dunson, D. B., <em>Minimax Optimal Bayesian Aggregation</em> 2014 (<a href="https://arxiv.org/abs/1403.1345">arXiv</a>)</p>
+<p>Say we have a number of estimators <span class="math inline">\(\hat f_1, \ldots, \hat f_K\)</span> derived from a number of models <span class="math inline">\(M_1, \ldots, M_K\)</span> for some regression problem <span class="math inline">\(Y = f(X) + \epsilon\)</span>, but, as is the nature of things when estimating with limited data, we don’t know which estimator represents the true model (assuming the true model is in our list). The Bayesian habit is to stick a prior on the uncertainty, compute posteriors probabilities, and then average across the unknown parameter using the posterior probabilities as weights. Since the posterior probabilities (call them <span class="math inline">\(\lambda_1, \ldots, \lambda_K\)</span>) have to sum to 1, we obtain a <em>convex combination</em> of our estimators <span class="math display">\[ \hat f = \sum_{1\leq i \leq K} \lambda_i \hat f_i \]</span> This is the approach of <a href="https://www.stat.colostate.edu/~jah/papers/statsci.pdf">Bayesian Model Averaging</a> (BMA). Yang <em>et al.</em> propose to find such combinations using a <a href="https://en.wikipedia.org/wiki/Dirichlet_distribution">Dirichlet prior</a> on the weights <span class="math inline">\(\lambda_i\)</span>. If we remove the restriction that the weights sum to 1 and instead only ask that they have finite sum in absolute value, then we obtain <span class="math inline">\(\hat f\)</span> as a <em>linear combination</em> of <span class="math inline">\(\hat f_i\)</span>. The authors then place a Gamma prior on <span class="math inline">\(A = \sum_i |\lambda_i|\)</span> and a Dirichlet prior on <span class="math inline">\(\mu_i = \frac{|\lambda_i|}{A}\)</span>. In both the linear and the convex cases they show that the resulting estimator is minimax optimal in the sense that it will give the best worst-case predictions for a given number of observations, including the case where a sparsity restriction is placed on the number of estimators <span class="math inline">\(\hat f_i\)</span>; in other words, <span class="math inline">\(\hat f\)</span> converges to the true estimator as the number of observations increases with minimax optimal risk. The advantage to previous non-bayesian methods of linear or convex aggregation is that the sparsity parameter can be learned from the data. The Dirichlet convex combination gives good performance against Best Model selection, Majority Voting, and <a href="https://biostats.bepress.com/ucbbiostat/paper266/">SuperLearner</a>, especially when there are both a large number of observations and a large number of estimators.</p>
+<p>I implemented the convex case in R for use with <a href="https://github.com/paul-buerkner/brms">brms</a>. The Dirichlet distribution has been <a href="https://en.wikipedia.org/wiki/Dirichlet_distribution#Gamma_distribution">reparameterized</a> as a sum of Gamma RVs to aid in sampling. The Dirichlet concentration parameter is <span class="math inline">\(\frac{\alpha}{K^\gamma}\)</span>; the authors recommend choosing <span class="math inline">\(\alpha = 1\)</span> and <span class="math inline">\(\gamma = 2\)</span>.</p>
+<pre class="r" data-org-language="R"><code>convex_regression &lt;- function(formula, data,
+                              family = &quot;gaussian&quot;,
+                              ## Yang (2014) recommends alpha = 1, gamma = 2
+                              alpha = 1, gamma = 2,
+                              verbose = 0,
+                              ...) {
+  if (gamma &lt;= 1) {
+    warning(paste(&quot;Parameter gamma should be greater than 1. Given:&quot;, gamma))
+  }
+  if (alpha &lt;= 0) {
+    warning(paste(&quot;Parameter alpha should be greater than 0. Given:&quot;, alpha))
+  }
+  ## Set up priors.
+  K &lt;- length(terms(formula))
+  alpha_K &lt;- alpha / (K^gamma)
+  stanvars &lt;-
+    stanvar(alpha_K,
+      &quot;alpha_K&quot;,
+      block = &quot;data&quot;,
+      scode = &quot;  real&lt;lower = 0&gt; alpha_K;  // dirichlet parameter&quot;
+    ) +
+    stanvar(
+      name = &quot;b_raw&quot;,
+      block = &quot;parameters&quot;,
+      scode = &quot;  vector&lt;lower = 0&gt;[K] b_raw; &quot;
+    ) +
+    stanvar(
+      name = &quot;b&quot;,
+      block = &quot;tparameters&quot;,
+      scode = &quot;  vector[K] b = b_raw / sum(b_raw);&quot;
+    )
+  prior &lt;- prior(&quot;target += gamma_lpdf(b_raw | alpha_K, 1)&quot;,
+    class = &quot;b_raw&quot;, check = FALSE
+  )
+  f &lt;- update.formula(formula, . ~ . - 1)
+  if (verbose &gt; 0) {
+    make_stancode(f,
+      prior = prior,
+      data = data,
+      stanvars = stanvars
+    ) %&gt;% message()
+  }
+  fit_dir &lt;- brm(f,
+    prior = prior,
+    family = family,
+    data = data,
+    stanvars = stanvars,
+    ...
+  )
+  fit_dir
+}
+</code></pre>
+<p>Here is a <a href="https://gist.github.com/ryanholbrook/b5c7d44c0c7642eeee1a3034b48f29d7">gist</a> that includes an interface to <a href="https://tidymodels.github.io/parsnip/">parsnip</a>.</p>
+<p>In my own experiments, I found the performance of the convex aggregator to be comparable to a <a href="https://en.wikipedia.org/wiki/Lasso_(statistics)">LASSO</a> SuperLearner at the cost of the lengthier training that goes with MCMC methods and the finicky convergence of sparse priors. So I would likely reserve this for when I had lots of features and lots of estimators to work through, where I presume it would show an advantage. But in that case it would definitely be on my list of things to try.</p>
+<h1 id="bayesian-stacking">Bayesian Stacking</h1>
+<p>Yao, Y., Vehtari, A., Simpson, D., &amp; Gelman, A., <em>Using Stacking to Average Bayesian Predictive Distributions</em> (<a href="https://projecteuclid.org/euclid.ba/1516093227">pdf</a>)</p>
+<p>Another approach to model combination is <a href="https://doi.org/10.1080/01621459.1996.10476733">stacking</a>. With stacking, model weights are chosen by cross-validation to minimize <a href="https://en.wikipedia.org/wiki/Root-mean-square_deviation">RMSE</a> predictive error. Now, BMA finds the aggregated model that best fits the data, while stacking finds the aggregated model that gives the best predictions. Stacking therefore is usually better when predictions are what you want. A drawback is that stacking produces models through <em>point</em> estimates. So, they don’t give you all the information of a full distribution like BMA would. Yao <em>et al.</em> propose a method of stacking that instead finds the optimal <a href="https://en.wikipedia.org/wiki/Posterior_predictive_distribution">predictive distribution</a> by convex combinations of distributions with weights chosen by some scoring rule: the authors use the minimization of KL-divergence. Hence, they choose weights <span class="math inline">\(w\)</span> empirically through <a href="https://en.wikipedia.org/wiki/Cross-validation_(statistics)#Leave-one-out_cross-validation">LOO</a> by <span class="math display">\[ \max_w \frac{1}{n} \sum_{1\leq i \leq n} \log \sum_{1\leq k \leq K} w_k p(y_i | y_{-i}, M_k) \]</span> where <span class="math inline">\(y_1, \ldots, y_n\)</span> are the observed data and <span class="math inline">\(y_{-i}\)</span> is the data with <span class="math inline">\(y_i\)</span> left out. The following figure shows how stacking of predictive distributions gives the “best of both worlds” for BMA and point prediction stacking.</p>
+<figure>
+<img src="/images/stacking.png" alt="From Yao (2018)" /><figcaption>From Yao (2018)</figcaption>
+</figure>
+<p>They have implemented stacking for <a href="https://mc-stan.org/users/interfaces/rstan">Stan</a> models in the R package <a href="https://cran.r-project.org/web/packages/loo/vignettes/loo2-weights.html">loo</a>.</p>]]></description>
+    <pubDate>Fri, 04 Oct 2019 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/bayes-and-means/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+<item>
+    <title>Bayesian Topic Modeling</title>
+    <link>https://mathformachines.com/posts/bayesian-topic-modeling/index.html</link>
+    <description><![CDATA[<p>Imagine we have some collection of documents. They could be novels, or tweets, or financial reports—just any collection of text. We want an algorithm that can discover what they are about, and we would like our algorithm to do it automatically, without any hints. (That is, we want our algorithm to be <em>unsupervised</em>.) We will look at several models that probabilistically assign words to topics using <a href="https://en.wikipedia.org/wiki/Bayes&#39;_theorem">Bayes’ Theorem</a>. They are all <a href="https://en.wikipedia.org/wiki/Bayesian_network">Bayesian Graphical Models</a>.</p>
+<p>The basic problem in statistics is to infer some unobservable value from observable instances of it. In our case, we want to infer the <em>topics</em> of a document from the actual words in the document. We want to be able to infer that our document is about “colors” if we observe “red” and “green” and “blue”.</p>
+<p>Bayes’ Theorem allows us to do this. It allows us to infer probabilities concerning the unobserved value from the observations that we can make. It allows us to reason backwards in some sense. So, when constructing a Bayesian model, it is helpful to <em>think</em> backwards. Instead of first asking how words are distributed to topics and topics to documents, we will ask how we could <em>generate</em> a document if we already knew these distributions. To construct our model, we will first reason from the unknown values to the known values so that we know how to do the converse when the time comes.</p>
+<h1 id="some-simple-generative-examples">Some Simple Generative Examples</h1>
+<p>In all of our models, we are going make a simplfying assumption. We will assume that all of the words in a document occur independently of whatever words came before or come after; that is, a document will just be a “bag of words.” We’ll see that even with ignoring word-order, we can still infer pretty accurately what a document might be about.</p>
+<p>Let’s start with a very simple example: 1 document with 1 topic and 2 words in our vocabulary.</p>
+<p>(Some definitions: The “vocabulary” is just the set of unique words that occur in all of the documents together, the “corpus.” We’ll refer to a word in the vocabulary as just a “word” and some instance of a word in a document as a “token.”)</p>
+<p>Let’s say our two words are “blue” and “red”, and that the probability of any given word (any token) being “red” is <span class="math inline">\(\phi\)</span>: <span class="math inline">\(P(W = red) = \phi\)</span>. This is the same as saying our random variable of tokens <span class="math inline">\(W\)</span> has a Bernoulli distribution with parameter <span class="math inline">\(\phi\)</span>: <span class="math inline">\(W \sim Bernoulli(\phi)\)</span>.</p>
+<p>The distribution looks like this:</p>
+<pre class="ipython" data-exports="both"><code>x = [0, 1]
+pmf = st.bernoulli.pmf(x, 0.3)
+
+plt.stem(x, pmf)
+plt.xticks([0,1])
+plt.ylim(0,1)
+plt.xlim(-0.5, 1.5)
+</code></pre>
+<div class="RESULTS drawer">
+<pre class="example"><code>(-0.5, 1.5)
+</code></pre>
+</div>
+<figure><img src="/images/bernoulli.png" alt="Bernoulli pmf" /></figure>
+
+<p>Here, 1 represents “red” and 0 represents “blue” (or not-“red”).</p>
+<p>And here is how we could generate a document with this model:</p>
+<pre class="ipython" data-exports="both"><code>coding = {0 : &quot;blue&quot;, 1 : &quot;red&quot;}
+W = 50  # number of tokens in the document
+tokens = st.bernoulli.rvs(0.3, size = W)  # choose the tokens
+print(&#39; &#39;.join(str(w) for w in [coding[i] for i in tokens]))
+</code></pre>
+<pre class="example"><code>blue blue red blue red blue blue red red blue blue blue blue blue blue blue blue red blue blue blue blue blue blue blue blue blue red red blue blue blue blue blue blue red blue blue red blue red blue red blue blue blue blue blue red blue
+</code></pre>
+<h2 id="unigram-model">Unigram Model</h2>
+<p>For the general model, we will also choose the distribution of words within the topic randomly. That is, we will assign a probability distribution to <span class="math inline">\(\phi\)</span>.</p>
+<p>The <a href="https://en.wikipedia.org/wiki/Beta_distribution">beta distribution</a> is a natural choice. Since its support is <span class="math inline">\([0,1]\)</span> it can represent randomly chosen probabilities (values between 0 and 1). It is also conceptually convenient being the <a href="https://en.wikipedia.org/wiki/Conjugate_prior">conjugate prior</a> of the Bernoulli distribution, which allows us to make a more explicit connection between its parameters and the parameters of its Bernoulli distribution.</p>
+<p>The model is now:</p>
+<p><span class="math inline">\(\phi \sim Beta(\beta_0, \beta_1)\)</span></p>
+<p><span class="math inline">\(W \sim Bernoulli(\phi)\)</span></p>
+<p>where <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> are the “shape parameters” of the beta distribution. We can think of them as the assumed counts of each word, or the “pseudo-counts.” Let’s see how different values of these parameters affect the shape of the distribution.</p>
+<pre class="ipython" data-exports="both"><code>beta_0 = [0.8, 1, 2, 10]
+beta_1 = [0.8, 1, 2, 10]
+
+x = np.array(np.linspace(0, 1, 1000))
+
+f, axarr = plt.subplots(len(beta_0), len(beta_1), sharex=&#39;all&#39;, sharey=&#39;none&#39;)
+
+for i in range(len(beta_0)):
+    for j in range(len(beta_1)):
+        a = beta_0[i]
+        b = beta_1[j]
+        y = st.beta(a, b).pdf(x)
+        axarr[i, j].plot(x, y)
+        axarr[i, j].axes.yaxis.set_ticklabels([])
+        axarr[i, j].set_title(r&#39;$\beta_0 =$ &#39; + str(a) + r&#39;, $\beta_1 =$ &#39; + str(b))
+
+f.subplots_adjust(hspace=0.3)
+f.suptitle(r&#39;Beta Distributions for $\theta$&#39;, fontsize=20)
+</code></pre>
+<pre class="example"><code>Text(0.5, 0.98, &#39;Beta Distributions for $\\theta$&#39;)
+</code></pre>
+<figure><img src="/images/beta.png" alt="a grid of six beta pdfs for various parameters" /></figure>
+
+<p>Values near 0 will favor “blue” and values near 1 will favor “red”. We can choose <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> to generate the kinds of documents we like. (The notation is a bit backwards here: <span class="math inline">\(\beta_0\)</span> is the <em>pseudo-count</em> for “red”, whose probability is toward 1, on the right of the graph. So <span class="math inline">\(\beta_0 &gt; \beta_1\)</span> means more “red”s, and vice versa.)</p>
+<p>Let’s generate some documents with this expanded model. We’ll set <span class="math inline">\(\beta_0 = 0.8\)</span> and <span class="math inline">\(\beta_1 = 0.8\)</span>. We would expect most of our documents to favor one word or the other, but overall to occur equally often.</p>
+<pre class="ipython" data-exports="both"><code>beta_0 = 0.8
+beta_1 = 0.8
+
+thetas = st.beta.rvs(beta_0, beta_1, size = 6)
+
+W = 10  # number of tokens in each document
+
+for t in thetas:
+    print(&#39;Theta: &#39;, t)
+    tokens = st.bernoulli.rvs(t, size = W)
+    print(&#39;Document: &#39; + &#39; &#39;.join(str(w) for w in [coding[i] for i in tokens]) + &#39;\n&#39;)
+</code></pre>
+<pre class="example"><code>Theta:  0.2376299911870814
+Document: blue red blue blue red red blue blue blue blue
+
+Theta:  0.768902025579346
+Document: red red red red blue red red red blue red
+
+Theta:  0.6339386112711662
+Document: red blue red blue red blue blue blue red blue
+
+Theta:  0.889248394241369
+Document: red red red blue red red red red red red
+
+Theta:  0.7522981849896823
+Document: red red red red blue blue red red red red
+
+Theta:  0.18416659985533126
+Document: blue red red blue blue blue red red blue blue
+</code></pre>
+<p>(We could also assign a distribution to W, the number of tokens in each document. (Blei 2003) uses a Poisson distribution.)</p>
+<p>Let’s look at a couple more.</p>
+<h2 id="mixture-of-unigrams">Mixture of Unigrams</h2>
+<p>Here, we’ll also choose a single topic for each document, from among two. To simplify things, we’ll also assume the topics generate distinct words and that the proportions of words in topics are similar, that is, that they have the same shape parameters. We’ll see later that is a good assumption when using inference models.</p>
+<p>Distribution of topics to documents: <span class="math inline">\(\theta \sim Beta(\alpha_0, \alpha_1)\)</span></p>
+<p>Distribution of words to Topic 0: <span class="math inline">\(\phi_0 \sim Beta(\beta_0, \beta_1)\)</span></p>
+<p>Distribution of words to Topic 1: <span class="math inline">\(\phi_1 \sim Beta(\beta_0, \beta_1)\)</span></p>
+<p>The topics: <span class="math inline">\(T \sim Bernoulli(\theta)\)</span></p>
+<p>Words from Topic 0: <span class="math inline">\(W_1 \sim Bernoulli(\phi_0)\)</span></p>
+<p>Words from Topic 1: <span class="math inline">\(W_2 \sim Bernoulli(\phi_1)\)</span></p>
+<pre class="ipython" data-exports="both"><code>coding_0 = {0:&#39;blue&#39;, 1:&#39;red&#39;}  # words in topic 0
+coding_1 = {0:&#39;dogs&#39;, 1:&#39;cats&#39;}  # words in topic 1
+
+D = 15  # number of documents in corpus
+W = 10  # number of tokens in each document
+
+alpha_0, alpha_1 = 1, 1.5
+beta_0, beta_1 = 0.8, 0.8
+
+theta = st.beta.rvs(alpha_0, alpha_1, size = 1)[0]  # choose a distribution of topics to documents
+phi_0 = st.beta.rvs(beta_0, beta_1, size = 1)[0] # choose distribution of words in topic 0
+phi_1 = st.beta.rvs(beta_0, beta_1, size = 1)[0] # choose distribution of words in topic 1
+
+topics = st.bernoulli.rvs(theta, size = D)  # choose a topic for each document
+
+print(&#39;Theta: {:.3f}  Phi_0: {:.3f}  Phi_1: {:.3f}&#39;.format(theta, phi_0, phi_1))
+for i in range(D):
+    if topics[i] == 0:
+        tokens = st.bernoulli.rvs(phi_0, size = W)
+        print(&#39;Document: &#39; + &#39; &#39;.join(str(w) 
+              for w in [coding_0[i] for i in tokens]))
+    else:
+        tokens = st.bernoulli.rvs(phi_1, size = W)
+        print(&#39;Document: &#39; + &#39; &#39;.join(str(w) 
+              for w in [coding_1[i] for i in tokens]))
+</code></pre>
+<pre class="example"><code>Theta: 0.114  Phi_0: 0.973  Phi_1: 0.637
+Document: red red red red red red red red red red
+Document: red red red blue red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: dogs dogs cats cats cats cats cats dogs cats dogs
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+Document: red red blue red red red red red red red
+Document: red red red red red red red red red red
+Document: red red red red red red red red red red
+</code></pre>
+<h2 id="latent-dirichlet-allocation">Latent Dirichlet Allocation</h2>
+<p>This time, instead of choosing a single topic for each document, we’ll choose a topic for each word. This will make our model much more flexible and its behavior more realistic.</p>
+<p>Distribution of topics <strong>within</strong> documents: <span class="math inline">\(\theta \sim Beta(\alpha_0, \alpha_1)\)</span></p>
+<p>Distribution of words to Topic 0: <span class="math inline">\(\phi_0 \sim Beta(\beta_0, \beta_1)\)</span></p>
+<p>Distribution of words to Topic 1: <span class="math inline">\(\phi_1 \sim Beta(\beta_0, \beta_1)\)</span></p>
+<p>The topics: <span class="math inline">\(T \sim Bernoulli(\theta)\)</span></p>
+<p>Words from Topic 0: <span class="math inline">\(W_1 \sim Bernoulli(\phi_0)\)</span></p>
+<p>Words from Topic 1: <span class="math inline">\(W_2 \sim Bernoulli(\phi_1)\)</span></p>
+<pre class="ipython" data-exports="both"><code>coding_0 = {0:&#39;blue&#39;, 1:&#39;red&#39;}  # words in topic 0
+coding_1 = {0:&#39;dogs&#39;, 1:&#39;cats&#39;}  # words in topic 1
+
+D = 15
+W = 10  # number of tokens in each document
+
+alpha_0, alpha_1 = 1, 1.5
+beta_0, beta_1 = 0.8, 0.8
+
+theta = st.beta.rvs(alpha_0, alpha_1, size = 1)[0]  # choose a distribution of topics to documents
+phi_0 = st.beta.rvs(beta_0, beta_1, size = 1)[0]  # choose distribution of words in topic 0
+phi_1 = st.beta.rvs(beta_0, beta_1, size = 1)[0]  # choose distribution of words in topic 1
+
+print(&#39;Theta: {:.3f}  Phi_0: {:.3f}  Phi_1: {:.3f}&#39;.format(theta, phi_0, phi_1))
+for i in range(D):
+    print(&#39;Document: &#39;, end=&#39;&#39;)
+    topics = st.bernoulli.rvs(theta, size=W)  # choose topics for each word
+    for j in range(W):
+        if topics[j] == 0:
+            token = st.bernoulli.rvs(phi_0, size=1)[0]  # choose a word from topic 0
+            print(coding_0[token], end=&#39; &#39;)
+        else:
+            token = st.bernoulli.rvs(phi_1, size=1)[0]  # choose a word from topic 1
+            print(coding_1[token], end=&#39; &#39;)
+    print() 
+</code></pre>
+<pre class="example"><code>Theta: 0.384  Phi_0: 0.127  Phi_1: 0.028
+Document: dogs blue blue blue dogs blue dogs blue blue blue 
+Document: blue dogs blue blue dogs dogs dogs dogs blue cats 
+Document: blue dogs blue blue blue dogs red dogs blue blue 
+Document: dogs dogs red dogs dogs blue dogs blue blue blue 
+Document: blue dogs dogs blue blue dogs red dogs dogs red 
+Document: dogs blue blue red dogs blue dogs blue blue blue 
+Document: blue blue blue dogs blue dogs blue dogs dogs blue 
+Document: dogs red dogs red dogs blue dogs dogs blue blue 
+Document: dogs dogs blue dogs blue dogs blue blue blue dogs 
+Document: dogs blue blue blue blue red blue blue dogs dogs 
+Document: dogs dogs blue red dogs dogs blue blue blue blue 
+Document: blue blue blue red dogs blue blue blue blue red 
+Document: blue blue blue dogs blue dogs red dogs blue dogs 
+Document: dogs blue blue dogs dogs dogs blue dogs dogs blue 
+Document: dogs dogs dogs red blue dogs red dogs dogs dogs 
+</code></pre>
+<h1 id="the-dirichlet-distribution">The Dirichlet Distribution</h1>
+<p>Before we go on, we need to generalize our model a bit to be able to handle arbitrary numbers of words and topics, instead of being limited to just two. The multivariate generalization of the Bernoulli distribution is the <a href="https://en.wikipedia.org/wiki/Categorical_distribution">categorical distribution</a>, which simply gives a probability to each of some number of categories. The generalization of the beta distribution is a little trickier. It is called the <a href="https://en.wikipedia.org/wiki/Dirichlet_distribution">Dirichlet distribution</a>. And just like samples from the beta distribution will give parameters for a Bernoulli RV, samples from the Dirichlet distribution will give parameters for the categorical RV.</p>
+<p>Let’s recall the two requirements for some set of <span class="math inline">\(p\)</span>’s to be probability parameters to a categorical distribution. First, they have to sum to 1: <span class="math inline">\(p_0 + p_1 + \cdots + p_v = 1\)</span>. This means they form a <a href="https://en.wikipedia.org/wiki/Hyperplane">hyperplane</a> in <span class="math inline">\(v\)</span>-dimensional space. Second, they all have to be non-negative: <span class="math inline">\(p_i \geq 0\)</span>. This means they all lie in the first quadrant (or <a href="https://en.wikipedia.org/wiki/Orthant">orthant</a>, more precisely). The geometric object that satisfies these two requirements is a <a href="https://en.wikipedia.org/wiki/Simplex#The_standard_simplex">simplex</a>. In the case of two variables it will be a line-segment and in the case of three variables it will be a triangle.</p>
+<p>As sampled from the distribution, these values will form <a href="https://en.wikipedia.org/wiki/Barycentric_coordinate_system">barycentric coordinates</a> on the simplex. This just means that the coordinates tell you how far the point is from the center of the simplex, instead of how far it is from the origin, like with Cartesian coordinates.</p>
+<p>The 3-dimensional Dirichlet returns barycentric coordinates on the 2-simplex, a triangle. We can visualize the surface of the Dirichlet pdf as existing over a triangle; that is, its domain is the simplex.</p>
+<pre class="ipython" data-exports="both"><code>import simplex_plots as sp
+# from https://gist.github.com/tboggs/8778945
+
+alphas = [[0.999, 0.999, 0.999], [1, 2, 1], [1, 2, 3], 
+          [2, 0.999, 1], [10, 3, 4], [0.999, 1, 1]]
+
+fig = plt.figure(figsize=(12, 8))
+fig.suptitle(&#39;The Dirichlet Distribution&#39;, fontsize=16)
+for i, a in enumerate(alphas):
+    plt.subplot(2, len(alphas)/2, i + 1)
+    sp.draw_pdf_contours(sp.Dirichlet(a), border=True, cmap=&#39;Blues&#39;)
+    title = r&#39;$\alpha = $ = ({0[0]:.3f}, {0[1]:.3f}, {0[2]:.3f})&#39;.format(a)
+    plt.title(title, fontdict={&#39;fontsize&#39;: 14})
+</code></pre>
+<figure><img src="/images/dirichlet.png" alt="various dirichlet pdfs" /></figure>
+
+<p>Each corner of the triangle will favor a particular category (a word or a topic), just like either side of the domain of the beta distribution favored a category.</p>
+<p>As in the upper left picture, whenever all of the entries in <span class="math inline">\(\alpha\)</span> are equal, we call the distribution “symmetric,” and whenever they are all less then 1, we call the distribution “sparse.” Distributions that are both symmetric and sparse are often used as priors when inferring a topic model, symmetry because we don’t <em>a priori</em> have any reason to favor one unknown category over another, and sparsity to encourage our categories to be distinct.</p>
+<p>Now let’s start developing our models.</p>
+<h1 id="the-full-model">The Full Model</h1>
+<h2 id="data-preparation">Data Preparation</h2>
+<p>First we’ll make up a corpus and put it into an encoding that our models can use. To simplify things, we’ll let all of our documents have the same number of tokens and flatten the encoded data structure.</p>
+<pre class="ipython" data-exports="both"><code>from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_extraction.text import CountVectorizer
+
+corpus = [
+    &#39;Red blue green. Green blue blue? Red, red, blue, yellow.&#39;,
+    &#39;Car light red stop. Stop car. Car drive green, yellow.&#39;,
+    &#39;Car engine gas stop! Battery engine drive, car. Electric, gas.&#39;,
+    &#39;Watt, volt, volt, amp. Battery, watt, volt, electric volt charge. &#39;,
+]
+
+tokenizer = CountVectorizer(lowercase=True).build_analyzer()
+encoder = LabelEncoder()
+
+corpus_tokenized = np.array([tokenizer(doc) for doc in corpus])  # assign a number to each word
+encoder.fit(corpus_tokenized.ravel())
+vocab = list(encoder.classes_)  # the vocabulary
+
+# The number of documents and their length
+D, W = corpus_tokenized.shape
+# The number of words in the vocabulary
+V = len(vocab)
+
+# Flatten and encode the corpus, and create an index.
+data = corpus_tokenized.ravel()
+data = encoder.transform(data)
+data_index = np.repeat(np.arange(D), W)
+</code></pre>
+<p>Now a couple of diagnostic functions.</p>
+<pre class="ipython" data-exports="both"><code>def print_top_words(vocab, phis, n):
+    &#39;&#39;&#39;Prints the top words occuring within a topic.&#39;&#39;&#39;
+    for i, p in enumerate(phis):
+        z = list(zip(vocab, p))
+        z.sort(key = lambda x: x[1], reverse=True)
+        z = z[0:n]
+
+        for word, percent in z:
+            print(f&#39;Topic: {i:2}  Word: {word:10}  Percent: {percent:0.3f}&#39;)
+
+        print()
+
+def print_corpus_topics(corpus_tokenized, zs):
+    &#39;&#39;&#39;Prints the corpus together with the topic assigned to each word.&#39;&#39;&#39;
+    for d in range(zs.shape[0]):  # the document index
+        for w in range(zs.shape[1]):  # the word index
+            print(f&#39;({corpus_tokenized[d, w]}, {zs[d, w]})&#39;, end=&#39; &#39;)
+        print(&#39;\n&#39;)
+</code></pre>
+<h2 id="the-unigram-model">The Unigram Model</h2>
+<p>In this model, words from every document are drawn from a single categorical distribution.</p>
+<p>Distribution of words in a document: <span class="math inline">\(\phi \sim Dir(\vec{\beta})\)</span>, where <span class="math inline">\(\vec{\beta}\)</span> is a vector of shape parameters</p>
+<p>Distribution of tokens: <span class="math inline">\(W \sim Cat(\vec{\phi})\)</span></p>
+<p><a href="https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">Markov-Chain Monte Carlo</a> is a technique for sampling a model to discover its posterior parameters statistically. When models become complex, it is often the case that analytic solutions for the parameters are intractable. We will use the <a href="https://docs.pymc.io/">PyMC3</a> package.</p>
+<p>First we describe the model.</p>
+<pre class="ipython" data-exports="both"><code># Pseudo-counts for each vocab word occuring in the documents.
+beta = np.ones(V)
+
+with pm.Model() as unigram_model:
+
+    # Distribution of word-types in the corpus.
+    phi = pm.Dirichlet(&#39;phi&#39;, a = beta)
+
+    # The distribution of words.
+    w = pm.Categorical(&#39;w&#39;, p = phi, observed = data)
+</code></pre>
+<p>Next we sample the model to create the posterior distribution.</p>
+<pre class="ipython" data-exports="both"><code>with unigram_model:
+    draw = 5000
+    unigram_trace = pm.sample(5000, tune=1000, chains=4, progressbar=False)
+</code></pre>
+<p>And now we can see what the model determined the proportion of each word in the corpus was.</p>
+<pre class="ipython" data-exports="both"><code>print_top_words(vocab, [unigram_trace.get_values(&#39;phi&#39;)[draw-1]], len(vocab))
+</code></pre>
+<pre class="example"><code>Topic:  0  Word: red         Percent: 0.150
+Topic:  0  Word: watt        Percent: 0.145
+Topic:  0  Word: car         Percent: 0.117
+Topic:  0  Word: green       Percent: 0.080
+Topic:  0  Word: battery     Percent: 0.073
+Topic:  0  Word: volt        Percent: 0.068
+Topic:  0  Word: yellow      Percent: 0.067
+Topic:  0  Word: drive       Percent: 0.059
+Topic:  0  Word: electric    Percent: 0.054
+Topic:  0  Word: gas         Percent: 0.053
+Topic:  0  Word: stop        Percent: 0.048
+Topic:  0  Word: blue        Percent: 0.030
+Topic:  0  Word: engine      Percent: 0.025
+Topic:  0  Word: charge      Percent: 0.021
+Topic:  0  Word: light       Percent: 0.011
+Topic:  0  Word: amp         Percent: 0.002
+</code></pre>
+<h2 id="mixture-of-unigrams-naive-bayes">Mixture of Unigrams (Naive Bayes)</h2>
+<p>In this model, each document is assigned a topic and each topic has its own distribution of words.</p>
+<p>Distribution of topics to documents: <span class="math inline">\(\vec{\theta} \sim Dirichlet(\vec{\alpha})\)</span></p>
+<p>Distribution of words to topics: <span class="math inline">\(\vec{\phi} \sim Dirichlet(\vec{\beta})\)</span></p>
+<p>The topics: <span class="math inline">\(T \sim Categorical(\vec{\theta})\)</span></p>
+<p>The tokens: <span class="math inline">\(W \sim Categorical(\vec{\phi})\)</span></p>
+<pre class="ipython" data-exports="both"><code># Number of topics    
+K = 3
+
+# Pseudo-counts for topics and words.
+alpha = np.ones(K)*0.8
+beta = np.ones(V)*0.8
+
+with pm.Model() as naive_model:
+    # Global topic distribution
+    theta = pm.Dirichlet(&quot;theta&quot;, a=alpha)
+
+    # Word distributions for K topics
+    phi = pm.Dirichlet(&quot;phi&quot;, a=beta, shape=(K, V))
+
+    # Topic of documents
+    z = pm.Categorical(&quot;z&quot;, p=theta, shape=D)
+
+    # Words in documents
+    p = phi[z][data_index]
+    w = pm.Categorical(&quot;w&quot;, p=p, observed=data)
+</code></pre>
+<pre class="ipython" data-exports="both"><code>with naive_model:
+    draw = 5000
+    naive_trace = pm.sample(draw, tune=1000, chains=4, progressbar=False)
+</code></pre>
+<pre class="ipython" data-exports="both"><code>print_top_words(vocab, naive_trace[&#39;phi&#39;][draw-1], 5)
+</code></pre>
+<pre class="example"><code>Topic:  0  Word: drive       Percent: 0.177
+Topic:  0  Word: car         Percent: 0.166
+Topic:  0  Word: red         Percent: 0.126
+Topic:  0  Word: blue        Percent: 0.108
+Topic:  0  Word: green       Percent: 0.086
+
+Topic:  1  Word: car         Percent: 0.238
+Topic:  1  Word: green       Percent: 0.192
+Topic:  1  Word: watt        Percent: 0.180
+Topic:  1  Word: blue        Percent: 0.070
+Topic:  1  Word: red         Percent: 0.045
+
+Topic:  2  Word: volt        Percent: 0.161
+Topic:  2  Word: car         Percent: 0.123
+Topic:  2  Word: engine      Percent: 0.113
+Topic:  2  Word: electric    Percent: 0.094
+Topic:  2  Word: gas         Percent: 0.081
+</code></pre>
+<h2 id="latent-dirichlet-allocation-1">Latent Dirichlet Allocation</h2>
+<p>In this model, each word is assigned a topic and topics are distributed varyingly within each document.</p>
+<p>Distribution of topics within documents: <span class="math inline">\(\vec{\theta} \sim Dirichlet(\vec{\alpha})\)</span></p>
+<p>Distribution of words to topics: <span class="math inline">\(\vec{\phi} \sim Dirichlet(\vec{\beta})\)</span></p>
+<p>The topics: <span class="math inline">\(T \sim Categorical(\vec{\theta})\)</span></p>
+<p>The tokens: <span class="math inline">\(W \sim Categorical(\vec{\phi})\)</span></p>
+<pre class="ipython" data-exports="both"><code># Number of topics    
+K = 3
+
+# Pseudo-counts. Sparse to encourage separation.
+alpha = np.ones((1, K))*0.5
+beta = np.ones((1, V))*0.5
+
+with pm.Model() as lda_model:
+    # Distribution of topics within each document
+    theta = pm.Dirichlet(&quot;theta&quot;, a=alpha, shape=(D, K))
+
+    # Distribution of words within each topic
+    phi = pm.Dirichlet(&quot;phi&quot;, a=beta, shape=(K, V))
+
+    # The topic for each word
+    z = pm.Categorical(&quot;z&quot;, p=theta, shape=(W, D))
+
+    # Words in documents
+    p = phi[z].reshape((D*W, V))
+    w = pm.Categorical(&quot;w&quot;, p=p, observed=data)
+</code></pre>
+<pre class="ipython" data-exports="both"><code>with lda_model:
+    draw = 5000
+    lda_trace = pm.sample(draw, tune=1000, chains=4, progressbar=False)
+
+print_top_words(tokens, lda_trace.get_values(&#39;phi&#39;)[draw-1], 4)
+</code></pre>
+<p>At the cost of some complexity, we can rewrite our model to handle a corpus with documents of varying lengths.</p>
+<pre class="ipython" data-exports="both"><code>alpha = np.ones([D, K])*0.5  # prior weights for the topics in each document (pseudo-counts)
+beta  = np.ones([K, V])*0.5  # prior weights for the vocab words in each topic (pseudo-counts)
+
+sequence_data = np.reshape(np.array(data), (D,W))
+N = np.repeat(W, D)  # this model needs a list of document lengths
+
+with pm.Model() as sequence_model:
+
+    # distribution of the topics occuring in a particular document
+    theta   = pm.Dirichlet(&#39;theta&#39;, a=alpha, shape=(D, K))
+
+    # distribution of the vocab words occuring in a particular topic
+    phi     = pm.Dirichlet(&#39;phi&#39;, a=beta, shape=(K, V))
+
+    # the topic for a particular word in a particular document: shape = (D, N[d])
+    # theta[d] is the vector of category probabilities for each topic in 
+    # document d.
+    z = [pm.Categorical(&#39;z_{}&#39;.format(d), p = theta[d], shape=N[d])
+          for d in range(D)]
+
+    # the word occuring at position n, in a particular document d: shape = (D, N[d]) 
+    # z[d] is the vector of topics for document d
+    # z[d][n] is the topic for word n in document d
+    # phi[z[d][n]] is the distribution of words for topic z[d][n]
+    # [d][n] is the n-th word observed in document d
+    w = [pm.Categorical(&#39;w_{}_{}&#39;.format(d, n), p=phi[z[d][n]],
+                        observed = sequence_data[d][n])
+         for d in range(D) for n in range(N[d])]
+
+with sequence_model:
+    draw = 5000
+    sequence_trace = pm.sample(draw, tune=1000, chains=4, progressbar=False)
+
+print_top_words(tokens, sequence_trace.get_values(&#39;phi&#39;)[4999], 4)
+</code></pre>
+<p>And here we can see what topic the model assigned to each token in the corpus.</p>
+<pre class="ipython" data-exports="both"><code>zs = [sequence_trace.get_values(&#39;z_{}&#39;.format(d))[draw-1] for d in range(D)]
+zs = np.array(zs)
+
+print_corpus_topics(corpus_tokenized, zs)
+</code></pre>
+<pre class="example"><code>(red, 2) (blue, 0) (green, 0) (green, 0) (blue, 0) (blue, 0) (red, 2) (red, 0) (blue, 0) (yellow, 0) 
+
+(car, 1) (light, 2) (red, 1) (stop, 1) (stop, 1) (car, 1) (car, 1) (drive, 1) (green, 2) (yellow, 1) 
+
+(car, 1) (engine, 1) (gas, 1) (stop, 1) (battery, 1) (engine, 1) (drive, 1) (car, 0) (electric, 1) (gas, 1) 
+
+(watt, 0) (volt, 0) (volt, 0) (amp, 1) (battery, 1) (watt, 0) (volt, 0) (electric, 0) (volt, 0) (charge, 0) 
+
+</code></pre>
+<p>Since we chose to distribute words among three topics, we can examine the distributions of these topics to each document on a simplex. Below, each triangle represents a document and each corner represents a topic. Whenever the sampled points cluster at a corner, that means our model decided that that document was predominantly about the corresponding topic.</p>
+<pre class="ipython" data-exports="both"><code>with sequence_model:
+    pps = pm.sample_posterior_predictive(sequence_trace, vars=[theta], samples=1000, progressbar=False)
+
+var = pps[&#39;theta&#39;]
+thetas = sequence_trace[&#39;theta&#39;][4999]
+nthetas = thetas.shape[0]
+
+blue = sns.color_palette(&#39;Blues_r&#39;)[0]
+fig = plt.figure()
+fig.suptitle(&#39;Distribution of Topics to Documents&#39;, fontsize=16)
+for i, ts in enumerate(thetas):
+    plt.subplot(2, nthetas/2, i + 1)
+    sp.plot_points(var[:,i], color=blue, marker=&#39;o&#39;, alpha=0.1, markersize=3)
+    title = r&#39;$\theta_{0}$ = ({1[0]:.3f}, {1[1]:.3f}, {1[2]:.3f})&#39;.format(i,ts)
+    plt.title(title, fontdict={&#39;fontsize&#39;: 14})
+</code></pre>
+<figure><img src="/images/distribution.png" alt="random sample of documents in the dirichlet model"/></figure>
+
+<p>That’s all for now!</p>
+<h1 id="references">References</h1>
+<p>Blei, David M, Andrew Y Ng and Michael I Jordan. 2003. “Latent dirichlet allocation.” Journal of machine Learning research.</p>
+<p><a href="https://stackoverflow.com/questions/31473459/pymc3-how-to-implement-latent-dirichlet-allocation" class="uri">https://stackoverflow.com/questions/31473459/pymc3-how-to-implement-latent-dirichlet-allocation</a></p>
+<p><a href="https://github.com/junpenglao/Planet_Sakaar_Data_Science/blob/master/PyMC3QnA/discourse_2314.ipynb" class="uri">https://github.com/junpenglao/Planet_Sakaar_Data_Science/blob/master/PyMC3QnA/discourse_2314.ipynb</a></p>]]></description>
+    <pubDate>Wed, 30 Jan 2019 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/bayesian-topic-modeling/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+
+    </channel>
+</rss>

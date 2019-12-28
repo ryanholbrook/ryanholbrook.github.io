@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>Math for Machines</title>
+        <link>https://mathformachines.com</link>
+        <description><![CDATA[A blog about data science and machine learning, with a lot of math.]]></description>
+        <atom:link href="https://mathformachines.com/feeds/BMA.xml" rel="self"
+                   type="application/rss+xml" />
+        <lastBuildDate>Fri, 04 Oct 2019 00:00:00 UT</lastBuildDate>
+        <item>
+    <title>What I'm Reading 1: Bayes and Means</title>
+    <link>https://mathformachines.com/posts/bayes-and-means/index.html</link>
+    <description><![CDATA[<h1 id="bayesian-aggregation">Bayesian Aggregation</h1>
+<p>Yang, Y., &amp; Dunson, D. B., <em>Minimax Optimal Bayesian Aggregation</em> 2014 (<a href="https://arxiv.org/abs/1403.1345">arXiv</a>)</p>
+<p>Say we have a number of estimators <span class="math inline">\(\hat f_1, \ldots, \hat f_K\)</span> derived from a number of models <span class="math inline">\(M_1, \ldots, M_K\)</span> for some regression problem <span class="math inline">\(Y = f(X) + \epsilon\)</span>, but, as is the nature of things when estimating with limited data, we don’t know which estimator represents the true model (assuming the true model is in our list). The Bayesian habit is to stick a prior on the uncertainty, compute posteriors probabilities, and then average across the unknown parameter using the posterior probabilities as weights. Since the posterior probabilities (call them <span class="math inline">\(\lambda_1, \ldots, \lambda_K\)</span>) have to sum to 1, we obtain a <em>convex combination</em> of our estimators <span class="math display">\[ \hat f = \sum_{1\leq i \leq K} \lambda_i \hat f_i \]</span> This is the approach of <a href="https://www.stat.colostate.edu/~jah/papers/statsci.pdf">Bayesian Model Averaging</a> (BMA). Yang <em>et al.</em> propose to find such combinations using a <a href="https://en.wikipedia.org/wiki/Dirichlet_distribution">Dirichlet prior</a> on the weights <span class="math inline">\(\lambda_i\)</span>. If we remove the restriction that the weights sum to 1 and instead only ask that they have finite sum in absolute value, then we obtain <span class="math inline">\(\hat f\)</span> as a <em>linear combination</em> of <span class="math inline">\(\hat f_i\)</span>. The authors then place a Gamma prior on <span class="math inline">\(A = \sum_i |\lambda_i|\)</span> and a Dirichlet prior on <span class="math inline">\(\mu_i = \frac{|\lambda_i|}{A}\)</span>. In both the linear and the convex cases they show that the resulting estimator is minimax optimal in the sense that it will give the best worst-case predictions for a given number of observations, including the case where a sparsity restriction is placed on the number of estimators <span class="math inline">\(\hat f_i\)</span>; in other words, <span class="math inline">\(\hat f\)</span> converges to the true estimator as the number of observations increases with minimax optimal risk. The advantage to previous non-bayesian methods of linear or convex aggregation is that the sparsity parameter can be learned from the data. The Dirichlet convex combination gives good performance against Best Model selection, Majority Voting, and <a href="https://biostats.bepress.com/ucbbiostat/paper266/">SuperLearner</a>, especially when there are both a large number of observations and a large number of estimators.</p>
+<p>I implemented the convex case in R for use with <a href="https://github.com/paul-buerkner/brms">brms</a>. The Dirichlet distribution has been <a href="https://en.wikipedia.org/wiki/Dirichlet_distribution#Gamma_distribution">reparameterized</a> as a sum of Gamma RVs to aid in sampling. The Dirichlet concentration parameter is <span class="math inline">\(\frac{\alpha}{K^\gamma}\)</span>; the authors recommend choosing <span class="math inline">\(\alpha = 1\)</span> and <span class="math inline">\(\gamma = 2\)</span>.</p>
+<pre class="r" data-org-language="R"><code>convex_regression &lt;- function(formula, data,
+                              family = &quot;gaussian&quot;,
+                              ## Yang (2014) recommends alpha = 1, gamma = 2
+                              alpha = 1, gamma = 2,
+                              verbose = 0,
+                              ...) {
+  if (gamma &lt;= 1) {
+    warning(paste(&quot;Parameter gamma should be greater than 1. Given:&quot;, gamma))
+  }
+  if (alpha &lt;= 0) {
+    warning(paste(&quot;Parameter alpha should be greater than 0. Given:&quot;, alpha))
+  }
+  ## Set up priors.
+  K &lt;- length(terms(formula))
+  alpha_K &lt;- alpha / (K^gamma)
+  stanvars &lt;-
+    stanvar(alpha_K,
+      &quot;alpha_K&quot;,
+      block = &quot;data&quot;,
+      scode = &quot;  real&lt;lower = 0&gt; alpha_K;  // dirichlet parameter&quot;
+    ) +
+    stanvar(
+      name = &quot;b_raw&quot;,
+      block = &quot;parameters&quot;,
+      scode = &quot;  vector&lt;lower = 0&gt;[K] b_raw; &quot;
+    ) +
+    stanvar(
+      name = &quot;b&quot;,
+      block = &quot;tparameters&quot;,
+      scode = &quot;  vector[K] b = b_raw / sum(b_raw);&quot;
+    )
+  prior &lt;- prior(&quot;target += gamma_lpdf(b_raw | alpha_K, 1)&quot;,
+    class = &quot;b_raw&quot;, check = FALSE
+  )
+  f &lt;- update.formula(formula, . ~ . - 1)
+  if (verbose &gt; 0) {
+    make_stancode(f,
+      prior = prior,
+      data = data,
+      stanvars = stanvars
+    ) %&gt;% message()
+  }
+  fit_dir &lt;- brm(f,
+    prior = prior,
+    family = family,
+    data = data,
+    stanvars = stanvars,
+    ...
+  )
+  fit_dir
+}
+</code></pre>
+<p>Here is a <a href="https://gist.github.com/ryanholbrook/b5c7d44c0c7642eeee1a3034b48f29d7">gist</a> that includes an interface to <a href="https://tidymodels.github.io/parsnip/">parsnip</a>.</p>
+<p>In my own experiments, I found the performance of the convex aggregator to be comparable to a <a href="https://en.wikipedia.org/wiki/Lasso_(statistics)">LASSO</a> SuperLearner at the cost of the lengthier training that goes with MCMC methods and the finicky convergence of sparse priors. So I would likely reserve this for when I had lots of features and lots of estimators to work through, where I presume it would show an advantage. But in that case it would definitely be on my list of things to try.</p>
+<h1 id="bayesian-stacking">Bayesian Stacking</h1>
+<p>Yao, Y., Vehtari, A., Simpson, D., &amp; Gelman, A., <em>Using Stacking to Average Bayesian Predictive Distributions</em> (<a href="https://projecteuclid.org/euclid.ba/1516093227">pdf</a>)</p>
+<p>Another approach to model combination is <a href="https://doi.org/10.1080/01621459.1996.10476733">stacking</a>. With stacking, model weights are chosen by cross-validation to minimize <a href="https://en.wikipedia.org/wiki/Root-mean-square_deviation">RMSE</a> predictive error. Now, BMA finds the aggregated model that best fits the data, while stacking finds the aggregated model that gives the best predictions. Stacking therefore is usually better when predictions are what you want. A drawback is that stacking produces models through <em>point</em> estimates. So, they don’t give you all the information of a full distribution like BMA would. Yao <em>et al.</em> propose a method of stacking that instead finds the optimal <a href="https://en.wikipedia.org/wiki/Posterior_predictive_distribution">predictive distribution</a> by convex combinations of distributions with weights chosen by some scoring rule: the authors use the minimization of KL-divergence. Hence, they choose weights <span class="math inline">\(w\)</span> empirically through <a href="https://en.wikipedia.org/wiki/Cross-validation_(statistics)#Leave-one-out_cross-validation">LOO</a> by <span class="math display">\[ \max_w \frac{1}{n} \sum_{1\leq i \leq n} \log \sum_{1\leq k \leq K} w_k p(y_i | y_{-i}, M_k) \]</span> where <span class="math inline">\(y_1, \ldots, y_n\)</span> are the observed data and <span class="math inline">\(y_{-i}\)</span> is the data with <span class="math inline">\(y_i\)</span> left out. The following figure shows how stacking of predictive distributions gives the “best of both worlds” for BMA and point prediction stacking.</p>
+<figure>
+<img src="/images/stacking.png" alt="From Yao (2018)" /><figcaption>From Yao (2018)</figcaption>
+</figure>
+<p>They have implemented stacking for <a href="https://mc-stan.org/users/interfaces/rstan">Stan</a> models in the R package <a href="https://cran.r-project.org/web/packages/loo/vignettes/loo2-weights.html">loo</a>.</p>]]></description>
+    <pubDate>Fri, 04 Oct 2019 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/bayes-and-means/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+
+    </channel>
+</rss>
