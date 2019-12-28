@@ -61,6 +61,7 @@ main = hakyll $ do
               <> mainContext tags
         in
         pandocMainCompiler
+          >>= saveSnapshot "feed"
           >>= loadAndApplyTemplate "templates/post-body.html" postContext
           >>= saveSnapshot "content" -- Save content for landing page (index.html)
                                      -- Must come after post-body so the post $toc$
@@ -131,6 +132,17 @@ main = hakyll $ do
                 >>= loadAndApplyTemplate "templates/sitemap.xml" sitemapCtx
                 >>= cleanUrls
 
+    create ["RSS.xml"] $ do
+      route idRoute
+      compile $ do
+        let ctx = simplePostContext <> bodyField "description"
+        posts <- fmap (take 10) . recentFirst =<<
+          loadAllSnapshots postPattern "feed"
+        renderRss mainFeedConfiguration ctx posts
+
+    -- Build feeds for each tag
+    tagsFeedRules tags simplePostContext mainFeedConfiguration
+
     -- Build templates
     match "templates/*" $
       compile templateBodyCompiler
@@ -142,6 +154,10 @@ root = "https://mathformachines.com"
 
 postPattern :: Pattern
 postPattern = "posts/*" .&&. hasNoVersion
+
+postsWithTag :: String -> Tags -> Maybe Pattern
+postsWithTag t tags =
+  fromList . snd <$> find (\m -> fst m == t) (tagsMap tags)
 
 
 -----------
@@ -276,3 +292,27 @@ cleanUrls :: Item String -> Compiler (Item String)
 cleanUrls = relativizeUrls
             >=> cleanIndexUrls
             >=> cleanIndexHtmls
+
+------------
+-- RSS Feeds
+
+mainFeedConfiguration :: FeedConfiguration
+mainFeedConfiguration = FeedConfiguration
+  { feedTitle = "Math for Machines"
+  , feedDescription = "A blog about data science and machine learning, with a lot of math."
+  , feedAuthorName = "Ryan Holbrook"
+  , feedAuthorEmail = "ryan@mathformachines.com"
+  , feedRoot = "https://mathformachines.com"
+  }
+
+-- Build an RSS feed for each tag
+-- from <https://github.com/jaspervdj/hakyll/pull/283/files>
+tagsFeedRules :: Tags -> Context String -> FeedConfiguration -> Rules ()
+tagsFeedRules tags postCtx feedConfiguration =
+    forM_ (tagsMap tags) $ \(tag, identifiers) ->
+        create [fromFilePath $ "feeds/" ++ tag ++ ".xml"] $ do
+            route idRoute
+            compile $ do
+                let feedCtx = postCtx `mappend` bodyField "description"
+                tagPosts <- mapM (`loadSnapshot` "feed") identifiers
+                renderRss feedConfiguration feedCtx tagPosts
