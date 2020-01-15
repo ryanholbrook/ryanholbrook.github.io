@@ -8,6 +8,15 @@
 
 
   <url>
+    <loc>https://mathformachines.com/posts/decision/</loc>
+    
+    <lastmod>2020-01-09</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://mathformachines.com/posts/least-squares-with-the-mp-inverse/</loc>
     
     <lastmod>2019-11-21</lastmod>

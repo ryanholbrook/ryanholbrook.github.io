@@ -7,8 +7,596 @@
         <description><![CDATA[A blog about data science and machine learning, with a lot of math.]]></description>
         <atom:link href="https://mathformachines.com/RSS.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Thu, 21 Nov 2019 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Thu, 09 Jan 2020 00:00:00 UT</lastBuildDate>
         <item>
+    <title>Optimal Boundaries</title>
+    <link>https://mathformachines.com/posts/decision/index.html</link>
+    <description><![CDATA[<h1 id="introduction">Introduction</h1>
+<p>Over the next few posts, we will investigate <em>decision boundaries</em>. A decision boundary is a graphical representation of the solution to a classification problem. Decision boundaries can help us to understand what kind of solution might be appropriate for a problem. They can also help us to understand the how various machine learning classifiers arrive at a solution.</p>
+<p>In this post, we will look at a problem’s <em>optimal</em> decision boundary, which we can find when we know exactly how our data was generated. The optimal decision boundary represents the “best” solution possible for that problem. Consequently, by looking at the complexity of this boundary and at how much error it produces, we can get an idea of the inherent difficulty of the problem.</p>
+<p>Unless we have generated the data ourselves, we won’t usually be able to find the optimal boundary. Instead, we approximate it using a classifier. A good machine learning classifier tries to approximate the optimal boundary for a problem as closely as possible.</p>
+<p>In future posts, we will look at the approximating boundary created by various classification algorithms. We will investigate the strategy the classifier uses to create this boundary and how this boundary evolves as the classifier is trained on more and more data. There are many classification algorithms available to a data scientist – regression, discriminant analysis, decision trees, neural networks, to name a few – and it is important to understand which algorithm is appropritate for the problem at hand. Decision boundaries can help us to do this.</p>
+<video autoplay loop mutued playsinline>
+  <source src="./images/rf_mix.webm" type="video/webm">
+  <source src="./images/rf_mix.mp4" type="video/mp4">
+</video>
+
+<h1 id="optimal-boundaries">Optimal Boundaries</h1>
+<p>A classification problem asks: given some observations of a thing, what is the best way to assign that thing to a class based on some of its features? For instance, we might want to predict whether a person will like a movie or not based on some data we have about them, the “features” of that person.</p>
+<p>A solution to the classification problem is a rule that partitions the features and assigns each all the features of a partition to the same class. The “boundary” of this partitioning is the <strong>decision boundary</strong> of the rule.</p>
+<p>It might be that two observations have exactly the same features, but are assigned to different classes. (Two things that look the same in the ways we’ve observed might differ in ways we haven’t observed.) In terms of probabilities this means both <span class="math display">\[P(C = 0 \mid X) \gt 0\]</span> and <span class="math display">\[P(C = 1 \mid X) \gt 0\]</span>. In other words, we might not be able with full certainty to classify an observation. We could however assign the observation to its <em>most probable</em> class. This gives us the decision rule <span class="math display">\[ \hat{C} = \operatorname*{argmax}_c P(C = c \mid X) \]</span></p>
+<p>The boundary that this rule produces is the <strong>optimal decision boundary</strong>. It is the <a href="https://en.wikipedia.org/wiki/Maximum_a_posteriori_estimation">MAP estimate</a> of the class label, and it is the rule that minimizes classification error under the <a href="https://en.wikipedia.org/wiki/Loss_function#0-1_loss_function">zero-one loss function</a>. We will look at error and loss more in a future post.</p>
+<p>We will consider <em>binary</em> classification problems, meaning, there will only be two possible classes, 0 or 1. For a binary classification problem, the optimal boundary occurs at those points where each class is equally probable: <span class="math display">\[ P(C = 0 \mid X) = P(C = 1 \mid X) \]</span></p>
+<h1 id="prepare-r">Prepare R</h1>
+<p>We will use R to do our analysis. We’ll have a chance to try out <code>gganimate</code> and <code>patchwork</code>, a couple of newer packages that <a href="https://www.data-imaginist.com/">Thomas Lin Pedersen</a> has been working on; they are really nice.</p>
+<p>Here we’ll define some functions to produce plots of our examples. All of these assume a classification problem where our response is binary, <span class="math inline">\(C \in \{0, 1\}\)</span>, and is predicted by two continuous features, <span class="math inline">\((X, Y)\)</span>.</p>
+<p>Briefly, they are</p>
+<ol>
+<li><code>gg_sample</code> :: creates a layer for a sample of the features colored by class.</li>
+<li><code>gg_density</code> :: creates a layer of contour plots for feature densities within each class.</li>
+<li><code>gg_optimal</code> :: creates a layer showing an optimal decision boundary.</li>
+<li><code>gg_mix_label</code> :: creates a layer labelling components in a mixture distribution.</li>
+</ol>
+<p>
+
+<pre class="r"><code>library(magrittr)
+library(tidyverse)
+library(ggplot2)
+library(gganimate)
+library(patchwork)
+
+theme_set(theme_linedraw() +
+          theme(plot.title = element_text(size = 20),
+                legend.position = &quot;none&quot;,
+                axis.text.x = element_blank(),
+                axis.text.y = element_blank(),
+                axis.title.x = element_blank(),
+                axis.title.y = element_blank(),
+                aspect.ratio = 1))
+
+#&#39; Make a sample layer
+#&#39;
+#&#39; @param data data.frame: a sample with continuous features `x` and `y`
+#&#39; grouped by factor `class`
+#&#39; @param classes (optional) a vector of which levels of `class` to
+#&#39; plot; default is to plot data from all classes
+gg_sample &lt;- function(data, classes = NULL, size = 3, alpha = 0.5, ...) {
+    if (is.null(classes)) {
+        subdata &lt;- data
+    } else {
+        subdata &lt;- filter(data, class %in% classes)
+    }
+    list(geom_point(data = subdata,
+                    aes(x, y,
+                        color = factor(class),
+                        shape = factor(class)),
+                    size = size,
+                    alpha = alpha,
+                    ...),
+         scale_colour_discrete(drop = TRUE,
+                               limits = levels(factor(data$class))))
+}
+
+#&#39; Make a density layer
+#&#39;
+#&#39; @param data data.frame: a data grid of features `x` and `y` with contours `z`
+#&#39; @param data character: the name of the contour column 
+gg_density &lt;- function(data, z, size = 1, color = &quot;black&quot;, alpha = 1, ...) {
+    z &lt;- ensym(z)
+    geom_contour(data = data,
+                 aes(x, y, z = !!z),
+                 size = size,
+                 color = color,
+                 alpha = alpha,
+                 ...)
+}
+
+#&#39; Make an optimal boundary layer
+#&#39;
+#&#39; @param data data.frame: a data grid of features `x` and `y` with a column with
+#&#39; the `optimal` boundary contours
+#&#39; @param breaks numeric: which contour levels of `optimal` to plot
+gg_optimal &lt;- function(data, breaks = c(0), ...) {
+    gg_density(data, z = optimal, breaks = breaks, ...)
+}
+
+#&#39; Make a layer of component labels for a mixture distribution with two classes
+#&#39;
+#&#39; @param mus list(data.frame): the means for components of each class; every row
+#&#39; is a mean, each column is a coordinate
+#&#39; @param classes (optional) a vector of which levels of class to plot
+gg_mix_label &lt;- function(mus, classes = NULL, size = 10, ...) {
+    ns &lt;- map_int(mus, nrow)
+    component &lt;- do.call(c, map(ns, seq_len))
+    class &lt;- do.call(c, map2(0:(length(ns) - 1), ns, rep.int))
+    mu_all &lt;- do.call(rbind, mus)
+    data &lt;- cbind(mu_all, component, class) %&gt;%
+        set_colnames(c(&quot;x&quot;, &quot;y&quot;, &quot;component&quot;, &quot;class&quot;)) %&gt;%
+        as_tibble()
+    if (is.null(classes)) {
+        subdata &lt;- data
+    } else {
+        subdata &lt;- filter(data, class %in% classes)
+    }    
+    list(shadowtext::geom_shadowtext(data = subdata,
+                                     mapping = aes(x, y,
+                                                   label = component,
+                                                   color = factor(class)),
+                                     size = size,
+                                     ...),
+         scale_colour_discrete(drop = TRUE,
+                               limits = levels(factor(data$class))))
+}
+
+</code></pre>
+<h1 id="decision-boundaries-for-continuous-features">Decision Boundaries for Continuous Features</h1>
+<p>Decision boundaries are most easily visualized whenever we have <em>continuous</em> features, most especially when we have <em>two</em> continuous features, because then the decision boundary will exist in a plane.</p>
+<p>With two continuous features, the feature space will form a plane, and a decision boundary in this feature space is a set of one or more curves that divide the plane into distinct regions. Inside of a region, all observations will be assigned to the same class.</p>
+<p>As mentioned above, whenever we know exactly how our data was generated, we can produce the optimal decision boundary. Though this won’t usually be possible in practice, investigating the optimal boundaries produced from simulated data can still help us to understand their properties.</p>
+<p>We will look at the optimal boundary for a binary classification problem on a with features on a couple of common distributions: a multivariate normal distribution and a mixture of normal distributions.</p>
+<h2 id="normally-distributed-features">Normally Distributed Features</h2>
+<p>In a binary classification problem, whenever the features for each class jointly have a multivariate normal distribution, the optimal decision boundary is relatively simple. We will start our investigation here.</p>
+<p>With two features, the feature space is a plane. It can be shown that the optimal decision boundary in this case will either be a line or a <a href="https://en.wikipedia.org/wiki/Conic_section">conic section</a> (that is, an ellipse, a parabola, or a hyperbola). With higher dimesional feature spaces, the decision boundary will form a <a href="https://en.wikipedia.org/wiki/Hyperplane">hyperplane</a> or a <a href="https://en.wikipedia.org/wiki/Quadric">quadric surface</a>.</p>
+<p>We will consider classification problems with two classes, <span class="math inline">\(C = {0, 1}\)</span>, and two features, <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. Each class will be Bernoulli distributed and the features for each class will be distributed normally. Specifically,</p>
+<table>
+<tbody>
+<tr class="odd">
+<td>Classes</td>
+<td><span class="math inline">\( C \sim \operatorname{Bernoulli}(p) \)</span></td>
+</tr>
+<tr class="even">
+<td>Features for Class 0</td>
+<td><span class="math inline">\( (X, Y) \mid C = 0 \sim \operatorname{Normal}(\mu_0, \Sigma_0) \)</span></td>
+</tr>
+<tr class="odd">
+<td>Features for Class 1</td>
+<td><span class="math inline">\( (X, Y) \mid C = 1 \sim \operatorname{Normal}(\mu_0, \Sigma_1) \)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Our goal is to produce two kinds of visualizations: one, of a sample from these distributions, and two, the contours of the class-conditional densities for each feature. We’ll use the <code>mvnfast</code> package to help us with computations on the joint MVN.</p>
+<h3 id="samples">Samples</h3>
+<p>Let’s choose some values for our parameters. We’ll start with the case when the classes occur equally often. For our features, we’ll choose means so that there is some significant overlap between the two classes, and covariance matrices so that the distributions have a nice elliptical shape.</p>
+<pre class="r"><code>p &lt;- 0.5
+mu_0 &lt;- c(0, 2)
+sigma_0 &lt;- matrix(c(1, 0.3, 0.3, 1), nrow = 2)
+mu_1 &lt;- c(2, 0)
+sigma_1 &lt;- matrix(c(1, -0.3, -0.3, 1), nrow = 2)
+</code></pre>
+<p>Now we’ll write a function to create a dataframe containing a sample of classified features from our distribution.</p>
+<pre class="r"><code>#&#39; Generate normally distributed feature samples for a binary
+#&#39; classification problem
+#&#39;
+#&#39; @param n integer: the size of the sample
+#&#39; @param mean_0 vector: the mean vector of the first class
+#&#39; @param sigma_0 matrix: the 2x2 covariance matrix of the first class
+#&#39; @param mean_1 vector: the mean vector of the second class
+#&#39; @param sigma_1 matrix: the 2x2 covariance matrix of the second class
+#&#39; @param p_0 double: the prior probability of class 0
+make_mvn_sample &lt;- function(n, mu_0, sigma_0, mu_1, sigma_1, p_0) {
+    n_0 &lt;- rbinom(1, n, p_0)
+    n_1 &lt;- n - n_0
+    sample_mvn &lt;- as_tibble(
+        rbind(mvnfast::rmvn(n_0,
+                            mu = mu_0,
+                            sigma = sigma_0),
+              mvnfast::rmvn(n_1,
+                            mu = mu_1,
+                            sigma = sigma_1)))
+    sample_mvn[1:n_0, 3] &lt;- 0
+    sample_mvn[(n_0 + 1):(n_0 + n_1), 3] &lt;- 1
+    sample_mvn &lt;- sample_mvn[sample(nrow(sample_mvn)), ]
+    colnames(sample_mvn) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;class&quot;)
+    sample_mvn
+}
+
+</code></pre>
+<p>Finally, we’ll create a sample of 4000 points and plot the result.</p>
+<pre class="r"><code>n &lt;- 4000
+set.seed(31415)
+sample_mvn &lt;- make_mvn_sample(n,
+                              mu_0, sigma_0,
+                              mu_1, sigma_1,
+                              p)
+
+ggplot() +
+    gg_sample(sample_mvn) +
+    coord_fixed()
+</code></pre>
+<figure>
+<img src="./images/sample_mvn.png" title="sample-mvn" alt="A sample of the feature distributions for each class." width="400" /><figcaption>A sample of the feature distributions for each class.</figcaption>
+</figure>
+<p>It should be apparent that because of the overlap in these distributions, any decision rule will necessarily misclassify some observations fairly often.</p>
+<h3 id="classes-on-the-feature-space">Classes on the Feature Space</h3>
+<p>Next, we will produce some contour plots of our feature distributions. Let’s write a function to generate class probabilities at any observation <span class="math inline">\((x, y)\)</span> in the feature space; we will model the optimal decision boundary as those points where the posterior probabilities of the two classes are equal, that is, where <span class="math display">\[ P(X, Y \mid C = 0) P(C = 0) - P(X, Y \mid C = 1) P(C = 1) = 0 \]</span></p>
+<pre class="r"><code>#&#39; Make an optimal prediction at a point from two class distributions
+#&#39;
+#&#39; @param x vector: input
+#&#39; @param p_0 double: prior probability of class 0
+#&#39; @param dfun_0 function(x): density of features of class 0
+#&#39; @param dfun_1 function(x): density of features of class 1
+optimal_predict &lt;- function(x, p_0, dfun_0, dfun_1) {
+    ## Prior probability of class 1
+    p_1 &lt;- 1 - p_0
+    ## Conditional probability of (x, y) given class 0
+    p_x_0 &lt;- dfun_0(x)
+    ## Conditional probability of (x, y) given class 1
+    p_x_1 &lt;- dfun_1(x)
+    ## Conditional probability of class 0 given (x, y)
+    p_0_xy &lt;- p_x_0 * p_0
+    ## Conditional probability of class 1 given (x, y)
+    p_1_xy &lt;- p_x_1 * p_1
+    optimal &lt;- p_1_xy - p_0_xy
+    class &lt;- ifelse(optimal &gt; 0, 1, 0)
+    result &lt;- c(p_0_xy, p_1_xy, optimal, class)
+    names(result) &lt;- c(&quot;p_0_xy&quot;, &quot;p_1_xy&quot;, &quot;optimal&quot;, &quot;class&quot;)
+    result
+}
+
+#&#39; Construct a dataframe with posterior class probabilities and the
+#&#39; optimal decision boundary over a grid on the feature space
+#&#39; 
+#&#39; @param mean_0 vector: the mean vector of the first class
+#&#39; @param sigma_0 matrix: the 2x2 covariance matrix of the first class
+#&#39; @param mean_1 vector: the mean vector of the second class
+#&#39; @param sigma_1 matrix: the 2x2 covariance matrix of the second class
+#&#39; @param p_0 double: the prior probability of class 0
+make_density_mvn &lt;- function(mean_0, sigma_0, mean_1, sigma_1, p_0,
+                             x_min, x_max, y_min, y_max, delta = 0.05) {
+    x &lt;- seq(x_min, x_max, delta)
+    y &lt;- seq(y_min, y_max, delta)
+    density_mvn &lt;- expand.grid(x, y)
+    names(density_mvn) &lt;- c(&quot;x&quot;, &quot;y&quot;)
+    dfun_0 &lt;- function(x) mvnfast::dmvn(x, mu_0, sigma_0)
+    dfun_1 &lt;- function(x) mvnfast::dmvn(x, mu_1, sigma_1)
+    optimal_mvn &lt;- function(x, y) optimal_predict(c(x, y), p_0, dfun_0, dfun_1)
+    density_mvn &lt;-as.tibble(
+        cbind(density_mvn,
+              t(mapply(optimal_mvn,
+                       density_mvn$x, density_mvn$y))))
+    density_mvn
+}
+
+</code></pre>
+<p>Now we can generate a grid of points and compute posterior class probabilities over that grid. By plotting these probabilities, we can get describe both the conditional feature distributions for each class as well as the joint feature distribution.</p>
+<pre class="r"><code>density_mvn &lt;- make_density_mvn(mu_0, sigma_0, mu_1, sigma_1, p,
+                                -3, 5, -3, 5)
+
+(ggplot() +
+ gg_sample(sample_mvn, alpha = 0.1) +
+ gg_density(density_mvn, z = p_0_xy) +
+ gg_density(density_mvn, z = p_1_xy) +
+ ggtitle(&quot;Conditional Distributions&quot;)) +
+(ggplot() +
+ gg_sample(sample_mvn, alpha = 0.1) +
+ geom_contour(data = density_mvn,
+              aes(x = x, y = y, z = p_0_xy + p_1_xy),
+              size = 1,
+              color = &quot;black&quot;) +
+ ggtitle(&quot;Joint Distribution&quot;))
+
+</code></pre>
+<figure>
+<img src="./images/density_mvn.png" title="density-mvn" alt="Contours of the feature distributions for each class." width="800" /><figcaption>Contours of the feature distributions for each class.</figcaption>
+</figure>
+<h3 id="the-optimal-decision-boundary">The Optimal Decision Boundary</h3>
+<p>Now let’s add a plot for the optimal decision boundary for this problem.</p>
+<pre class="r"><code>(ggplot() +
+ gg_density(density_mvn, z = p_0_xy,
+            alpha = 0.25) +
+ gg_density(density_mvn, z = p_1_xy,
+            alpha = 0.25) +
+ gg_optimal(density_mvn)) +
+(ggplot() +
+ gg_sample(sample_mvn, alpha = 0.25) +
+ gg_optimal(density_mvn)) +
+plot_annotation(&quot;The Optimal Decision Boundary&quot;)
+
+</code></pre>
+<figure>
+<img src="./images/optimal_mvn.png" title="optimal-mvn" alt="The optimal decision boundary" width="800" /><figcaption>The optimal decision boundary</figcaption>
+</figure>
+<p>Notice how the boundary runs through the points where the contours of the two conditional distributions intersect. These points of intersection are where the classes have equal posterior probability.</p>
+<h2 id="mixture-of-normals">Mixture of Normals</h2>
+<p>The features of each class might also be modeled as a <em>mixture</em> of normal distributions. This means that each observation in a class will come from one of <em>several</em> normal distributions; in our case, the distributions from a class will be joined by a common hyperparameter, their mean.</p>
+<p>In description, at least, the problem is still relatively simple. The possible decision boundaries produced, however, can be quite complex. This is a much more difficult problem than the one we saw before.</p>
+<p>For our examples, we will generate the data as follows:</p>
+<table>
+<tbody>
+<tr class="odd">
+<td>Classes</td>
+<td><span class="math inline">\( C \sim Bernoulli(p) \)</span></td>
+</tr>
+<tr class="even">
+<td>Mean of Means for Class 0</td>
+<td><span class="math inline">\( \nu_0 \sim Normal((0, 1), I) \)</span></td>
+</tr>
+<tr class="odd">
+<td>Mean of Means for Class 1</td>
+<td><span class="math inline">\( \nu_0 \sim Normal((1, 0), I) \)</span></td>
+</tr>
+<tr class="even">
+<td>Means of Components for Class 0</td>
+<td><span class="math inline">\( \mu_{0, i=1, \ldots, n_0} \sim Normal(\nu_0, I) \)</span></td>
+</tr>
+<tr class="odd">
+<td>Means of Components for Class 1</td>
+<td><span class="math inline">\( \mu_{1, i=1, \ldots, n_1} \sim Normal(\nu_1, I) \)</span></td>
+</tr>
+<tr class="even">
+<td>Features for Class 0</td>
+<td><span class="math inline">\( (X, Y) \mid C = 0 \sim w_{0, 1} Normal(\mu_{0, 1}, \Sigma_0) + \cdots + w_{0, l_0} Normal(\mu_{0, 0}, \Sigma_0) \)</span></td>
+</tr>
+<tr class="odd">
+<td>Features for Class 1</td>
+<td><span class="math inline">\( (X, Y) \mid C = 1 \sim w_{1, 1} Normal(\mu_{1, 1}, \Sigma_1) + \cdots + w_{1, l_1} Normal(\mu_{1, l_1}, \Sigma_1) \)</span></td>
+</tr>
+</tbody>
+</table>
+<p>where <span class="math inline">\(n_0\)</span> is the number of components for class 0, <span class="math inline">\(w_{0, i}\)</span> are the weights on each component, <span class="math inline">\(\Sigma_0 = \frac{1}{2 * l_0} I\)</span>, and <span class="math inline">\(I\)</span> is the identity matrix; similarly for class 1.</p>
+<p>This is a bit awful, but we are basically doing this:</p>
+<p>For each class, define the distribution of the features <span class="math inline">\((X, Y)\)</span> by</p>
+<ol>
+<li>Choosing the number of components to go in the mixture.</li>
+<li>Choosing a mean for each component by sampling from a normal distribution.</li>
+</ol>
+<p>Then, to get a sample: Get an observation by</p>
+<ol>
+<li>Choosing a class, 0 or 1.</li>
+<li>Choosing a component from that class, a normal distribution.</li>
+<li>Sample the observation from that component.</li>
+</ol>
+<h3 id="samples-1">Samples</h3>
+<p>The computations for the mixture of MVNs are fairly similar to the ones we did before. First let’s define a sampling function. This function just implements the above steps.</p>
+<pre class="r"><code>#&#39; Generate normally distributed feature samples for a binary
+#&#39; classification problem
+#&#39;
+#&#39; @param n integer: the size of the sample
+#&#39; @param nu_0 numeric: the average mean of the components of the first feature
+#&#39; @param sigma_0 matrix: covariance of components of the first feature
+#&#39; @param n_0 integer: class frequency of first feature in the sample
+#&#39; @param w_0 numeric: vector of weights for components of the first feature
+#&#39; @param mean_1 numeric: the average mean of the components of the second feature
+#&#39; @param sigma_1 matrix: covariance of components of the second feature
+#&#39; @param n_1 integer: class frequency of second feature in the sample
+#&#39; @param w_1 numeric: vector of weights for components of the second feature
+#&#39; @param p_0 double: the prior probability of class 0
+make_mix_sample &lt;- function(n,
+                            nu_0, tau_0, n_0, sigma_0, w_0,
+                            nu_1, tau_1, n_1, sigma_1, w_1,
+                            p_0) {
+    ## Number of Components for Each Class
+    l_0 &lt;- length(w_0)
+    l_1 &lt;- length(w_1)
+    ## Sample the Component Means
+    mu_0 &lt;- mvnfast::rmvn(n = l_0,
+                          mu = nu_0, sigma = tau_0)
+    mu_1 &lt;- mvnfast::rmvn(n = l_1,
+                          mu = nu_1, sigma = tau_1)
+    ## Class Frequency in the Sample
+    n_0 &lt;- rbinom(1, n, p_0)
+    n_1 &lt;- n - n_0
+    ## Sample the Features
+    f_0 &lt;- mvnfast::rmixn(n = n_0,
+                          mu = mu_0, sigma = sigma_0, w = w_0,
+                          retInd = TRUE)
+    c_0 &lt;- attr(f_0, &quot;index&quot;)
+    f_1 &lt;- mvnfast::rmixn(n = n_1,
+                          mu = mu_1, sigma = sigma_1, w = w_1,
+                          retInd = TRUE)
+    c_1 &lt;- attr(f_1, &quot;index&quot;)
+    sample_mix &lt;- as.data.frame(rbind(f_0, f_1))
+    sample_mix[, 3] &lt;- c(c_0, c_1)
+    ## Define Classes
+    sample_mix[1:n_0, 4] &lt;- 0
+    sample_mix[(n_0 + 1):(n_0 + n_1), 4] &lt;- 1
+    sample_mix &lt;- sample_mix[sample(nrow(sample_mix)), ]
+    names(sample_mix) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;component&quot;, &quot;class&quot;)
+    ## Store Component Means
+    attr(sample_mix, &quot;mu_0&quot;) &lt;- mu_0
+    attr(sample_mix, &quot;mu_1&quot;) &lt;- mu_1
+    sample_mix
+}
+
+</code></pre>
+<p>Now we’ll define the parameters, construct a sample, and look at the result.</p>
+<pre class="r"><code>
+## Bernoulli parameter for class distribution
+p = 0.5
+## Mean of component means
+nu_0 = c(0, 1)
+nu_1 = c(1, 0)
+## Covariance for component means
+tau_0 = matrix(c(1, 0, 0, 1), nrow = 2)
+tau_1 = matrix(c(1, 0, 0, 1), nrow = 2)
+## Number of components for each class
+n_0 &lt;- 10
+n_1 &lt;- 10
+## Covariance for each class
+sigma_0 &lt;- replicate(n_0, matrix(c(1, 0, 0, 1), 2) / n_0 * 2,
+                     simplify = FALSE)
+sigma_1 &lt;- replicate(n_1, matrix(c(1, 0, 0, 1), 2) / n_1 * 2,
+                     simplify = FALSE)
+## Weights of mixture components
+w_0 &lt;- rep(1 / n_0, n_0)
+w_1 &lt;- rep(1 / n_1, n_1)
+
+## Sample size
+n &lt;- 4000
+set.seed(31)
+sample_mix &lt;- make_mix_sample(n,
+                              nu_0, tau_0, n_0, sigma_0, w_0,
+                              nu_1, tau_1, n_1, sigma_1, w_1,
+                              p)
+## Retrieve the generated component means
+mu_0 &lt;- attr(sample_mix, &quot;mu_0&quot;)
+mu_1 &lt;- attr(sample_mix, &quot;mu_1&quot;)
+
+ggplot() +
+    gg_sample(sample_mix) +
+    ggtitle(&quot;Sample of Mixture Distribution&quot;)
+
+ggplot() +
+    gg_sample(sample_mix) +
+    gg_mix_label(list(mu_0, mu_1)) +
+    facet_wrap(vars(class)) +
+    ggtitle(&quot;Feature Components&quot;)
+
+</code></pre>
+<figure>
+<img src="./images/sample_mix.png" title="sample-mix" alt="A sample from the mixture distributions." width="400" /><figcaption>A sample from the mixture distributions.</figcaption>
+</figure>
+<p>We’ve labelled the component means for each class. (There are 10 components for class 0, and 10 components for class 1.) You can see that around each of these labels is a sample from a normal distribution.</p>
+<h3 id="classes-on-the-feature-space-1">Classes on the Feature Space</h3>
+<p>Now we’ll compute class probabilities on the feature space.</p>
+<p>First define a generating function.</p>
+<pre class="r"><code>#&#39; Construct a dataframe with posterior class probabilities and the
+#&#39; optimal decision boundary over a grid on the feature space
+#&#39; 
+#&#39; @param mean_0 numeric: the average mean of the components of the first feature
+#&#39; @param sigma_0 matrix: covariance of components of the first feature
+#&#39; @param w_0 numeric: vector of weights for components of the first feature
+#&#39; @param mean_1 numeric: the average mean of the components of the second feature
+#&#39; @param sigma_1 matrix: covariance of components of the second feature
+#&#39; @param w_1 numeric: vector of weights for components of the second feature
+#&#39; @param p_0 double: the prior probability of class 0
+make_density_mix &lt;- function(mean_0, sigma_0, w_0,
+                             mean_1, sigma_1, w_1, p_0,
+                             x_min, x_max, y_min, y_max, delta = 0.05) {
+    x &lt;- seq(x_min, x_max, delta)
+    y &lt;- seq(y_min, y_max, delta)
+    density_mix &lt;- expand.grid(x, y)
+    names(density_mix) &lt;- c(&quot;x&quot;, &quot;y&quot;)
+    dfun_0 &lt;- function(x) mvnfast::dmixn(matrix(x, nrow = 1),
+                                         mu = mean_0,
+                                         sigma = sigma_0,
+                                         w = w_0)
+    dfun_1 &lt;- function(x) mvnfast::dmixn(matrix(x, nrow = 1),
+                                         mu = mean_1,
+                                         sigma = sigma_1,
+                                         w = w_1)
+    optimal_mix &lt;- function(x, y) optimal_predict(c(x, y), p_0, dfun_0, dfun_1)
+    density_mix &lt;-as.tibble(
+        cbind(density_mix,
+              t(mapply(optimal_mix,
+                       density_mix$x, density_mix$y))))
+    density_mix
+}
+</code></pre>
+<p>And now compute the grid and plot.</p>
+<pre class="r"><code>density_mix &lt;- make_density_mix(mu_0, sigma_0, w_0, mu_1, sigma_1, w_1, p,
+                                -3, 5, -3, 5)
+
+(ggplot() +
+ gg_sample(sample_mix, classes = 0,
+           alpha = 0.1) +
+ gg_density(density_mix, z = p_0_xy) +
+ gg_mix_label(list(mu_0, mu_1), classes = 0) +
+ ggtitle(&quot;Density of Class 0&quot;)) +
+(ggplot() +
+ gg_sample(sample_mix, classes = 1,
+           alpha = 0.1) +
+ gg_density(density_mix, z = p_1_xy) +
+ gg_mix_label(list(mu_0, mu_1), classes = 1) +
+ ggtitle(&quot;Density of Class 1&quot;)) +
+(ggplot() +
+ gg_sample(sample_mix,
+           alpha = 0.1) +
+ geom_contour(data = density_mix,
+              aes(x = x, y = y, z = p_0_xy + p_1_xy),
+              color = &quot;black&quot;,
+              size = 1) +
+ ggtitle(&quot;Joint Density&quot;))
+
+</code></pre>
+<figure>
+<img src="./images/density_mix.png" title="density-mix" alt="Contours of the feature distributions for each class." width="1000" /><figcaption>Contours of the feature distributions for each class.</figcaption>
+</figure>
+<h1 id="the-optimal-decision-boundary-1">The Optimal Decision Boundary</h1>
+<p>And here is the optimal decision boundary for this problem. Notice how again the boundary runs through points of intersection in the two conditional distributions, and how it separates the classes of observations in the sample.</p>
+<pre class="r"><code>(ggplot() +
+ gg_density(density_mix, z = p_0_xy,
+            alpha = 0.25) +
+ gg_density(density_mix, z = p_1_xy,
+            alpha = 0.25) +
+ gg_optimal(density_mix)) +
+(ggplot() +
+ gg_sample(sample_mix, alpha = 0.25) +
+ gg_optimal(density_mix))
+</code></pre>
+<figure>
+<img src="./images/optimal_mix.png" title="optimal-mix" alt="The optimal decision boundary." width="800" /><figcaption>The optimal decision boundary.</figcaption>
+</figure>
+<h1 id="class-imbalance">Class Imbalance</h1>
+<p>So far, we’ve only seen the case where the two classes occur about equally often. If one class has a lower probability of occuring (say class 1), then the optimal decision boundary must move toward the class 1 distribution in order to equalize the probabilities on either side. This should help illustrate why it’s important to consider class imbalance whenever you’re working on a classification problem. A large imbalance can change your decisions drastically.</p>
+<p>To see this change, we will use the <code>gganimate</code> package to produce an animation showing how the optimal boundary changes as the Bernoulli parameter (the frequency of class 0) changes from 0.1 to 0.9.</p>
+<h2 id="normally-distributed-features-1">Normally Distributed Features</h2>
+<pre class="r"><code>## Evaluate mu_0, sigma_0, etc. again, if needed.
+
+density_p0 &lt;-
+    map_dfr(seq(0.1, 0.9, 0.005),
+            function(p_0)
+                make_density_mvn(mu_0, sigma_0, mu_1, sigma_1,
+                                 p_0, -3, 5, -3, 5) %&gt;%
+                mutate(p_0 = p_0))
+
+anim &lt;- ggplot() +
+    geom_contour(data = density_p0,
+                 aes(x = x, y = y, z = p_0_xy + p_1_xy),
+                 color = &quot;black&quot;,
+                 size = 1,
+                 alpha = 0.25) +
+    gg_optimal(density_p0) +
+    transition_manual(p_0) +
+    ggtitle(&quot;Proportion of Class 0: {current_frame}&quot;)
+
+anim &lt;- animate(anim, renderer = gifski_renderer(),
+                width = 800, height = 800)
+
+anim
+</code></pre>
+<video autoplay loop mutued playsinline>
+  <source src="./images/imbalance_mvn.webm" type="video/webm">
+  <source src="./images/imbalance_mvn.mp4" type="video/mp4">
+</video>
+
+<h2 id="mixture-of-normals-1">Mixture of Normals</h2>
+<pre class="r"><code>density_mix_p0 &lt;-
+    map_dfr(seq(0.1, 0.9, 0.005),
+            function(p_0)
+                make_density_mix(mu_0, sigma_0, w_0, mu_1, sigma_1, w_1,
+                                 p_0, -3, 5, -3, 5) %&gt;%
+                mutate(p_0 = p_0))
+anim &lt;- ggplot() +
+    geom_contour(data = density_mix_p0,
+                 aes(x = x, y = y, z = p_0_xy + p_1_xy),
+                 color = &quot;black&quot;,
+                 size = 1,
+                 alpha = 0.25) +
+    gg_optimal(density_mix_p0) +
+    transition_manual(p_0) +
+    ggtitle(&quot;Proportion of Class 0: {current_frame}&quot;)
+
+anim &lt;- animate(anim, renderer = gifski_renderer(),
+                width = 800, height = 800)
+
+anim
+
+</code></pre>
+<video autoplay loop mutued playsinline>
+  <source src="./images/imbalance_mix.webm" type="video/webm">
+  <source src="./images/imbalance_mix.mp4" type="video/mp4">
+</video>
+
+<h1 id="conclusion">Conclusion</h1>
+<p>In this post, we reviewed <strong>decision boundaries</strong>, a way of visualizing classification rules. In particular, we looked at <strong>optimal</strong> decision boundaries, which represent the <em>best</em> solution possible to a problem given certain costs for misclassification. The rule we used in this post was the <strong>MAP</strong> estimate, which minimizes zero-one loss, where all misclassifications are equally likely.</p>
+<p>In future posts, we’ll look other kinds of loss functions and how that can affect the decision rule, and also at the boundaries produced by a number of statistical learning models.</p>
+<p>Hope you enjoyed it!</p>]]></description>
+    <pubDate>Thu, 09 Jan 2020 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/decision/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+<item>
     <title>Least Squares with the Moore-Penrose Inverse</title>
     <link>https://mathformachines.com/posts/least-squares-with-the-mp-inverse/index.html</link>
     <description><![CDATA[<h1 id="introduction">Introduction</h1>
@@ -1089,262 +1677,6 @@ v&#39;^* e&#39;^* = v^* e^* = v^* A A^{-1} e^* = v&#39;^* A^{-1} e^*
 <p>for all <span class="math inline">\(w&#39;\)</span>. So, <span class="math inline">\(e&#39;^* = A^{-1}e^*\)</span>. <strong>QED</strong></p>]]></description>
     <pubDate>Mon, 18 Mar 2019 00:00:00 UT</pubDate>
     <guid>https://mathformachines.com/posts/change-of-basis-for-vectors-and-covectors/index.html</guid>
-    <dc:creator>Ryan Holbrook</dc:creator>
-</item>
-<item>
-    <title>A Tour of Tensors</title>
-    <link>https://mathformachines.com/posts/a-tour-of-tensors/index.html</link>
-    <description><![CDATA[<p>Tensors can sometimes have a fearsome reputation. They are at heart, however, no more difficult to define than polynomials. I’ve tried in these notes to take a computational focus and to avoid formalism when possible; I haven’t assumed any more than what you might encounter in an undergraduate linear algebra course. If you’re interested in tensors applied to machine learning, or have wondered why arrays in Tensorflow are called tensors, you might find this useful. I’ll do some computations in <a href="http://www.sagemath.org/">Sage</a> and also in <a href="http://www.numpy.org/">Numpy</a> for illustration.</p>
-<h1 id="abstract-tensors">Abstract Tensors</h1>
-<p>First, let’s take brief look at tensors in the abstract. This is just to give us an idea of what properties they have and how they function. I’ll gloss over most of the details of the construction.</p>
-<p>A tensor is a vector. It is an element of a vector space. Being a vector, if we have a basis for the space we can write the tensor as a list of coordinates (or maybe something like a matrix or an array – we’ll see how).</p>
-<p>A tensor is a vector in a product vector space. This means that part of it comes from one vector space and part of it comes from another. These parts combine in a way that fits with the usual notions of how products should work. Why would we want these tensors, these products of vectors? It turns out that lots of useful things are tensors. Matrices and linear maps are tensors, and so are determinants and inner products and cross products. Tensors give us power to express many useful ideas.</p>
-<p>A simple product of vectors looks like <span class="math inline">\(v \otimes w\)</span> and the product space looks like <span class="math inline">\(V \otimes W\)</span>, where <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span> are vector spaces. The elements of <span class="math inline">\(V \otimes W\)</span> are linear combinations of these simple products. So, a typical element of <span class="math inline">\(V \otimes W\)</span> might look like <span class="math inline">\(v_1 \otimes w_2 + 5(v_4 \otimes w_1) + 3(v_3 \otimes w_2)\)</span>.</p>
-<p>Again, <span class="math inline">\(V \otimes W\)</span> is a vector space. Its vectors are called tensors. Tensors are linear combinations of simple tensors like <span class="math inline">\(v \otimes w\)</span>.</p>
-<p>The tensor space <span class="math inline">\(V \otimes W\)</span> is a vector space, but its vectors have some special properties given to them by <span class="math inline">\(\otimes\)</span>. This product has many of the same useful properties as products of numbers. They are:</p>
-<p><span class="math display">\[ \textbf{Distributivity:  } v \otimes (w_1 + w_2) = v \otimes w_1 + v \otimes w_2 \]</span></p>
-<p>(Just like <span class="math inline">\(x(y + z) = xy + xz\)</span>.)</p>
-<p>and</p>
-<p><span class="math display">\[ \textbf{Scalar Multiples: } a (v \otimes w) = (av) \otimes w = v \otimes (aw) \]</span></p>
-<p>(Just like <span class="math inline">\(a(xy) = (ax)y = x(ay)\)</span>.)</p>
-<p>The tensor product also does what we expect with the zero vector, namely: <span class="math inline">\(v \otimes w = 0\)</span> if and only if <span class="math inline">\(v = 0\)</span> or <span class="math inline">\(w = 0\)</span>. The tensor product does not have the commutivity property however. A tensor <span class="math inline">\(v \otimes w\)</span> doesn’t have to be the same as <span class="math inline">\(w \otimes v\)</span>. For one, the vector on the left has to come from <span class="math inline">\(V\)</span> and the vector on the right has to come from <span class="math inline">\(W\)</span>.</p>
-<p>Using these properties we can manipulate tensors just like we do polynomials. For instance:</p>
-<span class="math display">\[\begin{equation}
- \begin{split}
- &amp; 2(v_1 \otimes w_1) + 3(v_1 + v_2) \otimes w_1 \\
- = &amp; 2(v_1 \otimes w_1) + 3(v_1 \otimes w_1) + 3(v_2 \otimes w_1) \\
- = &amp; 5(v_1 \otimes w_1) + 3(v_2 \otimes w_1)
- \end{split}
-\end{equation}
-\]</span>
-<p>You could think of an abstract tensor as a sort of polynomial where the odd-looking product <span class="math inline">\(\otimes\)</span> reminds us that the <span class="math inline">\(v\)</span> and <span class="math inline">\(w\)</span> don’t generally commute.</p>
-<p>Here’s an example. <code>FiniteRankFreeModule</code> is creating a vector space of dimension 2 over the quotients <span class="math inline">\(\mathbb Q\)</span>. A module is a kind of generalized vector space.</p>
-<pre class="python"><code>M = FiniteRankFreeModule(QQ, 2, name=&#39;M&#39;, start_index=1)
-v = M.basis(&#39;v&#39;)
-s = M.tensor((2, 0), name=&#39;s&#39;)
-s[v,:] = [[1, 2], [3, 4]]
-t = M.tensor((2, 0), name=&#39;t&#39;)
-t[v,:] = [[5, 6], [7, 8]]
-latex(s.display(v))
-latex(t.display(v))
-latex((s + t).display(v))
-</code></pre>
-<div class="RESULTS drawer">
-<p><span class="math display">\[ s = v_{1}\otimes v_{1} + 2 v_{1}\otimes v_{2} + 3 v_{2}\otimes v_{1} + 4 v_{2}\otimes v_{2} \]</span> <span class="math display">\[ t = 5 v_{1}\otimes v_{1} + 6 v_{1}\otimes v_{2} + 7 v_{2}\otimes v_{1} + 8 v_{2}\otimes v_{2} \]</span> <span class="math display">\[ s+t = 6 v_{1}\otimes v_{1} + 8 v_{1}\otimes v_{2} + 10 v_{2}\otimes v_{1} + 12 v_{2}\otimes v_{2} \]</span></p>
-</div>
-<h2 id="construction-of-the-tensor-space">Construction of the Tensor Space</h2>
-<p>This is just a note on how the tensor space <span class="math inline">\(V \otimes W\)</span> can be constructed from <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span>. It’s not essential to anything that follows.</p>
-<p>Basically, we can construct <span class="math inline">\(V \otimes W\)</span> the same way that we can construct the complex numbers from the real numbers. To get the complex numbers from the reals, we just add in some new number <span class="math inline">\(i\)</span> to the real numbers and then define a simplification rule that says <span class="math inline">\(i^2 = -1\)</span>. To get <span class="math inline">\(V \otimes W\)</span> from <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span>, we just take all linear combinations of vectors from <span class="math inline">\(V\)</span> and vectors from <span class="math inline">\(W\)</span> and then define the Distributivity and Scalar Multiplication rules. The formalism that does this is called a <a href="https://en.wikipedia.org/wiki/">quotient space</a>, or see <a href="https://en.wikipedia.org/wiki/Tensor_product#The_definition_of_the_abstract_tensor_product">here</a> for the tensor product construction.</p>
-<p>By constructing the space <span class="math inline">\(V \otimes W\)</span> in the most general way possible (meaning, not adding any other rules except distribution and scalar multiplication), we ensure that any kind of space or object that has these kinds of linear or multilinear properties has a representation as a tensor, and any other kind of construction that satisfies these rules will be essentially equivalent to the tensor construction. (The property is called a <a href="https://en.wikipedia.org/wiki/Universal_property">universal property</a>. It occurs all the time in mathematics and is very useful.) Tensors are the general language of linearity.</p>
-<h1 id="tensors-as-arrays">Tensors as Arrays</h1>
-<p>We can represent tensors as arrays, which is nice for doing computations.</p>
-<p>If we have a basis for <span class="math inline">\(V\)</span> and a basis for <span class="math inline">\(W\)</span>, then we can make a basis for <span class="math inline">\(V \otimes W\)</span> in just the way we should expect: by taking all the products of the basis vectors. Namely, if <span class="math inline">\((e_i)\)</span> is a basis for <span class="math inline">\(V\)</span> and <span class="math inline">\((f_j)\)</span> is a basis for <span class="math inline">\(W\)</span>, then <span class="math inline">\((e_i \otimes f_j)\)</span> is a basis for <span class="math inline">\(V \otimes W\)</span>. This also means that the dimension of <span class="math inline">\(V \otimes W\)</span> is the product of the dimensions of <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span>; that is, <span class="math inline">\(dim(V \otimes W) = dim(V)dim(W)\)</span>.</p>
-<p>Recall that if we can write a vector in <span class="math inline">\(V\)</span> as <span class="math inline">\(v = \sum a_i e_i\)</span>, then <span class="math inline">\((a_i)\)</span> is its representation as a vector of coordinates. A tensor in <span class="math inline">\(V \otimes W\)</span> will instead have a representation as a matrix. If <span class="math inline">\(m = dim(V)\)</span> and <span class="math inline">\(n = dim(W)\)</span>, then this will be an <span class="math inline">\(m \times n\)</span> matrix. If we write a tensor in terms of its basis elements as:</p>
-<p><span class="math display">\[\sum_i \sum_j c_{i,j} (e_i \otimes f_j)\]</span></p>
-<p>then its matrix is <span class="math inline">\([c_{i,j}]\)</span>. The subscript of <span class="math inline">\(e_i\)</span> tells you the row and the subscript of <span class="math inline">\(f_j\)</span> tells you the column. For example, let’s say <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span> are both two-dimensional. We could write a tensor</p>
-<p><span class="math display">\[(e_1 \otimes f_1) + 2(e_1 \otimes f_2) + 3(e_2 \otimes f_1) + 4(e_2 \otimes f_2)\]</span></p>
-<p>as</p>
-<span class="math display">\[\begin{bmatrix}
- 1 &amp; 2 \\
- 3 &amp; 4 \\
-\end{bmatrix}
-\]</span>
-<p>But what if we have a vector <span class="math inline">\(v\)</span> in <span class="math inline">\(V\)</span> and a vector <span class="math inline">\(w\)</span> in <span class="math inline">\(W\)</span> and we want to find out what the matrix of <span class="math inline">\(v \otimes w\)</span> is? This is easy too. Say <span class="math inline">\(v = \sum a_i e_i\)</span> and <span class="math inline">\(w = \sum b_j f_j\)</span>. Then</p>
-<p><span class="math display">\[v \otimes w = \sum_i \sum_j a_i b_j (e_i \otimes f_j)\]</span></p>
-<p>and its matrix is <span class="math inline">\([a_i b_j]\)</span>. In other words, the entry in row <span class="math inline">\(i\)</span> and column <span class="math inline">\(j\)</span> will be <span class="math inline">\(a_i b_j\)</span>.</p>
-<p>It’s easy to find this matrix using matrix multiplication. If we write our coordinate vectors as column vectors, then our tensor product becomes an <a href="https://en.wikipedia.org/wiki/Outer_product">outer product</a>:</p>
-<p><span class="math display">\[\color{RubineRed}v \color{black}\otimes \color{MidnightBlue}w\color{black} = \color{RubineRed}v\color{MidnightBlue} w^\mathsf{T}\]</span></p>
-<p>For instance,</p>
-<p><span class="math display">\[
- \color{RubineRed}(1, 2, 3)\color{Black} \otimes \color{RoyalBlue}(4, 5, 6)\color{Black} = 
- \color{RubineRed}\begin{bmatrix}
- 1\\
- 2\\
- 3 \end{bmatrix} \color{black}
- \color{RoyalBlue}[4, 5, 6]\color{black}
- = \begin{bmatrix}
- \color{RubineRed}1\color{black}\cdot \color{RoyalBlue}4\color{black} &amp; \color{RubineRed}1\color{black}\cdot \color{RoyalBlue}5\color{black} &amp; \color{RubineRed}1\color{black}\cdot \color{RoyalBlue}6\color{black} \\ 
- \color{RubineRed}2\color{black}\cdot \color{RoyalBlue}4\color{black} &amp; \color{RubineRed}2\color{black}\cdot \color{RoyalBlue}5\color{black} &amp; \color{RubineRed}2\color{black}\cdot \color{RoyalBlue}6\color{black} \\ 
- \color{RubineRed}3\color{black}\cdot \color{RoyalBlue}4\color{black} &amp; \color{RubineRed}3\color{black}\cdot \color{RoyalBlue}5\color{black} &amp; \color{RubineRed}3\color{black}\cdot \color{RoyalBlue}6\color{black}\end{bmatrix}
- =\begin{bmatrix}
- 4 &amp; 5 &amp; 6 \\
- 8 &amp; 10 &amp; 15 \\
- 12 &amp; 15 &amp; 18\end{bmatrix}
- \]</span></p>
-<p>Notice the correspondence between the basis elements and the entries of the matrix in the next example.</p>
-<pre class="python" data-results="drawer" data-exports="both" data-session="yes"><code>M = FiniteRankFreeModule(QQ, 3, name=&#39;M&#39;, start_index=1)
-e = M.basis(&#39;e&#39;)
-v = M([-2, 9, 5], basis=e, name=&#39;v&#39;)
-w = M([1, 0, -2], basis=e, name=&#39;w&#39;)
-latex((v*w).display())
-latex((v*w)[e,:])
-</code></pre>
-<div class="RESULTS drawer">
-<p><span class="math display">\[
- v\otimes w = -2 e_{1}\otimes e_{1} + 4 e_{1}\otimes e_{3} + 9 e_{2}\otimes e_{1} -18 e_{2}\otimes e_{3} + 5 e_{3}\otimes e_{1} -10 e_{3}\otimes e_{3} \\
- \left(\begin{array}{rrr}
- -2 &amp; 0 &amp; 4 \\
- 9 &amp; 0 &amp; -18 \\
- 5 &amp; 0 &amp; -10
- \end{array}\right)
- \]</span></p>
-</div>
-<p>We can extend the tensor product construction to any number of vector spaces. In this way we get multidimensional arrays. We might represent a tensor in a space <span class="math inline">\(U \otimes V \otimes W\)</span> as a “matrix of matricies.”</p>
-<p><span class="math display">\[
- \left[\begin{array}{r}
-   \left[\begin{array}{rr}
-   c_{111} &amp; c_{112} \\
-   c_{121} &amp; c_{122}
-   \end{array}\right] \\
-   \left[\begin{array}{rr}
-   c_{211} &amp; c_{212} \\
-   c_{221} &amp; c_{222}
-   \end{array}\right]
- \end{array}\right]
- \]</span></p>
-<p>And we use the more general <a href="https://en.wikipedia.org/wiki/Kronecker_product">Kronecker product</a> to find the product of tensors:</p>
-<p><span class="math display">\[
- \color{RubineRed}(1, 2)
-   \color{Black} \otimes
-   \color{RoyalBlue}
-   \left[\begin{array}{rr}
-   1 &amp; 2 \\
-   3 &amp; 4
-   \end{array}\right]
- \color{Black} =
-   \color{RubineRed}
-   \left[\begin{array}{r}
-   1 \\
-   2 
-   \end{array}\right]
-   \color{RoyalBlue}
-   \left[\begin{array}{rr}
-   1 &amp; 2 \\
-   3 &amp; 4
-   \end{array}\right]
- \color{Black} =
- \left[\begin{array}{r}
-   \color{RubineRed} 1
-   \color{RoyalBlue}
-   \left[\begin{array}{rr}
-   1 &amp; 2 \\
-   3 &amp; 4
-   \end{array}\right] \\
-   \color{RubineRed} 2
-   \color{RoyalBlue}
-   \left[\begin{array}{rr}
-   1 &amp; 2 \\
-   3 &amp; 4
-   \end{array}\right]
- \color{Black}\end{array}\right] =
- \left[\begin{array}{r}
-   \left[\begin{array}{rr}
-   1 &amp; 2 \\
-   3 &amp; 4
-   \end{array}\right] \\
-   \left[\begin{array}{rr}
-   2 &amp; 4 \\
-   6 &amp; 8
-   \end{array}\right]
- \color{Black}\end{array}\right]
- \]</span></p>
-<pre class="python" data-exports="both" data-session="yes"><code>M = FiniteRankFreeModule(QQ, 2, name=&#39;M&#39;, start_index=1)
-e = M.basis(&#39;e&#39;)
-u = M([1, 2], basis=e, name=&#39;u&#39;)
-vw = M.tensor((2, 0), name=&#39;vw&#39;)
-vw[e,:] = [[1, 2], [3, 4]]
-(u*vw).display(e)
-print()
-(u*vw)[e,:]
-</code></pre>
-<pre class="example"><code>u*vw = e_1*e_1*e_1 + 2 e_1*e_1*e_2 + 3 e_1*e_2*e_1 + 4 e_1*e_2*e_2 + 2 e_2*e_1*e_1 + 4 e_2*e_1*e_2 + 6 e_2*e_2*e_1 + 8 e_2*e_2*e_2
-
-[[[1, 2], [3, 4]], [[2, 4], [6, 8]]]
-</code></pre>
-<p>The number of vector spaces in the product space is the same as the number of dimensions in the arrays of its tensors (that is, the number of indices needed to specify a component). This number is called the “order” of a tensor (or sometimes “degree”). The order of the tensor above is 3.</p>
-<p>We can extend this product to tensors of any order. The components of a tensor <span class="math inline">\(s \otimes t\)</span> can always be found by taking the product of the respective components of <span class="math inline">\(s\)</span> and <span class="math inline">\(t\)</span>. For instance, if <span class="math inline">\(s_{12} = 5\)</span> and <span class="math inline">\(t_{345} = 7\)</span>, then <span class="math inline">\((s \otimes t)_{12345} = s_{12}t_{345} = 5\cdot7 = 35\)</span>.</p>
-<pre class="python" data-exports="both" data-session="yes"><code>M = FiniteRankFreeModule(QQ, 5, name=&#39;M&#39;, start_index=1)
-e = M.basis(&#39;e&#39;)
-s = M.tensor((2, 0), name=&#39;s&#39;)
-s[e,1,2] = 5
-t = M.tensor((3, 0), name=&#39;t&#39;)
-t[e,3,4,5] = 7
-(s*t)[e,1,2,3,4,5]
-</code></pre>
-<pre class="example"><code>35
-</code></pre>
-<h1 id="tensors-as-maps">Tensors as Maps</h1>
-<p>I mentioned earlier that things like cross-products and determinants are tensors. We’ll see how that works now. Recall that every vector space <span class="math inline">\(V\)</span> has a dual vector space <span class="math inline">\(V^*\)</span> which is the space of all linear maps <span class="math inline">\(V \rightarrow F\)</span>, where <span class="math inline">\(F\)</span> is the field of scalars of <span class="math inline">\(V\)</span>. In terms of matricies, we might think of elements in <span class="math inline">\(V\)</span> as column vectors and elements of <span class="math inline">\(V^*\)</span> as row vectors. Then, we can apply an element of <span class="math inline">\(V^*\)</span> to an element of <span class="math inline">\(V\)</span> just like we do when representing linear maps as matricies:</p>
-<p><span class="math display">\[
- \left[a_1, a_2, a_3\right]
-   \left[\begin{array}{r} 
-   b_1 \\
-   b_2 \\
-   b_3 \end{array}\right] =
- a_1b_1 + a_2b_2 + a_3b_3
- \]</span></p>
-<p>This in fact is just the <a href="https://en.wikipedia.org/wiki/Dot_product">dot product</a> of the two vectors.</p>
-<p>Let’s take a product <span class="math inline">\(T = V \otimes \cdots \otimes V \otimes V^* \otimes \cdots \otimes V^*\)</span>. The number of times <span class="math inline">\(V\)</span> occurs is called the “covariant” order of the space and the number of times <span class="math inline">\(V^*\)</span> occurs is called the “contravariant” order of the space. (The reason for these names is related to the <a href="https://en.wikipedia.org/wiki/Covariance_and_contravariance_of_vectors">change-of-basis</a> on vectors of those types). We say that a tensor has “type <span class="math inline">\((k, l)\)</span>” when it is of contravariant order <span class="math inline">\(k\)</span> and covariant order <span class="math inline">\(l\)</span>. So when we had earlier <code>M.tensor((2, 0), name='t')</code>, the <code>(2, 0)</code> was saying that we wanted a tensor with 2 contravariant parts.</p>
-<p>Tensors of order <span class="math inline">\((0, 1)\)</span> are mappings <span class="math inline">\(V \rightarrow F\)</span>. They will map tensors of order <span class="math inline">\((1, 0)\)</span> (that is, column vectors) to the scalar field, and like above, this will just be the dot product of the two vectors.</p>
-<pre class="python" data-exports="both" data-session="yes"><code>M = FiniteRankFreeModule(QQ, 3, name=&#39;M&#39;, start_index=1)
-e = M.basis(&#39;e&#39;)
-
-s = M.tensor((0, 1), name=&#39;s&#39;)
-s[e, :] = [1, 2, 3]
-t = M.tensor((1, 0), name=&#39;t&#39;)
-t[e, :] = [4, 5, 6]
-
-v = vector([1, 2, 3])
-w = vector([4, 5, 6])
-
-s(t) == v.dot_product(w)
-</code></pre>
-<pre class="example"><code>True
-</code></pre>
-<p>Expanding this idea, we can think of a tensor <span class="math inline">\(t\)</span> of order <span class="math inline">\((1,1)\)</span> either as a <a href="https://en.wikipedia.org/wiki/Multilinear_form">multilinear form</a> <span class="math inline">\(t:V^* \otimes V \rightarrow F\)</span> or as a <a href="https://en.wikipedia.org/wiki/Linear_map">linear map</a>, as <span class="math inline">\(t:V \rightarrow V\)</span> or as <span class="math inline">\(t:V^* \rightarrow V^*\)</span>. The difference is just in <a href="https://en.wikipedia.org/wiki/Partial_application">what and how many</a> arguments we pass in to the tensor. For instance, if we pass a column vector <span class="math inline">\(v\)</span> into the tensor <span class="math inline">\(t\)</span> in its second position (the position of <span class="math inline">\(V\)</span>), then we get a map <span class="math inline">\(V \rightarrow V\)</span>; this is the same as multiplying a vector by a matrix representing a linear map. This partial application is called a “contraction.”</p>
-<pre class="python" data-exports="both" data-session="yes"><code>s = M.tensor((1, 1), name=&#39;s&#39;)
-s[e, :] = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-t = M.tensor((1, 0), name=&#39;t&#39;)
-t[e, :] = [4, 5, 6]
-
-m = Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-w = vector([4, 5, 6])
-
-s.contract(t)[e,:] == list(m*w)
-</code></pre>
-<pre class="example"><code>True
-</code></pre>
-<p>Generally, we can represent any kind of multilinear map <span class="math inline">\(V^* \times \cdots \times V^* \times V \times \cdots \times V \rightarrow F\)</span> as a tensor in the space <span class="math inline">\(V \otimes \cdots \otimes V \otimes V^* \otimes \cdots \otimes V^*\)</span>. Since determinants and cross-products are multilinear maps, they too are tensors.</p>
-<p>Sage makes a distinction between contravariant and covariant parts, but libraries like <code>numpy</code> and <code>tensorflow</code> do not. When using these, we can contract one tensor with another along any axes whose dimensions are the same. Their contraction operation is called <code>tensordot</code>.</p>
-<pre class="python" data-exports="both" data-session="yes"><code>import numpy as np
-
-s = np.ones((2, 3, 4, 5))
-t = np.ones((5, 4, 3, 2))
-np.tensordot(s, t, axes=[[0, 1, 2], [3, 2, 1]])
-</code></pre>
-<pre class="example"><code>array([[24., 24., 24., 24., 24.],
-       [24., 24., 24., 24., 24.],
-       [24., 24., 24., 24., 24.],
-       [24., 24., 24., 24., 24.],
-       [24., 24., 24., 24., 24.]])
-</code></pre>
-<p>We could think of the axes in <code>s</code> as representing row vectors (<span class="math inline">\(V^*\)</span>) and the axes in <code>t</code> as representing column vectors (<span class="math inline">\(V\)</span>).</p>
-<p>We could also do this using <a href="https://en.wikipedia.org/wiki/Einstein_notation">Einstein notation</a>. Basically, whenever an index appears twice in an expression, it means to sum over that index while multiplying together the respective components (just like a dot product on those two axes).</p>
-<pre class="python" data-exports="both" data-session="yes"><code>s = np.ones((2, 3, 4))
-t = np.ones((4, 3, 2))
-
-np.einsum(&#39;ija, bji -&gt; ab&#39;, s, t)
-</code></pre>
-<pre class="example"><code>array([[6., 6., 6., 6.],
-       [6., 6., 6., 6.],
-       [6., 6., 6., 6.],
-       [6., 6., 6., 6.]])
-</code></pre>
-<p>Einstein summations are a convenient way to do lots of different kinds of tensor computations. <a href="https://rockt.github.io/2018/04/30/einsum">Here</a> are a bunch of great examples.</p>
-<h1 id="conclusion">Conclusion</h1>
-<p>That’s all for now! For anyone reading, I hope you found it informative. Tensors can be hard to get started on, but once you see the idea, I think you’ll find them a pleasure to work with.</p>]]></description>
-    <pubDate>Tue, 05 Feb 2019 00:00:00 UT</pubDate>
-    <guid>https://mathformachines.com/posts/a-tour-of-tensors/index.html</guid>
     <dc:creator>Ryan Holbrook</dc:creator>
 </item>
 

@@ -81,6 +81,594 @@
     <dc:creator>Ryan Holbrook</dc:creator>
 </item>
 <item>
+    <title>Optimal Boundaries</title>
+    <link>https://mathformachines.com/posts/decision/index.html</link>
+    <description><![CDATA[<h1 id="introduction">Introduction</h1>
+<p>Over the next few posts, we will investigate <em>decision boundaries</em>. A decision boundary is a graphical representation of the solution to a classification problem. Decision boundaries can help us to understand what kind of solution might be appropriate for a problem. They can also help us to understand the how various machine learning classifiers arrive at a solution.</p>
+<p>In this post, we will look at a problem’s <em>optimal</em> decision boundary, which we can find when we know exactly how our data was generated. The optimal decision boundary represents the “best” solution possible for that problem. Consequently, by looking at the complexity of this boundary and at how much error it produces, we can get an idea of the inherent difficulty of the problem.</p>
+<p>Unless we have generated the data ourselves, we won’t usually be able to find the optimal boundary. Instead, we approximate it using a classifier. A good machine learning classifier tries to approximate the optimal boundary for a problem as closely as possible.</p>
+<p>In future posts, we will look at the approximating boundary created by various classification algorithms. We will investigate the strategy the classifier uses to create this boundary and how this boundary evolves as the classifier is trained on more and more data. There are many classification algorithms available to a data scientist – regression, discriminant analysis, decision trees, neural networks, to name a few – and it is important to understand which algorithm is appropritate for the problem at hand. Decision boundaries can help us to do this.</p>
+<video autoplay loop mutued playsinline>
+  <source src="./images/rf_mix.webm" type="video/webm">
+  <source src="./images/rf_mix.mp4" type="video/mp4">
+</video>
+
+<h1 id="optimal-boundaries">Optimal Boundaries</h1>
+<p>A classification problem asks: given some observations of a thing, what is the best way to assign that thing to a class based on some of its features? For instance, we might want to predict whether a person will like a movie or not based on some data we have about them, the “features” of that person.</p>
+<p>A solution to the classification problem is a rule that partitions the features and assigns each all the features of a partition to the same class. The “boundary” of this partitioning is the <strong>decision boundary</strong> of the rule.</p>
+<p>It might be that two observations have exactly the same features, but are assigned to different classes. (Two things that look the same in the ways we’ve observed might differ in ways we haven’t observed.) In terms of probabilities this means both <span class="math display">\[P(C = 0 \mid X) \gt 0\]</span> and <span class="math display">\[P(C = 1 \mid X) \gt 0\]</span>. In other words, we might not be able with full certainty to classify an observation. We could however assign the observation to its <em>most probable</em> class. This gives us the decision rule <span class="math display">\[ \hat{C} = \operatorname*{argmax}_c P(C = c \mid X) \]</span></p>
+<p>The boundary that this rule produces is the <strong>optimal decision boundary</strong>. It is the <a href="https://en.wikipedia.org/wiki/Maximum_a_posteriori_estimation">MAP estimate</a> of the class label, and it is the rule that minimizes classification error under the <a href="https://en.wikipedia.org/wiki/Loss_function#0-1_loss_function">zero-one loss function</a>. We will look at error and loss more in a future post.</p>
+<p>We will consider <em>binary</em> classification problems, meaning, there will only be two possible classes, 0 or 1. For a binary classification problem, the optimal boundary occurs at those points where each class is equally probable: <span class="math display">\[ P(C = 0 \mid X) = P(C = 1 \mid X) \]</span></p>
+<h1 id="prepare-r">Prepare R</h1>
+<p>We will use R to do our analysis. We’ll have a chance to try out <code>gganimate</code> and <code>patchwork</code>, a couple of newer packages that <a href="https://www.data-imaginist.com/">Thomas Lin Pedersen</a> has been working on; they are really nice.</p>
+<p>Here we’ll define some functions to produce plots of our examples. All of these assume a classification problem where our response is binary, <span class="math inline">\(C \in \{0, 1\}\)</span>, and is predicted by two continuous features, <span class="math inline">\((X, Y)\)</span>.</p>
+<p>Briefly, they are</p>
+<ol>
+<li><code>gg_sample</code> :: creates a layer for a sample of the features colored by class.</li>
+<li><code>gg_density</code> :: creates a layer of contour plots for feature densities within each class.</li>
+<li><code>gg_optimal</code> :: creates a layer showing an optimal decision boundary.</li>
+<li><code>gg_mix_label</code> :: creates a layer labelling components in a mixture distribution.</li>
+</ol>
+<p>
+
+<pre class="r"><code>library(magrittr)
+library(tidyverse)
+library(ggplot2)
+library(gganimate)
+library(patchwork)
+
+theme_set(theme_linedraw() +
+          theme(plot.title = element_text(size = 20),
+                legend.position = &quot;none&quot;,
+                axis.text.x = element_blank(),
+                axis.text.y = element_blank(),
+                axis.title.x = element_blank(),
+                axis.title.y = element_blank(),
+                aspect.ratio = 1))
+
+#&#39; Make a sample layer
+#&#39;
+#&#39; @param data data.frame: a sample with continuous features `x` and `y`
+#&#39; grouped by factor `class`
+#&#39; @param classes (optional) a vector of which levels of `class` to
+#&#39; plot; default is to plot data from all classes
+gg_sample &lt;- function(data, classes = NULL, size = 3, alpha = 0.5, ...) {
+    if (is.null(classes)) {
+        subdata &lt;- data
+    } else {
+        subdata &lt;- filter(data, class %in% classes)
+    }
+    list(geom_point(data = subdata,
+                    aes(x, y,
+                        color = factor(class),
+                        shape = factor(class)),
+                    size = size,
+                    alpha = alpha,
+                    ...),
+         scale_colour_discrete(drop = TRUE,
+                               limits = levels(factor(data$class))))
+}
+
+#&#39; Make a density layer
+#&#39;
+#&#39; @param data data.frame: a data grid of features `x` and `y` with contours `z`
+#&#39; @param data character: the name of the contour column 
+gg_density &lt;- function(data, z, size = 1, color = &quot;black&quot;, alpha = 1, ...) {
+    z &lt;- ensym(z)
+    geom_contour(data = data,
+                 aes(x, y, z = !!z),
+                 size = size,
+                 color = color,
+                 alpha = alpha,
+                 ...)
+}
+
+#&#39; Make an optimal boundary layer
+#&#39;
+#&#39; @param data data.frame: a data grid of features `x` and `y` with a column with
+#&#39; the `optimal` boundary contours
+#&#39; @param breaks numeric: which contour levels of `optimal` to plot
+gg_optimal &lt;- function(data, breaks = c(0), ...) {
+    gg_density(data, z = optimal, breaks = breaks, ...)
+}
+
+#&#39; Make a layer of component labels for a mixture distribution with two classes
+#&#39;
+#&#39; @param mus list(data.frame): the means for components of each class; every row
+#&#39; is a mean, each column is a coordinate
+#&#39; @param classes (optional) a vector of which levels of class to plot
+gg_mix_label &lt;- function(mus, classes = NULL, size = 10, ...) {
+    ns &lt;- map_int(mus, nrow)
+    component &lt;- do.call(c, map(ns, seq_len))
+    class &lt;- do.call(c, map2(0:(length(ns) - 1), ns, rep.int))
+    mu_all &lt;- do.call(rbind, mus)
+    data &lt;- cbind(mu_all, component, class) %&gt;%
+        set_colnames(c(&quot;x&quot;, &quot;y&quot;, &quot;component&quot;, &quot;class&quot;)) %&gt;%
+        as_tibble()
+    if (is.null(classes)) {
+        subdata &lt;- data
+    } else {
+        subdata &lt;- filter(data, class %in% classes)
+    }    
+    list(shadowtext::geom_shadowtext(data = subdata,
+                                     mapping = aes(x, y,
+                                                   label = component,
+                                                   color = factor(class)),
+                                     size = size,
+                                     ...),
+         scale_colour_discrete(drop = TRUE,
+                               limits = levels(factor(data$class))))
+}
+
+</code></pre>
+<h1 id="decision-boundaries-for-continuous-features">Decision Boundaries for Continuous Features</h1>
+<p>Decision boundaries are most easily visualized whenever we have <em>continuous</em> features, most especially when we have <em>two</em> continuous features, because then the decision boundary will exist in a plane.</p>
+<p>With two continuous features, the feature space will form a plane, and a decision boundary in this feature space is a set of one or more curves that divide the plane into distinct regions. Inside of a region, all observations will be assigned to the same class.</p>
+<p>As mentioned above, whenever we know exactly how our data was generated, we can produce the optimal decision boundary. Though this won’t usually be possible in practice, investigating the optimal boundaries produced from simulated data can still help us to understand their properties.</p>
+<p>We will look at the optimal boundary for a binary classification problem on a with features on a couple of common distributions: a multivariate normal distribution and a mixture of normal distributions.</p>
+<h2 id="normally-distributed-features">Normally Distributed Features</h2>
+<p>In a binary classification problem, whenever the features for each class jointly have a multivariate normal distribution, the optimal decision boundary is relatively simple. We will start our investigation here.</p>
+<p>With two features, the feature space is a plane. It can be shown that the optimal decision boundary in this case will either be a line or a <a href="https://en.wikipedia.org/wiki/Conic_section">conic section</a> (that is, an ellipse, a parabola, or a hyperbola). With higher dimesional feature spaces, the decision boundary will form a <a href="https://en.wikipedia.org/wiki/Hyperplane">hyperplane</a> or a <a href="https://en.wikipedia.org/wiki/Quadric">quadric surface</a>.</p>
+<p>We will consider classification problems with two classes, <span class="math inline">\(C = {0, 1}\)</span>, and two features, <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. Each class will be Bernoulli distributed and the features for each class will be distributed normally. Specifically,</p>
+<table>
+<tbody>
+<tr class="odd">
+<td>Classes</td>
+<td><span class="math inline">\( C \sim \operatorname{Bernoulli}(p) \)</span></td>
+</tr>
+<tr class="even">
+<td>Features for Class 0</td>
+<td><span class="math inline">\( (X, Y) \mid C = 0 \sim \operatorname{Normal}(\mu_0, \Sigma_0) \)</span></td>
+</tr>
+<tr class="odd">
+<td>Features for Class 1</td>
+<td><span class="math inline">\( (X, Y) \mid C = 1 \sim \operatorname{Normal}(\mu_0, \Sigma_1) \)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Our goal is to produce two kinds of visualizations: one, of a sample from these distributions, and two, the contours of the class-conditional densities for each feature. We’ll use the <code>mvnfast</code> package to help us with computations on the joint MVN.</p>
+<h3 id="samples">Samples</h3>
+<p>Let’s choose some values for our parameters. We’ll start with the case when the classes occur equally often. For our features, we’ll choose means so that there is some significant overlap between the two classes, and covariance matrices so that the distributions have a nice elliptical shape.</p>
+<pre class="r"><code>p &lt;- 0.5
+mu_0 &lt;- c(0, 2)
+sigma_0 &lt;- matrix(c(1, 0.3, 0.3, 1), nrow = 2)
+mu_1 &lt;- c(2, 0)
+sigma_1 &lt;- matrix(c(1, -0.3, -0.3, 1), nrow = 2)
+</code></pre>
+<p>Now we’ll write a function to create a dataframe containing a sample of classified features from our distribution.</p>
+<pre class="r"><code>#&#39; Generate normally distributed feature samples for a binary
+#&#39; classification problem
+#&#39;
+#&#39; @param n integer: the size of the sample
+#&#39; @param mean_0 vector: the mean vector of the first class
+#&#39; @param sigma_0 matrix: the 2x2 covariance matrix of the first class
+#&#39; @param mean_1 vector: the mean vector of the second class
+#&#39; @param sigma_1 matrix: the 2x2 covariance matrix of the second class
+#&#39; @param p_0 double: the prior probability of class 0
+make_mvn_sample &lt;- function(n, mu_0, sigma_0, mu_1, sigma_1, p_0) {
+    n_0 &lt;- rbinom(1, n, p_0)
+    n_1 &lt;- n - n_0
+    sample_mvn &lt;- as_tibble(
+        rbind(mvnfast::rmvn(n_0,
+                            mu = mu_0,
+                            sigma = sigma_0),
+              mvnfast::rmvn(n_1,
+                            mu = mu_1,
+                            sigma = sigma_1)))
+    sample_mvn[1:n_0, 3] &lt;- 0
+    sample_mvn[(n_0 + 1):(n_0 + n_1), 3] &lt;- 1
+    sample_mvn &lt;- sample_mvn[sample(nrow(sample_mvn)), ]
+    colnames(sample_mvn) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;class&quot;)
+    sample_mvn
+}
+
+</code></pre>
+<p>Finally, we’ll create a sample of 4000 points and plot the result.</p>
+<pre class="r"><code>n &lt;- 4000
+set.seed(31415)
+sample_mvn &lt;- make_mvn_sample(n,
+                              mu_0, sigma_0,
+                              mu_1, sigma_1,
+                              p)
+
+ggplot() +
+    gg_sample(sample_mvn) +
+    coord_fixed()
+</code></pre>
+<figure>
+<img src="./images/sample_mvn.png" title="sample-mvn" alt="A sample of the feature distributions for each class." width="400" /><figcaption>A sample of the feature distributions for each class.</figcaption>
+</figure>
+<p>It should be apparent that because of the overlap in these distributions, any decision rule will necessarily misclassify some observations fairly often.</p>
+<h3 id="classes-on-the-feature-space">Classes on the Feature Space</h3>
+<p>Next, we will produce some contour plots of our feature distributions. Let’s write a function to generate class probabilities at any observation <span class="math inline">\((x, y)\)</span> in the feature space; we will model the optimal decision boundary as those points where the posterior probabilities of the two classes are equal, that is, where <span class="math display">\[ P(X, Y \mid C = 0) P(C = 0) - P(X, Y \mid C = 1) P(C = 1) = 0 \]</span></p>
+<pre class="r"><code>#&#39; Make an optimal prediction at a point from two class distributions
+#&#39;
+#&#39; @param x vector: input
+#&#39; @param p_0 double: prior probability of class 0
+#&#39; @param dfun_0 function(x): density of features of class 0
+#&#39; @param dfun_1 function(x): density of features of class 1
+optimal_predict &lt;- function(x, p_0, dfun_0, dfun_1) {
+    ## Prior probability of class 1
+    p_1 &lt;- 1 - p_0
+    ## Conditional probability of (x, y) given class 0
+    p_x_0 &lt;- dfun_0(x)
+    ## Conditional probability of (x, y) given class 1
+    p_x_1 &lt;- dfun_1(x)
+    ## Conditional probability of class 0 given (x, y)
+    p_0_xy &lt;- p_x_0 * p_0
+    ## Conditional probability of class 1 given (x, y)
+    p_1_xy &lt;- p_x_1 * p_1
+    optimal &lt;- p_1_xy - p_0_xy
+    class &lt;- ifelse(optimal &gt; 0, 1, 0)
+    result &lt;- c(p_0_xy, p_1_xy, optimal, class)
+    names(result) &lt;- c(&quot;p_0_xy&quot;, &quot;p_1_xy&quot;, &quot;optimal&quot;, &quot;class&quot;)
+    result
+}
+
+#&#39; Construct a dataframe with posterior class probabilities and the
+#&#39; optimal decision boundary over a grid on the feature space
+#&#39; 
+#&#39; @param mean_0 vector: the mean vector of the first class
+#&#39; @param sigma_0 matrix: the 2x2 covariance matrix of the first class
+#&#39; @param mean_1 vector: the mean vector of the second class
+#&#39; @param sigma_1 matrix: the 2x2 covariance matrix of the second class
+#&#39; @param p_0 double: the prior probability of class 0
+make_density_mvn &lt;- function(mean_0, sigma_0, mean_1, sigma_1, p_0,
+                             x_min, x_max, y_min, y_max, delta = 0.05) {
+    x &lt;- seq(x_min, x_max, delta)
+    y &lt;- seq(y_min, y_max, delta)
+    density_mvn &lt;- expand.grid(x, y)
+    names(density_mvn) &lt;- c(&quot;x&quot;, &quot;y&quot;)
+    dfun_0 &lt;- function(x) mvnfast::dmvn(x, mu_0, sigma_0)
+    dfun_1 &lt;- function(x) mvnfast::dmvn(x, mu_1, sigma_1)
+    optimal_mvn &lt;- function(x, y) optimal_predict(c(x, y), p_0, dfun_0, dfun_1)
+    density_mvn &lt;-as.tibble(
+        cbind(density_mvn,
+              t(mapply(optimal_mvn,
+                       density_mvn$x, density_mvn$y))))
+    density_mvn
+}
+
+</code></pre>
+<p>Now we can generate a grid of points and compute posterior class probabilities over that grid. By plotting these probabilities, we can get describe both the conditional feature distributions for each class as well as the joint feature distribution.</p>
+<pre class="r"><code>density_mvn &lt;- make_density_mvn(mu_0, sigma_0, mu_1, sigma_1, p,
+                                -3, 5, -3, 5)
+
+(ggplot() +
+ gg_sample(sample_mvn, alpha = 0.1) +
+ gg_density(density_mvn, z = p_0_xy) +
+ gg_density(density_mvn, z = p_1_xy) +
+ ggtitle(&quot;Conditional Distributions&quot;)) +
+(ggplot() +
+ gg_sample(sample_mvn, alpha = 0.1) +
+ geom_contour(data = density_mvn,
+              aes(x = x, y = y, z = p_0_xy + p_1_xy),
+              size = 1,
+              color = &quot;black&quot;) +
+ ggtitle(&quot;Joint Distribution&quot;))
+
+</code></pre>
+<figure>
+<img src="./images/density_mvn.png" title="density-mvn" alt="Contours of the feature distributions for each class." width="800" /><figcaption>Contours of the feature distributions for each class.</figcaption>
+</figure>
+<h3 id="the-optimal-decision-boundary">The Optimal Decision Boundary</h3>
+<p>Now let’s add a plot for the optimal decision boundary for this problem.</p>
+<pre class="r"><code>(ggplot() +
+ gg_density(density_mvn, z = p_0_xy,
+            alpha = 0.25) +
+ gg_density(density_mvn, z = p_1_xy,
+            alpha = 0.25) +
+ gg_optimal(density_mvn)) +
+(ggplot() +
+ gg_sample(sample_mvn, alpha = 0.25) +
+ gg_optimal(density_mvn)) +
+plot_annotation(&quot;The Optimal Decision Boundary&quot;)
+
+</code></pre>
+<figure>
+<img src="./images/optimal_mvn.png" title="optimal-mvn" alt="The optimal decision boundary" width="800" /><figcaption>The optimal decision boundary</figcaption>
+</figure>
+<p>Notice how the boundary runs through the points where the contours of the two conditional distributions intersect. These points of intersection are where the classes have equal posterior probability.</p>
+<h2 id="mixture-of-normals">Mixture of Normals</h2>
+<p>The features of each class might also be modeled as a <em>mixture</em> of normal distributions. This means that each observation in a class will come from one of <em>several</em> normal distributions; in our case, the distributions from a class will be joined by a common hyperparameter, their mean.</p>
+<p>In description, at least, the problem is still relatively simple. The possible decision boundaries produced, however, can be quite complex. This is a much more difficult problem than the one we saw before.</p>
+<p>For our examples, we will generate the data as follows:</p>
+<table>
+<tbody>
+<tr class="odd">
+<td>Classes</td>
+<td><span class="math inline">\( C \sim Bernoulli(p) \)</span></td>
+</tr>
+<tr class="even">
+<td>Mean of Means for Class 0</td>
+<td><span class="math inline">\( \nu_0 \sim Normal((0, 1), I) \)</span></td>
+</tr>
+<tr class="odd">
+<td>Mean of Means for Class 1</td>
+<td><span class="math inline">\( \nu_0 \sim Normal((1, 0), I) \)</span></td>
+</tr>
+<tr class="even">
+<td>Means of Components for Class 0</td>
+<td><span class="math inline">\( \mu_{0, i=1, \ldots, n_0} \sim Normal(\nu_0, I) \)</span></td>
+</tr>
+<tr class="odd">
+<td>Means of Components for Class 1</td>
+<td><span class="math inline">\( \mu_{1, i=1, \ldots, n_1} \sim Normal(\nu_1, I) \)</span></td>
+</tr>
+<tr class="even">
+<td>Features for Class 0</td>
+<td><span class="math inline">\( (X, Y) \mid C = 0 \sim w_{0, 1} Normal(\mu_{0, 1}, \Sigma_0) + \cdots + w_{0, l_0} Normal(\mu_{0, 0}, \Sigma_0) \)</span></td>
+</tr>
+<tr class="odd">
+<td>Features for Class 1</td>
+<td><span class="math inline">\( (X, Y) \mid C = 1 \sim w_{1, 1} Normal(\mu_{1, 1}, \Sigma_1) + \cdots + w_{1, l_1} Normal(\mu_{1, l_1}, \Sigma_1) \)</span></td>
+</tr>
+</tbody>
+</table>
+<p>where <span class="math inline">\(n_0\)</span> is the number of components for class 0, <span class="math inline">\(w_{0, i}\)</span> are the weights on each component, <span class="math inline">\(\Sigma_0 = \frac{1}{2 * l_0} I\)</span>, and <span class="math inline">\(I\)</span> is the identity matrix; similarly for class 1.</p>
+<p>This is a bit awful, but we are basically doing this:</p>
+<p>For each class, define the distribution of the features <span class="math inline">\((X, Y)\)</span> by</p>
+<ol>
+<li>Choosing the number of components to go in the mixture.</li>
+<li>Choosing a mean for each component by sampling from a normal distribution.</li>
+</ol>
+<p>Then, to get a sample: Get an observation by</p>
+<ol>
+<li>Choosing a class, 0 or 1.</li>
+<li>Choosing a component from that class, a normal distribution.</li>
+<li>Sample the observation from that component.</li>
+</ol>
+<h3 id="samples-1">Samples</h3>
+<p>The computations for the mixture of MVNs are fairly similar to the ones we did before. First let’s define a sampling function. This function just implements the above steps.</p>
+<pre class="r"><code>#&#39; Generate normally distributed feature samples for a binary
+#&#39; classification problem
+#&#39;
+#&#39; @param n integer: the size of the sample
+#&#39; @param nu_0 numeric: the average mean of the components of the first feature
+#&#39; @param sigma_0 matrix: covariance of components of the first feature
+#&#39; @param n_0 integer: class frequency of first feature in the sample
+#&#39; @param w_0 numeric: vector of weights for components of the first feature
+#&#39; @param mean_1 numeric: the average mean of the components of the second feature
+#&#39; @param sigma_1 matrix: covariance of components of the second feature
+#&#39; @param n_1 integer: class frequency of second feature in the sample
+#&#39; @param w_1 numeric: vector of weights for components of the second feature
+#&#39; @param p_0 double: the prior probability of class 0
+make_mix_sample &lt;- function(n,
+                            nu_0, tau_0, n_0, sigma_0, w_0,
+                            nu_1, tau_1, n_1, sigma_1, w_1,
+                            p_0) {
+    ## Number of Components for Each Class
+    l_0 &lt;- length(w_0)
+    l_1 &lt;- length(w_1)
+    ## Sample the Component Means
+    mu_0 &lt;- mvnfast::rmvn(n = l_0,
+                          mu = nu_0, sigma = tau_0)
+    mu_1 &lt;- mvnfast::rmvn(n = l_1,
+                          mu = nu_1, sigma = tau_1)
+    ## Class Frequency in the Sample
+    n_0 &lt;- rbinom(1, n, p_0)
+    n_1 &lt;- n - n_0
+    ## Sample the Features
+    f_0 &lt;- mvnfast::rmixn(n = n_0,
+                          mu = mu_0, sigma = sigma_0, w = w_0,
+                          retInd = TRUE)
+    c_0 &lt;- attr(f_0, &quot;index&quot;)
+    f_1 &lt;- mvnfast::rmixn(n = n_1,
+                          mu = mu_1, sigma = sigma_1, w = w_1,
+                          retInd = TRUE)
+    c_1 &lt;- attr(f_1, &quot;index&quot;)
+    sample_mix &lt;- as.data.frame(rbind(f_0, f_1))
+    sample_mix[, 3] &lt;- c(c_0, c_1)
+    ## Define Classes
+    sample_mix[1:n_0, 4] &lt;- 0
+    sample_mix[(n_0 + 1):(n_0 + n_1), 4] &lt;- 1
+    sample_mix &lt;- sample_mix[sample(nrow(sample_mix)), ]
+    names(sample_mix) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;component&quot;, &quot;class&quot;)
+    ## Store Component Means
+    attr(sample_mix, &quot;mu_0&quot;) &lt;- mu_0
+    attr(sample_mix, &quot;mu_1&quot;) &lt;- mu_1
+    sample_mix
+}
+
+</code></pre>
+<p>Now we’ll define the parameters, construct a sample, and look at the result.</p>
+<pre class="r"><code>
+## Bernoulli parameter for class distribution
+p = 0.5
+## Mean of component means
+nu_0 = c(0, 1)
+nu_1 = c(1, 0)
+## Covariance for component means
+tau_0 = matrix(c(1, 0, 0, 1), nrow = 2)
+tau_1 = matrix(c(1, 0, 0, 1), nrow = 2)
+## Number of components for each class
+n_0 &lt;- 10
+n_1 &lt;- 10
+## Covariance for each class
+sigma_0 &lt;- replicate(n_0, matrix(c(1, 0, 0, 1), 2) / n_0 * 2,
+                     simplify = FALSE)
+sigma_1 &lt;- replicate(n_1, matrix(c(1, 0, 0, 1), 2) / n_1 * 2,
+                     simplify = FALSE)
+## Weights of mixture components
+w_0 &lt;- rep(1 / n_0, n_0)
+w_1 &lt;- rep(1 / n_1, n_1)
+
+## Sample size
+n &lt;- 4000
+set.seed(31)
+sample_mix &lt;- make_mix_sample(n,
+                              nu_0, tau_0, n_0, sigma_0, w_0,
+                              nu_1, tau_1, n_1, sigma_1, w_1,
+                              p)
+## Retrieve the generated component means
+mu_0 &lt;- attr(sample_mix, &quot;mu_0&quot;)
+mu_1 &lt;- attr(sample_mix, &quot;mu_1&quot;)
+
+ggplot() +
+    gg_sample(sample_mix) +
+    ggtitle(&quot;Sample of Mixture Distribution&quot;)
+
+ggplot() +
+    gg_sample(sample_mix) +
+    gg_mix_label(list(mu_0, mu_1)) +
+    facet_wrap(vars(class)) +
+    ggtitle(&quot;Feature Components&quot;)
+
+</code></pre>
+<figure>
+<img src="./images/sample_mix.png" title="sample-mix" alt="A sample from the mixture distributions." width="400" /><figcaption>A sample from the mixture distributions.</figcaption>
+</figure>
+<p>We’ve labelled the component means for each class. (There are 10 components for class 0, and 10 components for class 1.) You can see that around each of these labels is a sample from a normal distribution.</p>
+<h3 id="classes-on-the-feature-space-1">Classes on the Feature Space</h3>
+<p>Now we’ll compute class probabilities on the feature space.</p>
+<p>First define a generating function.</p>
+<pre class="r"><code>#&#39; Construct a dataframe with posterior class probabilities and the
+#&#39; optimal decision boundary over a grid on the feature space
+#&#39; 
+#&#39; @param mean_0 numeric: the average mean of the components of the first feature
+#&#39; @param sigma_0 matrix: covariance of components of the first feature
+#&#39; @param w_0 numeric: vector of weights for components of the first feature
+#&#39; @param mean_1 numeric: the average mean of the components of the second feature
+#&#39; @param sigma_1 matrix: covariance of components of the second feature
+#&#39; @param w_1 numeric: vector of weights for components of the second feature
+#&#39; @param p_0 double: the prior probability of class 0
+make_density_mix &lt;- function(mean_0, sigma_0, w_0,
+                             mean_1, sigma_1, w_1, p_0,
+                             x_min, x_max, y_min, y_max, delta = 0.05) {
+    x &lt;- seq(x_min, x_max, delta)
+    y &lt;- seq(y_min, y_max, delta)
+    density_mix &lt;- expand.grid(x, y)
+    names(density_mix) &lt;- c(&quot;x&quot;, &quot;y&quot;)
+    dfun_0 &lt;- function(x) mvnfast::dmixn(matrix(x, nrow = 1),
+                                         mu = mean_0,
+                                         sigma = sigma_0,
+                                         w = w_0)
+    dfun_1 &lt;- function(x) mvnfast::dmixn(matrix(x, nrow = 1),
+                                         mu = mean_1,
+                                         sigma = sigma_1,
+                                         w = w_1)
+    optimal_mix &lt;- function(x, y) optimal_predict(c(x, y), p_0, dfun_0, dfun_1)
+    density_mix &lt;-as.tibble(
+        cbind(density_mix,
+              t(mapply(optimal_mix,
+                       density_mix$x, density_mix$y))))
+    density_mix
+}
+</code></pre>
+<p>And now compute the grid and plot.</p>
+<pre class="r"><code>density_mix &lt;- make_density_mix(mu_0, sigma_0, w_0, mu_1, sigma_1, w_1, p,
+                                -3, 5, -3, 5)
+
+(ggplot() +
+ gg_sample(sample_mix, classes = 0,
+           alpha = 0.1) +
+ gg_density(density_mix, z = p_0_xy) +
+ gg_mix_label(list(mu_0, mu_1), classes = 0) +
+ ggtitle(&quot;Density of Class 0&quot;)) +
+(ggplot() +
+ gg_sample(sample_mix, classes = 1,
+           alpha = 0.1) +
+ gg_density(density_mix, z = p_1_xy) +
+ gg_mix_label(list(mu_0, mu_1), classes = 1) +
+ ggtitle(&quot;Density of Class 1&quot;)) +
+(ggplot() +
+ gg_sample(sample_mix,
+           alpha = 0.1) +
+ geom_contour(data = density_mix,
+              aes(x = x, y = y, z = p_0_xy + p_1_xy),
+              color = &quot;black&quot;,
+              size = 1) +
+ ggtitle(&quot;Joint Density&quot;))
+
+</code></pre>
+<figure>
+<img src="./images/density_mix.png" title="density-mix" alt="Contours of the feature distributions for each class." width="1000" /><figcaption>Contours of the feature distributions for each class.</figcaption>
+</figure>
+<h1 id="the-optimal-decision-boundary-1">The Optimal Decision Boundary</h1>
+<p>And here is the optimal decision boundary for this problem. Notice how again the boundary runs through points of intersection in the two conditional distributions, and how it separates the classes of observations in the sample.</p>
+<pre class="r"><code>(ggplot() +
+ gg_density(density_mix, z = p_0_xy,
+            alpha = 0.25) +
+ gg_density(density_mix, z = p_1_xy,
+            alpha = 0.25) +
+ gg_optimal(density_mix)) +
+(ggplot() +
+ gg_sample(sample_mix, alpha = 0.25) +
+ gg_optimal(density_mix))
+</code></pre>
+<figure>
+<img src="./images/optimal_mix.png" title="optimal-mix" alt="The optimal decision boundary." width="800" /><figcaption>The optimal decision boundary.</figcaption>
+</figure>
+<h1 id="class-imbalance">Class Imbalance</h1>
+<p>So far, we’ve only seen the case where the two classes occur about equally often. If one class has a lower probability of occuring (say class 1), then the optimal decision boundary must move toward the class 1 distribution in order to equalize the probabilities on either side. This should help illustrate why it’s important to consider class imbalance whenever you’re working on a classification problem. A large imbalance can change your decisions drastically.</p>
+<p>To see this change, we will use the <code>gganimate</code> package to produce an animation showing how the optimal boundary changes as the Bernoulli parameter (the frequency of class 0) changes from 0.1 to 0.9.</p>
+<h2 id="normally-distributed-features-1">Normally Distributed Features</h2>
+<pre class="r"><code>## Evaluate mu_0, sigma_0, etc. again, if needed.
+
+density_p0 &lt;-
+    map_dfr(seq(0.1, 0.9, 0.005),
+            function(p_0)
+                make_density_mvn(mu_0, sigma_0, mu_1, sigma_1,
+                                 p_0, -3, 5, -3, 5) %&gt;%
+                mutate(p_0 = p_0))
+
+anim &lt;- ggplot() +
+    geom_contour(data = density_p0,
+                 aes(x = x, y = y, z = p_0_xy + p_1_xy),
+                 color = &quot;black&quot;,
+                 size = 1,
+                 alpha = 0.25) +
+    gg_optimal(density_p0) +
+    transition_manual(p_0) +
+    ggtitle(&quot;Proportion of Class 0: {current_frame}&quot;)
+
+anim &lt;- animate(anim, renderer = gifski_renderer(),
+                width = 800, height = 800)
+
+anim
+</code></pre>
+<video autoplay loop mutued playsinline>
+  <source src="./images/imbalance_mvn.webm" type="video/webm">
+  <source src="./images/imbalance_mvn.mp4" type="video/mp4">
+</video>
+
+<h2 id="mixture-of-normals-1">Mixture of Normals</h2>
+<pre class="r"><code>density_mix_p0 &lt;-
+    map_dfr(seq(0.1, 0.9, 0.005),
+            function(p_0)
+                make_density_mix(mu_0, sigma_0, w_0, mu_1, sigma_1, w_1,
+                                 p_0, -3, 5, -3, 5) %&gt;%
+                mutate(p_0 = p_0))
+anim &lt;- ggplot() +
+    geom_contour(data = density_mix_p0,
+                 aes(x = x, y = y, z = p_0_xy + p_1_xy),
+                 color = &quot;black&quot;,
+                 size = 1,
+                 alpha = 0.25) +
+    gg_optimal(density_mix_p0) +
+    transition_manual(p_0) +
+    ggtitle(&quot;Proportion of Class 0: {current_frame}&quot;)
+
+anim &lt;- animate(anim, renderer = gifski_renderer(),
+                width = 800, height = 800)
+
+anim
+
+</code></pre>
+<video autoplay loop mutued playsinline>
+  <source src="./images/imbalance_mix.webm" type="video/webm">
+  <source src="./images/imbalance_mix.mp4" type="video/mp4">
+</video>
+
+<h1 id="conclusion">Conclusion</h1>
+<p>In this post, we reviewed <strong>decision boundaries</strong>, a way of visualizing classification rules. In particular, we looked at <strong>optimal</strong> decision boundaries, which represent the <em>best</em> solution possible to a problem given certain costs for misclassification. The rule we used in this post was the <strong>MAP</strong> estimate, which minimizes zero-one loss, where all misclassifications are equally likely.</p>
+<p>In future posts, we’ll look other kinds of loss functions and how that can affect the decision rule, and also at the boundaries produced by a number of statistical learning models.</p>
+<p>Hope you enjoyed it!</p>]]></description>
+    <pubDate>Thu, 09 Jan 2020 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/decision/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+<item>
     <title>investmentsim - an R Package for Simulating Investment Portfolios</title>
     <link>https://mathformachines.com/posts/investmentsim/index.html</link>
     <description><![CDATA[<p>I wrote a little package recently for a project I’ve been working on. I’ve mostly been using it to help out with Monte Carlo simulations for personal finance planning. It’s a little rough at the moment, but for the adventurous it’s on Github here: <a href="https://github.com/ryanholbrook/investmentsim">investmentsim</a>. And here’s a quick tutorial on how to use it.</p>
