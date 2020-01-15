@@ -24,7 +24,7 @@ bg-gray-xlight {
 
 body {
     font-family: "Bitstream Charter", "Palatino Linotype", Palatino, Palladio, "URW Palladio L", "Book Antiqua", Baskerville, "Bookman Old Style", "Nimbus Roman No9 L", Garamond, "Apple Garamond", "ITC Garamond Narrow", "New Century Schoolbook", "Century Schoolbook", "Century Schoolbook L", Georgia, serif;
-    font-size: 16px;
+    font-size: 17px;
     hyphens: auto;
     margin-bottom: 16px;
     overflow-wrap: break-word
@@ -159,7 +159,7 @@ body {
 }
 
 .container-xxxl {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: auto
 }
 
@@ -271,7 +271,15 @@ pre+p {
 
 #content h3 {
     font-size: 1em;
-    margin-top: 1em;
+    margin-top: 1.1em;
+    margin-bottom: 0.5em;
+    border-bottom: 1px #e1e4e8 solid;
+    line-height: 1em                       
+}
+
+#content h4 {
+    font-size: 1em;
+    margin-top: 1.1em;
     margin-bottom: 0.75em
 }
 
