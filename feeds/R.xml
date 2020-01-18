@@ -89,8 +89,8 @@
 <p>Unless we have generated the data ourselves, we won’t usually be able to find the optimal boundary. Instead, we approximate it using a classifier. A good machine learning classifier tries to approximate the optimal boundary for a problem as closely as possible.</p>
 <p>In future posts, we will look at the approximating boundary created by various classification algorithms. We will investigate the strategy the classifier uses to create this boundary and how this boundary evolves as the classifier is trained on more and more data. There are many classification algorithms available to a data scientist – regression, discriminant analysis, decision trees, neural networks, to name a few – and it is important to understand which algorithm is appropritate for the problem at hand. Decision boundaries can help us to do this.</p>
 <video autoplay loop mutued playsinline>
-  <source src="./images/rf_mix.webm" type="video/webm">
-  <source src="./images/rf_mix.mp4" type="video/mp4">
+  <source src="/images/rf_mix.webm" type="video/webm">
+  <source src="/images/rf_mix.mp4" type="video/mp4">
 </video>
 
 <h1 id="optimal-boundaries">Optimal Boundaries</h1>
@@ -276,7 +276,7 @@ ggplot() +
     coord_fixed()
 </code></pre>
 <figure>
-<img src="./images/sample_mvn.png" title="sample-mvn" alt="A sample of the feature distributions for each class." width="400" /><figcaption>A sample of the feature distributions for each class.</figcaption>
+<img src="/images/sample_mvn.png" title="sample-mvn" alt="A sample of the feature distributions for each class." width="400" /><figcaption>A sample of the feature distributions for each class.</figcaption>
 </figure>
 <p>It should be apparent that because of the overlap in these distributions, any decision rule will necessarily misclassify some observations fairly often.</p>
 <h3 id="classes-on-the-feature-space">Classes on the Feature Space</h3>
@@ -349,7 +349,7 @@ make_density_mvn &lt;- function(mean_0, sigma_0, mean_1, sigma_1, p_0,
 
 </code></pre>
 <figure>
-<img src="./images/density_mvn.png" title="density-mvn" alt="Contours of the feature distributions for each class." width="800" /><figcaption>Contours of the feature distributions for each class.</figcaption>
+<img src="/images/density_mvn.png" title="density-mvn" alt="Contours of the feature distributions for each class." width="800" /><figcaption>Contours of the feature distributions for each class.</figcaption>
 </figure>
 <h3 id="the-optimal-decision-boundary">The Optimal Decision Boundary</h3>
 <p>Now let’s add a plot for the optimal decision boundary for this problem.</p>
@@ -366,7 +366,7 @@ plot_annotation(&quot;The Optimal Decision Boundary&quot;)
 
 </code></pre>
 <figure>
-<img src="./images/optimal_mvn.png" title="optimal-mvn" alt="The optimal decision boundary" width="800" /><figcaption>The optimal decision boundary</figcaption>
+<img src="/images/optimal_mvn.png" title="optimal-mvn" alt="The optimal decision boundary" width="800" /><figcaption>The optimal decision boundary</figcaption>
 </figure>
 <p>Notice how the boundary runs through the points where the contours of the two conditional distributions intersect. These points of intersection are where the classes have equal posterior probability.</p>
 <h2 id="mixture-of-normals">Mixture of Normals</h2>
@@ -516,7 +516,7 @@ ggplot() +
 
 </code></pre>
 <figure>
-<img src="./images/sample_mix.png" title="sample-mix" alt="A sample from the mixture distributions." width="400" /><figcaption>A sample from the mixture distributions.</figcaption>
+<img src="/images/sample_mix.png" title="sample-mix" alt="A sample from the mixture distributions." width="400" /><figcaption>A sample from the mixture distributions.</figcaption>
 </figure>
 <p>We’ve labelled the component means for each class. (There are 10 components for class 0, and 10 components for class 1.) You can see that around each of these labels is a sample from a normal distribution.</p>
 <h3 id="classes-on-the-feature-space-1">Classes on the Feature Space</h3>
@@ -582,7 +582,7 @@ make_density_mix &lt;- function(mean_0, sigma_0, w_0,
 
 </code></pre>
 <figure>
-<img src="./images/density_mix.png" title="density-mix" alt="Contours of the feature distributions for each class." width="1000" /><figcaption>Contours of the feature distributions for each class.</figcaption>
+<img src="/images/density_mix.png" title="density-mix" alt="Contours of the feature distributions for each class." width="1000" /><figcaption>Contours of the feature distributions for each class.</figcaption>
 </figure>
 <h1 id="the-optimal-decision-boundary-1">The Optimal Decision Boundary</h1>
 <p>And here is the optimal decision boundary for this problem. Notice how again the boundary runs through points of intersection in the two conditional distributions, and how it separates the classes of observations in the sample.</p>
@@ -597,7 +597,7 @@ make_density_mix &lt;- function(mean_0, sigma_0, w_0,
  gg_optimal(density_mix))
 </code></pre>
 <figure>
-<img src="./images/optimal_mix.png" title="optimal-mix" alt="The optimal decision boundary." width="800" /><figcaption>The optimal decision boundary.</figcaption>
+<img src="/images/optimal_mix.png" title="optimal-mix" alt="The optimal decision boundary." width="800" /><figcaption>The optimal decision boundary.</figcaption>
 </figure>
 <h1 id="class-imbalance">Class Imbalance</h1>
 <p>So far, we’ve only seen the case where the two classes occur about equally often. If one class has a lower probability of occuring (say class 1), then the optimal decision boundary must move toward the class 1 distribution in order to equalize the probabilities on either side. This should help illustrate why it’s important to consider class imbalance whenever you’re working on a classification problem. A large imbalance can change your decisions drastically.</p>
@@ -628,8 +628,8 @@ anim &lt;- animate(anim, renderer = gifski_renderer(),
 anim
 </code></pre>
 <video autoplay loop mutued playsinline>
-  <source src="./images/imbalance_mvn.webm" type="video/webm">
-  <source src="./images/imbalance_mvn.mp4" type="video/mp4">
+  <source src="/images/imbalance_mvn.webm" type="video/webm">
+  <source src="/images/imbalance_mvn.mp4" type="video/mp4">
 </video>
 
 <h2 id="mixture-of-normals-1">Mixture of Normals</h2>
@@ -656,8 +656,8 @@ anim
 
 </code></pre>
 <video autoplay loop mutued playsinline>
-  <source src="./images/imbalance_mix.webm" type="video/webm">
-  <source src="./images/imbalance_mix.mp4" type="video/mp4">
+  <source src="/images/imbalance_mix.webm" type="video/webm">
+  <source src="/images/imbalance_mix.mp4" type="video/mp4">
 </video>
 
 <h1 id="conclusion">Conclusion</h1>
