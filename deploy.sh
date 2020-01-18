@@ -14,6 +14,7 @@ stack exec site build
 cp optimize.sh images/optimize.sh
 cd images
 ./optimize.sh
+cd ../
 
 # Get previous files
 git fetch --all
