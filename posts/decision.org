@@ -18,8 +18,8 @@ In future posts, we will look at the approximating boundary created by various c
 #+name: imbalance-mvn
 #+BEGIN_EXPORT html
 <video autoplay loop mutued playsinline>
-  <source src="./images/rf_mix.webm" type="video/webm">
-  <source src="./images/rf_mix.mp4" type="video/mp4">
+  <source src="/images/rf_mix.webm" type="video/webm">
+  <source src="/images/rf_mix.mp4" type="video/mp4">
 </video>
 #+END_EXPORT
 # #+HTML: <figcaption>A random forest learning a classification rule.</figcaption>
@@ -242,7 +242,7 @@ ggplot() +
 #+caption: A sample of the feature distributions for each class.
 #+ATTR_HTML: :width 400px
 #+name: sample-mvn
-[[file:./images/sample_mvn.png]]
+[[file:/images/sample_mvn.png]]
 
 
 It should be apparent that because of the overlap in these distributions, any decision rule will necessarily misclassify some observations fairly often.
@@ -329,7 +329,7 @@ density_mvn <- make_density_mvn(mu_0, sigma_0, mu_1, sigma_1, p,
 #+caption: Contours of the feature distributions for each class.
 #+ATTR_HTML: :width 800px
 #+name: density-mvn
-[[file:./images/density_mvn.png]]
+[[file:/images/density_mvn.png]]
 
 *** The Optimal Decision Boundary
 
@@ -352,7 +352,7 @@ plot_annotation("The Optimal Decision Boundary")
 #+caption: The optimal decision boundary
 #+ATTR_HTML: :width 800px
 #+name: optimal-mvn
-[[file:./images/optimal_mvn.png]]
+[[file:/images/optimal_mvn.png]]
 
 Notice how the boundary runs through the points where the contours of the two conditional distributions intersect. These points of intersection are where the classes have equal posterior probability.
 
@@ -494,7 +494,7 @@ ggplot() +
 #+caption: A sample from the mixture distributions.
 #+ATTR_HTML: :width 400px
 #+name: sample-mix
-[[file:./images/sample_mix.png]]
+[[file:/images/sample_mix.png]]
 
 We've labelled the component means for each class. (There are 10 components for class 0, and 10 components for class 1.) You can see that around each of these labels is a sample from a normal distribution.
 
@@ -571,7 +571,7 @@ density_mix <- make_density_mix(mu_0, sigma_0, w_0, mu_1, sigma_1, w_1, p,
 #+caption: Contours of the feature distributions for each class.
 #+ATTR_HTML: :width 1000px
 #+name: density-mix
-[[file:./images/density_mix.png]]
+[[file:/images/density_mix.png]]
 
 
 * The Optimal Decision Boundary
@@ -593,7 +593,7 @@ And here is the optimal decision boundary for this problem. Notice how again the
 #+caption: The optimal decision boundary.
 #+ATTR_HTML: :width 800px
 #+name: optimal-mix
-[[file:./images/optimal_mix.png]]
+[[file:/images/optimal_mix.png]]
 
 
 * Class Imbalance
@@ -633,8 +633,8 @@ anim
 #+name: imbalance-mvn
 #+BEGIN_EXPORT html
 <video autoplay loop mutued playsinline>
-  <source src="./images/imbalance_mvn.webm" type="video/webm">
-  <source src="./images/imbalance_mvn.mp4" type="video/mp4">
+  <source src="/images/imbalance_mvn.webm" type="video/webm">
+  <source src="/images/imbalance_mvn.mp4" type="video/mp4">
 </video>
 #+END_EXPORT
 # #+HTML: <figcaption>The optimal decision boundary for various levels of class imbalance.</figcaption>
@@ -670,8 +670,8 @@ anim
 #+name: imbalance-mix
 #+BEGIN_EXPORT html
 <video autoplay loop mutued playsinline>
-  <source src="./images/imbalance_mix.webm" type="video/webm">
-  <source src="./images/imbalance_mix.mp4" type="video/mp4">
+  <source src="/images/imbalance_mix.webm" type="video/webm">
+  <source src="/images/imbalance_mix.mp4" type="video/mp4">
 </video>
 #+END_EXPORT
 # #+HTML: <figcaption>The optimal decision boundary for various levels of class imbalance.</figcaption>

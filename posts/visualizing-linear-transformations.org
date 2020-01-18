@@ -58,8 +58,8 @@ If we think about all the vectors of length 1 as being the points of the [[https
 #+name: circle-scaled
 #+BEGIN_EXPORT html
 <video autoplay loop mutued playsinline>
-  <source src="./images/scaling.webm" type="video/webm">
-  <source src="./images/scaling.mp4" type="video/mp4">
+  <source src="../../images/scaling.webm" type="video/webm">
+  <source src="../../images/scaling.mp4" type="video/mp4">
 </video>
 #+END_EXPORT
 
@@ -76,8 +76,8 @@ This is an example of a [[https://en.wikipedia.org/wiki/Rank_(linear_algebra)][r
 #+name: circle-collapsed
 #+BEGIN_EXPORT html
 <video autoplay loop mutued playsinline>
-  <source src="./images/collapsed.webm" type="video/webm">
-  <source src="./images/collapsed.mp4" type="video/mp4">
+  <source src="../../images/collapsed.webm" type="video/webm">
+  <source src="../../images/collapsed.mp4" type="video/mp4">
 </video>
 #+END_EXPORT
 
@@ -101,8 +101,8 @@ And the unit circle gets mapped onto itself.
 #+name: circle-rotated
 #+BEGIN_EXPORT html
 <video autoplay loop mutued playsinline>
-  <source src="./images/rotation.webm" type="video/webm">
-  <source src="./images/rotation.mp4" type="video/mp4">
+  <source src="../../images/rotation.webm" type="video/webm">
+  <source src="../../images/rotation.mp4" type="video/mp4">
 </video>
 #+END_EXPORT
 
@@ -130,8 +130,8 @@ And the unit circle gets mapped onto itself.
 #+name: circle-reflected
 #+BEGIN_EXPORT html
 <video autoplay loop mutued playsinline>
-  <source src="./images/reflection.webm" type="video/webm">
-  <source src="./images/reflection.mp4" type="video/mp4">
+  <source src="../../images/reflection.webm" type="video/webm">
+  <source src="../../images/reflection.mp4" type="video/mp4">
 </video>
 #+END_EXPORT
 
@@ -176,8 +176,8 @@ This turns out to be:
 #+name: rot-scale-ref
 #+BEGIN_EXPORT html
 <video autoplay loop mutued playsinline>
-  <source src="./images/rot-scale-ref.webm" type="video/webm">
-  <source src="./images/rot-scale-ref.mp4" type="video/mp4">
+  <source src="../../images/rot-scale-ref.webm" type="video/webm">
+  <source src="../../images/rot-scale-ref.mp4" type="video/mp4">
 </video>
 #+END_EXPORT
 
@@ -204,8 +204,8 @@ And here is a [[https://en.wikipedia.org/wiki/Shear_mapping][shear transform]], 
 #+name: shear
 #+BEGIN_EXPORT html
 <video autoplay loop mutued playsinline>
-  <source src="./images/shear.webm" type="video/webm">
-  <source src="./images/shear.mp4" type="video/mp4">
+  <source src="../../images/shear.webm" type="video/webm">
+  <source src="../../images/shear.mp4" type="video/mp4">
 </video>
 #+END_EXPORT
 
