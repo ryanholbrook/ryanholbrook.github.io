@@ -898,8 +898,8 @@ A = \begin{bmatrix}
 <p>just like we had before.</p>
 <p>In an <a href="./posts/visualizing-linear-transformations/">earlier post</a>, we saw how we could use the SVD to visualize a matrix as a sequence of geometric transformations. Here is the matrix <span class="math inline">\(A\)</span> followed by <span class="math inline">\(A^{-1}\)</span>, acting on the unit circle:</p>
 <video autoplay loop mutued playsinline>
-  <source src="./images/invertible-equation.webm" type="video/webm">
-  <source src="./images/invertible-equation.mp4" type="video/mp4">
+  <source src="../../images/invertible-equation.webm" type="video/webm">
+  <source src="../../images/invertible-equation.mp4" type="video/mp4">
 </video>
 
 <p>The inverse matrix <span class="math inline">\(A^{-1}\)</span> reverses exactly the action of <span class="math inline">\(A\)</span>. The matrix <span class="math inline">\(A\)</span> will map any circle to a unique ellipse, with no overlap. So, <span class="math inline">\(A^{-1}\)</span> can map ellipses back to those same circles without any ambiguity. We don’t “lose information” by applying <span class="math inline">\(A\)</span>.</p>
@@ -952,8 +952,8 @@ A = \begin{bmatrix}
 <p>This is the Moore-Penrose inverse of <span class="math inline">\(A\)</span>.</p>
 <p>Like we did for the invertible matrix before, let’s get an idea of what <span class="math inline">\(A\)</span> and <span class="math inline">\(A^+\)</span> are doing geometrically. Here they are acting on the unit circle:</p>
 <video autoplay loop mutued playsinline>
-  <source src="./images/dependent-equation.webm" type="video/webm">
-  <source src="./images/dependent-equation.mp4" type="video/mp4">
+  <source src="../../images/dependent-equation.webm" type="video/webm">
+  <source src="../../images/dependent-equation.mp4" type="video/mp4">
 </video>
 
 <p>Notice how <span class="math inline">\(A\)</span> now collapses the circle onto a one-dimensional space. This is a consequence of it having dependent columns. For matricies with dependent columns, its image will be of lesser dimension than the space it’s mapping into. Another way of saying this is that it has a non-trivial <a href="https://en.wikipedia.org/wiki/Kernel_(linear_algebra)">null space</a>. It “zeroes out” some of the dimensions in its domain during the transformation.</p>
@@ -974,7 +974,7 @@ x_1 + x_2 &amp;= b_2
 1/2 (b_1 + b_2) \end{bmatrix} \]</span></p>
 <p>In other words, if we have to make <span class="math inline">\(x_1 + x_2\)</span> as close as possible to two different values <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span>, the best we can do is to choose <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> so as to get the average of <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span>.</p>
 <figure>
-<img src="./images/least-squares.png" title="least-squares" alt="The vector b = (1, 3) and its orthogonal projection \hat{b} = (2, 2)." width="400" /><figcaption>The vector <span class="math inline">\(b = (1, 3)\)</span> and its orthogonal projection <span class="math inline">\(\hat{b} = (2, 2)\)</span>.</figcaption>
+<img src="../../images/least-squares.png" title="least-squares" alt="The vector b = (1, 3) and its orthogonal projection \hat{b} = (2, 2)." width="400" /><figcaption>The vector <span class="math inline">\(b = (1, 3)\)</span> and its orthogonal projection <span class="math inline">\(\hat{b} = (2, 2)\)</span>.</figcaption>
 </figure>
 <p>Or we could think about this problem geometrically. In order for there to be a solution to <span class="math inline">\(A x = b\)</span>, the vector <span class="math inline">\(b\)</span> has to reside in the image of <span class="math inline">\(A\)</span>. The image of <span class="math inline">\(A\)</span> is the span of its columns, which is all vectors like <span class="math inline">\(c(1, 1)\)</span> for a scalar <span class="math inline">\(c\)</span>. This is just the line through the origin in the picture above. But <span class="math inline">\(b = (b_1, b_2)\)</span> is not on that line if <span class="math inline">\(b_1 \neq b_2\)</span>, and so instead we minimize the distance between the two with its orthogonal projection <span class="math inline">\(\hat b\)</span>. The error or residual is the difference <span class="math inline">\(\epsilon = b - \hat{b}\)</span>.</p>
   </section>

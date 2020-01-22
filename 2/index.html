@@ -203,8 +203,8 @@ d_1 &amp; 0   \\
 <p>It will shrink a vector by a factor of 0.75 along the x-axis and stretch a vector by a factor of 1.25 along the y-axis.</p>
 <p>If we think about all the vectors of length 1 as being the points of the <a href="https://en.wikipedia.org/wiki/Unit_circle">unit circle</a>, then we can get an idea of how the transformation will affect any vector. We can see a scaling as a continous transformation beginning at the <a href="https://en.wikipedia.org/wiki/Identity_matrix">identity matrix</a>.</p>
 <video autoplay loop mutued playsinline>
-  <source src="./images/scaling.webm" type="video/webm">
-  <source src="./images/scaling.mp4" type="video/mp4">
+  <source src="../../images/scaling.webm" type="video/webm">
+  <source src="../../images/scaling.mp4" type="video/mp4">
 </video>
 
 <p>If one of the diagonal entries is 0, then it will collapse the circle on the other axis.</p>
@@ -214,8 +214,8 @@ d_1 &amp; 0   \\
 \end{bmatrix}\]</span></p>
 <p>This is an example of a <a href="https://en.wikipedia.org/wiki/Rank_(linear_algebra)">rank-deficient</a> matrix. It maps every vector onto the y-axis, and so its image has a dimension less than the dimension of the full space.</p>
 <video autoplay loop mutued playsinline>
-  <source src="./images/collapsed.webm" type="video/webm">
-  <source src="./images/collapsed.mp4" type="video/mp4">
+  <source src="../../images/collapsed.webm" type="video/webm">
+  <source src="../../images/collapsed.mp4" type="video/mp4">
 </video>
 
 <h2 id="rotation">Rotation</h2>
@@ -229,8 +229,8 @@ d_1 &amp; 0   \\
 </figure>
 <p>And the unit circle gets mapped onto itself.</p>
 <video autoplay loop mutued playsinline>
-  <source src="./images/rotation.webm" type="video/webm">
-  <source src="./images/rotation.mp4" type="video/mp4">
+  <source src="../../images/rotation.webm" type="video/webm">
+  <source src="../../images/rotation.mp4" type="video/mp4">
 </video>
 
 <p>It shouldn’t be too hard to convince ourselves that the matrix we’ve written down is the one we want. Take some unit vector and write its coordinates like <span class="math inline">\((\cos\gamma, \sin\gamma)\)</span>. Multiply it by <span class="math inline">\(Ref(\theta)\)</span> to get <span class="math inline">\((\cos\gamma \cos\theta - \sin\gamma \sin\theta, \cos\gamma \sin\theta + \sin\gamma \cos\theta)\)</span>. But by a <a href="https://en.wikipedia.org/wiki/List_of_trigonometric_identities#Angle_sum_and_difference_identities">trigonometric identity</a>, this is exactly the vector <span class="math inline">\((\cos(\gamma + \theta), \sin(\gamma + \theta))\)</span>, which is our vector rotated by <span class="math inline">\(\theta\)</span>.</p>
@@ -245,8 +245,8 @@ d_1 &amp; 0   \\
 </figure>
 <p>And the unit circle gets mapped onto itself.</p>
 <video autoplay loop mutued playsinline>
-  <source src="./images/reflection.webm" type="video/webm">
-  <source src="./images/reflection.mp4" type="video/mp4">
+  <source src="../../images/reflection.webm" type="video/webm">
+  <source src="../../images/reflection.mp4" type="video/mp4">
 </video>
 
 <p>Note that the determinant of this matrix is -1, which means that it <em>reverses</em> orientation. But its columns are still orthonormal, and so it too is an isometry.</p>
@@ -280,8 +280,8 @@ d_1 &amp; 0   \\
 <li><span class="math inline">\(U\)</span>: Reflect over the line with angle <span class="math inline">\(-\frac{3\pi}{8}\)</span>.</li>
 </ol>
 <video autoplay loop mutued playsinline>
-  <source src="./images/rot-scale-ref.webm" type="video/webm">
-  <source src="./images/rot-scale-ref.mp4" type="video/mp4">
+  <source src="../../images/rot-scale-ref.webm" type="video/webm">
+  <source src="../../images/rot-scale-ref.mp4" type="video/mp4">
 </video>
 
 <h2 id="example-1">Example</h2>
@@ -301,8 +301,8 @@ d_1 &amp; 0   \\
 \end{bmatrix}
 \]</span>
 <video autoplay loop mutued playsinline>
-  <source src="./images/shear.webm" type="video/webm">
-  <source src="./images/shear.mp4" type="video/mp4">
+  <source src="../../images/shear.webm" type="video/webm">
+  <source src="../../images/shear.mp4" type="video/mp4">
 </video>
 
   </section>
