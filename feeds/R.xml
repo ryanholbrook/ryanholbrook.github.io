@@ -657,7 +657,7 @@ anim &lt;- animate(anim, renderer = gifski_renderer(),
 anim
 
 </code></pre>
-<video autoplay loop mutued playsinline>
+<video autoplay loop mutued playsinline controls>
   <source src="/images/imbalance_mix.webm" type="video/webm">
   <source src="/images/imbalance_mix.mp4" type="video/mp4">
   <source src="/images/imbalance_mix.ogg" type="video/ogg">

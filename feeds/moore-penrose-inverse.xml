@@ -97,9 +97,10 @@ A = \begin{bmatrix}
 \end{bmatrix} \]</span></p>
 <p>just like we had before.</p>
 <p>In an <a href="/posts/visualizing-linear-transformations/">earlier post</a>, we saw how we could use the SVD to visualize a matrix as a sequence of geometric transformations. Here is the matrix <span class="math inline">\(A\)</span> followed by <span class="math inline">\(A^{-1}\)</span>, acting on the unit circle:</p>
-<video autoplay loop mutued playsinline>
+<video autoplay loop mutued playsinline controls>
   <source src="../../images/invertible-equation.webm" type="video/webm">
   <source src="../../images/invertible-equation.mp4" type="video/mp4">
+  <source src="../../images/invertible-equation.webm" type="video/ogg">
 </video>
 
 <p>The inverse matrix <span class="math inline">\(A^{-1}\)</span> reverses exactly the action of <span class="math inline">\(A\)</span>. The matrix <span class="math inline">\(A\)</span> will map any circle to a unique ellipse, with no overlap. So, <span class="math inline">\(A^{-1}\)</span> can map ellipses back to those same circles without any ambiguity. We don’t “lose information” by applying <span class="math inline">\(A\)</span>.</p>
@@ -151,9 +152,10 @@ A = \begin{bmatrix}
 1/4 &amp; 1/4 \end{bmatrix} \]</span></p>
 <p>This is the Moore-Penrose inverse of <span class="math inline">\(A\)</span>.</p>
 <p>Like we did for the invertible matrix before, let’s get an idea of what <span class="math inline">\(A\)</span> and <span class="math inline">\(A^+\)</span> are doing geometrically. Here they are acting on the unit circle:</p>
-<video autoplay loop mutued playsinline>
+<video autoplay loop mutued playsinline controls>
   <source src="../../images/dependent-equation.webm" type="video/webm">
   <source src="../../images/dependent-equation.mp4" type="video/mp4">
+  <source src="../../images/dependent-equation.ogg" type="video/ogg">
 </video>
 
 <p>Notice how <span class="math inline">\(A\)</span> now collapses the circle onto a one-dimensional space. This is a consequence of it having dependent columns. For matricies with dependent columns, its image will be of lesser dimension than the space it’s mapping into. Another way of saying this is that it has a non-trivial <a href="https://en.wikipedia.org/wiki/Kernel_(linear_algebra)">null space</a>. It “zeroes out” some of the dimensions in its domain during the transformation.</p>
