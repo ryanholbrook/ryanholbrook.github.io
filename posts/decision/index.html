@@ -184,10 +184,9 @@
 <p>Unless we have generated the data ourselves, we won’t usually be able to find the optimal boundary. Instead, we approximate it using a classifier. A good machine learning classifier tries to approximate the optimal boundary for a problem as closely as possible.</p>
 <p>In future posts, we will look at the approximating boundary created by various classification algorithms. We will investigate the strategy the classifier uses to create this boundary and how this boundary evolves as the classifier is trained on more and more data. There are many classification algorithms available to a data scientist – regression, discriminant analysis, decision trees, neural networks, to name a few – and it is important to understand which algorithm is appropritate for the problem at hand. Decision boundaries can help us to do this.</p>
 <video autoplay loop mutued playsinline>
-  <source src="../../images/rf_mix.mp4" type="video/mp4">
+  <source src="../../images/rf_mix.mp4">
 </video>
 
-<p><img src="../../images/rf_mix.gif" /></p>
 <h1 id="optimal-boundaries">Optimal Boundaries</h1>
 <p>A classification problem asks: given some observations of a thing, what is the best way to assign that thing to a class based on some of its features? For instance, we might want to predict whether a person will like a movie or not based on some data we have about them, the “features” of that person.</p>
 <p>A solution to the classification problem is a rule that partitions the features and assigns each all the features of a partition to the same class. The “boundary” of this partitioning is the <strong>decision boundary</strong> of the rule.</p>
