@@ -568,7 +568,9 @@ for i, ts in enumerate(thetas):
 <p>In this post, we will look at a problem’s <em>optimal</em> decision boundary, which we can find when we know exactly how our data was generated. The optimal decision boundary represents the “best” solution possible for that problem. Consequently, by looking at the complexity of this boundary and at how much error it produces, we can get an idea of the inherent difficulty of the problem.</p>
 <p>Unless we have generated the data ourselves, we won’t usually be able to find the optimal boundary. Instead, we approximate it using a classifier. A good machine learning classifier tries to approximate the optimal boundary for a problem as closely as possible.</p>
 <p>In future posts, we will look at the approximating boundary created by various classification algorithms. We will investigate the strategy the classifier uses to create this boundary and how this boundary evolves as the classifier is trained on more and more data. There are many classification algorithms available to a data scientist – regression, discriminant analysis, decision trees, neural networks, to name a few – and it is important to understand which algorithm is appropritate for the problem at hand. Decision boundaries can help us to do this.</p>
-<video autoplay loop mutued playsinline controls>
+<video autoplay loop mutued playsinline>
+  <source src="/images/rf_mix.webm">
+  <source src="/images/rf_mix.mp4">
   <source src="/images/rf_mix.ogv">
 </video>
 
