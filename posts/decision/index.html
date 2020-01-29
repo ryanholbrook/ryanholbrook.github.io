@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Optimal Boundaries</title>
+    <title>Optimal Decision Boundaries</title>
     <link href="https://fonts.googleapis.com/css?family=Merriweather:400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro&display=swap" rel="stylesheet"> 
     <link href="https://unpkg.com/primer/build/build.css" rel="stylesheet">
@@ -84,7 +84,7 @@
                 <ul>
     
         <li>
-          <a href="../../posts/decision/">Optimal Boundaries</a>
+          <a href="../../posts/decision/">Optimal Decision Boundaries</a>
         </li>
     
         <li>
@@ -135,11 +135,11 @@
     <!-- Post Header  -->
 <div class="Subhead">
   <div class="Subhead-heading">
-      <h2 class="mt-3 mb-1"><a id="post-title" href="../../posts/decision/">Optimal Boundaries</a></h2>
+      <h2 class="mt-3 mb-1"><a id="post-title" href="../../posts/decision/">Optimal Decision Boundaries</a></h2>
   </div>
   <div class="Subhead-description">
     
-      <a href="../../tags/R/">R</a>, <a href="../../tags/classification/">classification</a>
+      <a href="../../tags/R/">R</a>, <a href="../../tags/classification/">classification</a>, <a href="../../tags/decision-boundaries/">decision-boundaries</a>, <a href="../../tags/data-science/">data-science</a>
     
     <div class="float-md-right" style="text-align=right">
       Published: January  9, 2020
@@ -184,8 +184,7 @@
 <p>Unless we have generated the data ourselves, we won’t usually be able to find the optimal boundary. Instead, we approximate it using a classifier. A good machine learning classifier tries to approximate the optimal boundary for a problem as closely as possible.</p>
 <p>In future posts, we will look at the approximating boundary created by various classification algorithms. We will investigate the strategy the classifier uses to create this boundary and how this boundary evolves as the classifier is trained on more and more data. There are many classification algorithms available to a data scientist – regression, discriminant analysis, decision trees, neural networks, to name a few – and it is important to understand which algorithm is appropritate for the problem at hand. Decision boundaries can help us to do this.</p>
 <video autoplay loop mutued playsinline>
-  <source src="../../images/rf_mix.webm" type="video/webm">
-  <source src="../../images/rf_mix.mp4" type="video/mp4">
+  <source src="../../images/rf_mix.gif" type="video/gif">
 </video>
 
 <h1 id="optimal-boundaries">Optimal Boundaries</h1>
@@ -799,7 +798,7 @@ anim
             <div id="side">
               <div>
                 <h1>Tags</h1>
-                <a style="font-size: 105%" href="../../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../../tags/category-theory/">category-theory</a> <a style="font-size: 100%" href="../../tags/classification/">classification</a> <a style="font-size: 100%" href="../../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../../tags/cql/">cql</a> <a style="font-size: 105%" href="../../tags/data-science/">data-science</a> <a style="font-size: 100%" href="../../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../../tags/engrams/">engrams</a> <a style="font-size: 105%" href="../../tags/finance/">finance</a> <a style="font-size: 100%" href="../../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../../tags/generalized-inverse/">generalized-inverse</a> <a style="font-size: 100%" href="../../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../../tags/investing/">investing</a> <a style="font-size: 100%" href="../../tags/julia/">julia</a> <a style="font-size: 100%" href="../../tags/least-squares/">least-squares</a> <a style="font-size: 115%" href="../../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../../tags/linear-equations/">linear-equations</a> <a style="font-size: 100%" href="../../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../../tags/memory/">memory</a> <a style="font-size: 100%" href="../../tags/moore-penrose-inverse/">moore-penrose-inverse</a> <a style="font-size: 100%" href="../../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../../tags/numpy/">numpy</a> <a style="font-size: 100%" href="../../tags/python/">python</a> <a style="font-size: 110%" href="../../tags/R/">R</a> <a style="font-size: 100%" href="../../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../../tags/review/">review</a> <a style="font-size: 100%" href="../../tags/sage/">sage</a> <a style="font-size: 100%" href="../../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../../tags/talk/">talk</a> <a style="font-size: 100%" href="../../tags/tensors/">tensors</a> <a style="font-size: 110%" href="../../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../../tags/vectors/">vectors</a>
+                <a style="font-size: 105%" href="../../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../../tags/category-theory/">category-theory</a> <a style="font-size: 100%" href="../../tags/classification/">classification</a> <a style="font-size: 100%" href="../../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../../tags/cql/">cql</a> <a style="font-size: 110%" href="../../tags/data-science/">data-science</a> <a style="font-size: 100%" href="../../tags/decision-boundaries/">decision-boundaries</a> <a style="font-size: 100%" href="../../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../../tags/engrams/">engrams</a> <a style="font-size: 105%" href="../../tags/finance/">finance</a> <a style="font-size: 100%" href="../../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../../tags/generalized-inverse/">generalized-inverse</a> <a style="font-size: 100%" href="../../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../../tags/investing/">investing</a> <a style="font-size: 100%" href="../../tags/julia/">julia</a> <a style="font-size: 100%" href="../../tags/least-squares/">least-squares</a> <a style="font-size: 115%" href="../../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../../tags/linear-equations/">linear-equations</a> <a style="font-size: 100%" href="../../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../../tags/memory/">memory</a> <a style="font-size: 100%" href="../../tags/moore-penrose-inverse/">moore-penrose-inverse</a> <a style="font-size: 100%" href="../../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../../tags/numpy/">numpy</a> <a style="font-size: 100%" href="../../tags/python/">python</a> <a style="font-size: 110%" href="../../tags/R/">R</a> <a style="font-size: 100%" href="../../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../../tags/review/">review</a> <a style="font-size: 100%" href="../../tags/sage/">sage</a> <a style="font-size: 100%" href="../../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../../tags/talk/">talk</a> <a style="font-size: 100%" href="../../tags/tensors/">tensors</a> <a style="font-size: 110%" href="../../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../../tags/vectors/">vectors</a>
               </div>
               <div>
                 <h1>Links</h1>

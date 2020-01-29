@@ -5,7 +5,7 @@
         <title>Math for Machines</title>
         <link>https://mathformachines.com</link>
         <description><![CDATA[A blog about data science and machine learning, with a lot of math.]]></description>
-        <atom:link href="https://mathformachines.com/feeds/classification.xml" rel="self"
+        <atom:link href="https://mathformachines.com/feeds/decision-boundaries.xml" rel="self"
                    type="application/rss+xml" />
         <lastBuildDate>Thu, 09 Jan 2020 00:00:00 UT</lastBuildDate>
         <item>
