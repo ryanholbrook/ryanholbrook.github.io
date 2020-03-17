@@ -569,16 +569,15 @@ for i, ts in enumerate(thetas):
 <p>Unless we have generated the data ourselves, we won’t usually be able to find the optimal boundary. Instead, we approximate it using a classifier. A good machine learning classifier tries to approximate the optimal boundary for a problem as closely as possible.</p>
 <p>In future posts, we will look at the approximating boundary created by various classification algorithms. We will investigate the strategy the classifier uses to create this boundary and how this boundary evolves as the classifier is trained on more and more data. There are many classification algorithms available to a data scientist – regression, discriminant analysis, decision trees, neural networks, to name a few – and it is important to understand which algorithm is appropritate for the problem at hand. Decision boundaries can help us to do this.</p>
 <video autoplay loop mutued playsinline>
-  <source src="/images/rf_mix.mp4" type="video/mp4">
   <source src="/images/rf_mix.webm" type="video/webm">
-  <source src="/images/rf_mix.ogv" type="video/ogg">
+  <source src="/images/rf_mix.mp4" type="video/mp4">
   Can't play the video for some reason! Click <a href="/images/rf_mix.gif">here</a> to download a gif.
 </video>
 
 <h1 id="optimal-boundaries">Optimal Boundaries</h1>
 <p>A classification problem asks: given some observations of a thing, what is the best way to assign that thing to a class based on some of its features? For instance, we might want to predict whether a person will like a movie or not based on some data we have about them, the “features” of that person.</p>
 <p>A solution to the classification problem is a rule that partitions the features and assigns each all the features of a partition to the same class. The “boundary” of this partitioning is the <strong>decision boundary</strong> of the rule.</p>
-<p>It might be that two observations have exactly the same features, but are assigned to different classes. (Two things that look the same in the ways we’ve observed might differ in ways we haven’t observed.) In terms of probabilities this means both <span class="math display">\[P(C = 0 \mid X) \gt 0\]</span> and <span class="math display">\[P(C = 1 \mid X) \gt 0\]</span>. In other words, we might not be able with full certainty to classify an observation. We could however assign the observation to its <em>most probable</em> class. This gives us the decision rule <span class="math display">\[ \hat{C} = \operatorname*{argmax}_c P(C = c \mid X) \]</span></p>
+<p>It might be that two observations have exactly the same features, but are assigned to different classes. (Two things that look the same in the ways we’ve observed might differ in ways we haven’t observed.) In terms of probabilities this means both <span class="math display">\[P(C = 0 \mid X) \gt 0\]</span> and <span class="math display">\[P(C = 1 \mid X) \gt 0\]</span> In other words, we might not be able with full certainty to classify an observation. We could however assign the observation to its <em>most probable</em> class. This gives us the decision rule <span class="math display">\[ \hat{C} = \operatorname*{argmax}_c P(C = c \mid X) \]</span></p>
 <p>The boundary that this rule produces is the <strong>optimal decision boundary</strong>. It is the <a href="https://en.wikipedia.org/wiki/Maximum_a_posteriori_estimation">MAP estimate</a> of the class label, and it is the rule that minimizes classification error under the <a href="https://en.wikipedia.org/wiki/Loss_function#0-1_loss_function">zero-one loss function</a>. We will look at error and loss more in a future post.</p>
 <p>We will consider <em>binary</em> classification problems, meaning, there will only be two possible classes, 0 or 1. For a binary classification problem, the optimal boundary occurs at those points where each class is equally probable: <span class="math display">\[ P(C = 0 \mid X) = P(C = 1 \mid X) \]</span></p>
 <h1 id="prepare-r">Prepare R</h1>
@@ -1150,6 +1149,246 @@ anim
 <p>Hope you enjoyed it!</p>]]></description>
     <pubDate>Thu, 09 Jan 2020 00:00:00 UT</pubDate>
     <guid>https://mathformachines.com/posts/decision/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+<item>
+    <title>Naive Bayes Classifiers</title>
+    <link>https://mathformachines.com/posts/naive-bayes/index.html</link>
+    <description><![CDATA[<p>We saw in the post on <a href="./posts/decision/">optimal decision boundaries</a> that the optimal boundary (under <a href="https://en.wikipedia.org/wiki/Loss_function#0-1_loss_function">zero-one loss</a>) is produced by a rule that assigns to an observation the <em>most probable</em> class <span class="math inline">\(c\)</span> given the observed features <span class="math inline">\(X\)</span>:</p>
+<p><span class="math display">\[ \hat{C} = \operatorname*{argmax}_c P(C = c \mid X) \]</span></p>
+<p>Recall that <a href="https://en.wikipedia.org/wiki/Bayes%27_theorem">Bayes’ theorem</a> tells us that this probability <span class="math inline">\(P(C = c \mid X)\)</span> is proportionate to <span class="math inline">\(P(X \mid C = c) P(C = c)\)</span>. To estimate this optimal classification rule, therefore, a classifier will often attempt to estimate either the maximum of <span class="math inline">\(P(X \mid C = c) P(C = c)\)</span> (a <a href="https://en.wikipedia.org/wiki/Maximum_a_posteriori_estimation">MAP</a> estimate) or only <span class="math inline">\(P(X \mid C = c)\)</span> (an <a href="https://en.wikipedia.org/wiki/Maximum_likelihood_estimation">MLE</a> estimate). These estimates converge as the sample size grows.</p>
+<p>One kind of classifier will make these estimations by modeling the class-conditional distributions for the features (that is, <span class="math inline">\(P(X \mid C = c)\)</span>) as <a href="https://en.wikipedia.org/wiki/Normal_distribution">Normal (or Gaussian) distributions</a> <span class="math inline">\(Normal(\mu_c, \Sigma_c)\)</span> and then using <a href="https://en.wikipedia.org/wiki/Plug-in_principle">plug-in</a> estimates for <span class="math inline">\(P(X)\)</span> and the parameters <span class="math inline">\(\mu_c\)</span> and <span class="math inline">\(\Sigma_c\)</span>. This technique is called <strong>Gaussian discriminant analysis</strong> (GDA).</p>
+<h1 id="naive-bayes-classifiers">Naive Bayes Classifiers</h1>
+<p>The first kind of classifier of this type we will consider is the <strong>naive Bayes</strong> classifier. A naive Bayes classifier, in addition to assuming a distribution for <span class="math inline">\(P(X \mid C = c)\)</span>, also assumes that the features are <a href="https://en.wikipedia.org/wiki/Conditional_independence">conditionally independent</a>. If <span class="math inline">\(X\)</span> is a vector of two features, <span class="math inline">\(X = (X_1, Y_1)\)</span>, this means we can write <span class="math display">\[ P(X \mid C = c) = P(X_1 \mid C = c) P(X_2 \mid C = c) \]</span></p>
+<p>This makes computing <span class="math inline">\(P(X \mid C = c)\)</span> especially easy.</p>
+<p>A naive Bayes classifier can model <span class="math inline">\(P(X_i \mid C = c)\)</span> with a variety of distributions. When the features are binary, it might make sense to use a <a href="https://en.wikipedia.org/wiki/Bernoulli_distribution">Bernoulli distribution</a>, for instance. Our features will be real-valued, though, and we will model the features with normal distributions.</p>
+<p>Considered as a method of GDA, this means we are modeling the class conditional distributions with <a href="https://en.wikipedia.org/wiki/Multivariate_normal_distribution">MVNs</a> <span class="math inline">\(Normal(\mu_c | \Sigma_c)\)</span> where each <a href="https://en.wikipedia.org/wiki/Covariance_matrix">covariance matrix</a> is <a href="https://en.wikipedia.org/wiki/Diagonal_matrix">diagonal</a>. (Recall that the off-diagonal entries of <span class="math inline">\(\Sigma_c\)</span> express the covariance between two features, while the diagonal entries of the matrix expresses the variance of individual features. Since we are assuming the features are independent, <a href="https://en.wikipedia.org/wiki/Correlation_and_dependence#Correlation_and_independence">they must also be uncorrelated</a>; hence, only diagonal entries can be non-zero.)</p>
+<h2 id="example-1---independent-features">Example 1 - Independent Features</h2>
+<p>Let’s first fit a Naive bayes classifier to a data set where the data is actually generated exactly how the NB classifier assumes it will be. Our model will be</p>
+<table>
+<tbody>
+<tr class="odd">
+<td>Classes</td>
+<td><span class="math inline">\(C \sim \operatorname{Bernoulli}(p)\)</span></td>
+</tr>
+<tr class="even">
+<td>Features for Class 0</td>
+<td><span class="math inline">\((X, Y) \mid C = 0 \sim \operatorname{Normal}(\mu_0, \Sigma_0)\)</span></td>
+</tr>
+<tr class="odd">
+<td>Features for Class 1</td>
+<td><span class="math inline">\((X, Y) \mid C = 1 \sim \operatorname{Normal}(\mu_0, \Sigma_1)\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>where</p>
+<table>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(p = 0.5\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mu_0 = (0, 2)\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\Sigma_0 = \begin{bmatrix}1 &amp; 0 \\ 0 &amp; 1.5\end{bmatrix}\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mu_1 = (2, 0)\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\Sigma_1 = \begin{bmatrix}2 &amp; 0 \\ 0 &amp; 1\end{bmatrix}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>First let’s define the parameters and generate a sample of 4000 points and then also plot the optimal boundary. (All the necessary functions were defined in the previous post. You can find the code here: )</p>
+<pre class="r"><code>p &lt;- 0.5
+mu_0 &lt;- c(0, 2)
+sigma_0 &lt;- matrix(c(1, 0, 0, 1.5), nrow = 2)
+mu_1 &lt;- c(2, 0)
+sigma_1 &lt;- matrix(c(2, 0, 0, 1), nrow = 2)
+
+n &lt;- 4000
+set.seed(31415)
+sample_mvn &lt;- make_mvn_sample(n,
+                              mu_0, sigma_0,
+                              mu_1, sigma_1,
+                              p)
+density_mvn &lt;- make_density_mvn(mu_0, sigma_0,
+                                mu_1, sigma_1,
+                                p,
+                                -3, 5, -3, 5)
+
+
+(ggplot() +
+ gg_density(density_mvn, z = p_0_xy,
+            alpha = 0.25) +
+ gg_density(density_mvn, z = p_1_xy,
+            alpha = 0.25) +
+ gg_optimal(density_mvn)) +
+(ggplot() +
+ gg_sample(sample_mvn, alpha = 0.25) +
+ gg_optimal(density_mvn)) +
+plot_annotation(&quot;The Optimal Decision Boundary&quot;)
+</code></pre>
+<p>We see as before that the optimal boundary runs through points of intersection of the contours. The fact that our features are independent means that the contours can “spread out” only horizontally or vertically. I mean that the major-axis of the ellipse drawn has to be either horizontal or vertical. A diagonal spread would mean that the features were correlated and not independent.</p>
+<p>Now let’s look at how the classifier fits on this data.</p>
+<pre class="r"><code>fit_mvn_nb &lt;- naivebayes::naive_bayes(factor(class) ~ x + y, data = sample_mvn)
+pred_mvn_nb &lt;- predict(fit_mvn_nb, newdata = density_mvn[, c(&quot;x&quot;, &quot;y&quot;)], type = &quot;prob&quot;)
+density_mvn_nb &lt;- cbind(density_mvn, &quot;fitted&quot; = pred_mvn_nb[, &quot;1&quot;] - 0.5)
+
+gg_plot_boundary(density_mvn_nb, sample_mvn, title = &quot;Naive Bayes&quot;)
+
+anim &lt;- animate_boundary(sample_mvn, density_mvn, 10, fit_and_predict_nb)
+anim_save(&quot;/home/jovyan/work/bayeserror/nb_mvn_perfect.gif&quot;)
+#+end_src r
+
+So, we can see that the model fits the optimal boundary quite well.
+
+
+Here is a confusion matrix. Accurate classification almost 99% of the time.
+
+#+begin_src r
+density_mvn_nb[, &quot;assigned&quot;] &lt;- ifelse(density_mvn_nb$fitted &gt; 0, 1, 0)
+
+caret::confusionMatrix(factor(density_mvn_nb$class),
+                       factor(density_mvn_nb$assigned))
+</code></pre>
+<h2 id="example-2---dependent-features">Example 2 - Dependent Features</h2>
+<p>What happens when the features are correlated within each class? Let’s have our data model now be</p>
+<table>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(p = 0.5\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mu_0 = (0, 2)\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\Sigma_0 = \begin{bmatrix}1 &amp; 0.5 \\ 0.5 &amp; 1.5\end{bmatrix}\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mu_1 = (2, 0)\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\Sigma_1 = \begin{bmatrix}2 &amp; -0.5 \\ -0.5 &amp; 1\end{bmatrix}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Note that the covariance matrices now have non-zero off-diagonal entries: the features are correlated.</p>
+<pre class="r"><code>p &lt;- 0.5
+mu_0 &lt;- c(0, 2)
+sigma_0 &lt;- matrix(c(2, -0.5, -0.5, 1), nrow = 2)
+mu_1 &lt;- c(2, 0)
+sigma_1 &lt;- matrix(c(1, 0.5, 0.5, 1.5), nrow = 2)
+
+n &lt;- 4000
+set.seed(31415)
+sample_mvn &lt;- make_mvn_sample(n,
+                              mu_0, sigma_0,
+                              mu_1, sigma_1,
+                              p)
+density_mvn &lt;- make_density_mvn(mu_0, sigma_0,
+                                mu_1, sigma_1,
+                                p,
+                                -3, 5, -3, 5)
+
+
+(ggplot() +
+ gg_density(density_mvn, z = p_0_xy,
+            alpha = 0.25) +
+ gg_density(density_mvn, z = p_1_xy,
+            alpha = 0.25) +
+ gg_optimal(density_mvn)) +
+(ggplot() +
+ gg_sample(sample_mvn, alpha = 0.25) +
+ gg_optimal(density_mvn)) +
+plot_annotation(&quot;The Optimal Decision Boundary&quot;)
+</code></pre>
+<p>The optimal boundary is not too different.</p>
+<pre class="r"><code>fit_mvn_nb &lt;- naivebayes::naive_bayes(factor(class) ~ x + y, data = sample_mvn)
+pred_mvn_nb &lt;- predict(fit_mvn_nb, newdata = density_mvn[, c(&quot;x&quot;, &quot;y&quot;)], type = &quot;prob&quot;)
+density_mvn_nb &lt;- cbind(density_mvn, &quot;fitted&quot; = pred_mvn_nb[, &quot;1&quot;] - 0.5)
+gg_plot_boundary(density_mvn_nb, sample_mvn, title = &quot;Naive Bayes&quot;)
+
+anim &lt;- animate_boundary(sample_mvn, density_mvn, 10, fit_and_predict_nb)
+
+anim_save(&quot;/home/jovyan/work/bayeserror/nb_mvn_dependent.gif&quot;)
+</code></pre>
+<p>But the naive Bayes classifier isn’t able to get a as exact of a fit this time.</p>
+<p>Here is a confusion matrix. Now only accurate about 86% of the time.</p>
+<pre class="r"><code>density_mvn_nb[, &quot;assigned&quot;] &lt;- ifelse(density_mvn_nb$fitted &gt; 0, 1, 0)
+
+caret::confusionMatrix(factor(density_mvn_nb$class),
+                       factor(density_mvn_nb$assigned))
+</code></pre>
+<h2 id="example-3---the-misspecified-model">Example 3 - The Misspecified Model</h2>
+<p>How badly does the model degrade as the features depart from independence? To investigate, let’s see how the fitted boundary changes as we vary the dependence structure in each class.</p>
+<pre class="r"><code>
+</code></pre>
+<pre class="r"><code>fit_mvn_nb &lt;- naivebayes::naive_bayes(factor(class) ~ x + y, data = sample_mvn)
+pred_mvn_nb &lt;- predict(fit_mvn_nb, newdata = density_mvn[, c(&quot;x&quot;, &quot;y&quot;)], type = &quot;prob&quot;)
+density_mvn_nb &lt;- cbind(density_mvn, &quot;fitted&quot; = pred_mvn_nb[, &quot;1&quot;] - 0.5)
+gg_plot_boundary(density_mvn_nb, sample_mvn, title = &quot;Naive Bayes&quot;)
+
+fit_mix_nb &lt;- naivebayes::naive_bayes(factor(class) ~ x + y, data = sample_mix, kernel = TRUE)
+pred_mix_nb &lt;- predict(fit_mix_nb, newdata = density_mix[, c(&quot;x&quot;, &quot;y&quot;)], type = &quot;prob&quot;)
+density_mix_nb &lt;- cbind(density_mix, &quot;fitted&quot; = pred_mix_nb[, &quot;1&quot;] - 0.5)
+
+gg_plot_boundary(density_mix_nb, sample_mix, title = &quot;Naive Bayes&quot;)
+
+
+fit_and_predict_nb &lt;- function(sample, density) {
+    fit_nb &lt;- naivebayes::naive_bayes(factor(class) ~ x + y, data = sample)
+    pred_nb &lt;- predict(fit_nb, newdata = density[, c(&quot;x&quot;, &quot;y&quot;)], type = &quot;prob&quot;)
+    density_nb &lt;- cbind(density, &quot;fitted&quot; = pred_nb[, &quot;1&quot;])
+    density_nb
+}
+
+anim &lt;- animate_boundary(sample_mvn, density_mvn, 10, fit_and_predict_nb)
+anim_save(&quot;/home/jovyan/work/bayeserror/nb_mvn.gif&quot;)
+
+anim &lt;- animate_boundary(sample_mixn, density_mix, 100, fit_and_predict_nb)
+anim_save(&quot;/home/jovyan/work/bayeserror/nb_mix.gif&quot;)
+</code></pre>
+<h1 id="linear-discriminant-analysis">Linear Discriminant Analysis</h1>
+<pre class="r"><code>
+fit_lda &lt;- MASS::lda(class ~ x + y, data = density_mvn)
+pred_lda &lt;- predict(fit_lda, newdata = density_mvn)
+density_lda &lt;- cbind(density_mvn, &quot;fitted&quot; = pred_lda$posterior[, &quot;1&quot;] - 0.5)
+</code></pre>
+<h1 id="quadratic-discriminant-analysis">Quadratic Discriminant Analysis</h1>
+<pre class="r"><code>
+fit_mvn_qda &lt;- MASS::qda(class ~ x + y, data = sample_mvn)
+pred_mvn_qda &lt;- predict(fit_mvn_qda, newdata = density_mvn)
+density_mvn_qda &lt;- cbind(density_mvn, &quot;fitted&quot; = pred_mvn_qda$posterior[, &quot;1&quot;] - 0.5)
+gg_plot_boundary(density_mvn_qda, sample_mvn, title = &quot;QDA&quot;)
+
+fit_mvn_qda &lt;- MASS::qda(class ~ x + y, data = sample_mvn)
+pred_mvn_qda &lt;- predict(fit_mvn_qda, newdata = density_mvn)
+density_mvn_qda &lt;- cbind(density_mvn, &quot;fitted&quot; = pred_mvn_qda$posterior[, &quot;1&quot;] - 0.5)
+gg_plot_boundary(density_mvn_qda, sample_mvn, title = &quot;QDA&quot;)
+
+
+fit_and_predict_qda &lt;- function(sample, density) {
+    fit_qda &lt;- MASS::qda(class ~ x + y, data = sample)
+    pred_qda &lt;- predict(fit_qda, newdata = density)
+    density_qda &lt;- cbind(density, &quot;fitted&quot; = pred_qda$posterior[, &quot;1&quot;])
+    density_qda
+}
+
+anim_mvn_qda &lt;- animate_boundary(sample_mvn, density_mvn, 10, fit_and_predict_qda)
+
+anim_save(&quot;/home/jovyan/work/bayeserror/qda_mvn.gif&quot;)
+
+anim_mix_qda &lt;- animate_boundary(sample_mix, density_mix, 10, fit_and_predict_qda)
+
+anim_save(&quot;/home/jovyan/work/bayeserror/qda_mix.gif&quot;)
+</code></pre>
+<h1 id="conclusion">Conclusion</h1>
+<p>All of these classifiers involved trade-offs.</p>]]></description>
+    <pubDate>Sun, 09 Feb 2020 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/naive-bayes/index.html</guid>
     <dc:creator>Ryan Holbrook</dc:creator>
 </item>
 
