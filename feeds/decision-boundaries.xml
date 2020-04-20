@@ -599,6 +599,139 @@ anim
     <guid>https://mathformachines.com/posts/decision/index.html</guid>
     <dc:creator>Ryan Holbrook</dc:creator>
 </item>
+<item>
+    <title>Six Varieties of Gaussian Discriminant Analysis</title>
+    <link>https://mathformachines.com/posts/discriminant-analysis/index.html</link>
+    <description><![CDATA[<div class="HEADER drawer">
+
+</div>
+<h1 id="introduction">Introduction</h1>
+<p><strong>Gaussian Discriminant Analysis (GDA)</strong> is the name for a family of classifiers that includes the well-known <a href="https://en.wikipedia.org/wiki/Linear_discriminant_analysis">linear</a> and <a href="https://en.wikipedia.org/wiki/Quadratic_classifier#Quadratic_discriminant_analysis">quadratic</a> classifiers. These classifiers use class-conditional normal distributions as the data model for their observed features:</p>
+<p><span class="math display">\[(X \mid C = c) \sim Normal(\mu_c, \Sigma_c) \]</span></p>
+<p>As we saw in the post on <a href="https://mathformachines.com/posts/decision/">optimal decision boundaries</a>, the classification problem is solved by maximizing the posterior probability of class <span class="math inline">\(C=c\)</span> given the observed data <span class="math inline">\(X\)</span>. From <a href="https://en.wikipedia.org/wiki/Bayes&#39;_theorem">Bayes’ theorem</a>, the addition of class distributions to our model then determines the problem completely:</p>
+<p><span class="math display">\[ p(C = c \mid X) = \frac{p(X \mid C = c)p(C=c)}{\Sigma_{c&#39;} p(X \mid C = c&#39;)p(C=c&#39;)} \]</span></p>
+<p>A typical set of class-conditional distributions for a binary classification problem might look like this:</p>
+<figure>
+<img src="/images/feature-distributions.png" title="feature-distributions" alt="Left: A sample from the feature distributions for the two-class case. Right: Their densities." width="800" /><figcaption><strong>Left:</strong> A sample from the feature distributions for the two-class case. <strong>Right:</strong> Their densities.</figcaption>
+</figure>
+<p>The classification problem then is to draw a boundary that optimally separates the two distributions.</p>
+<p>Typically, this boundary is formed by comparing <em>discriminant functions</em>, obtained by plugging in normal densities into the Bayes’ formula above. For a given observation, these discriminant functions assign a score to each class; the class with the highest score is the class chosen for that observation.</p>
+<p>In the most general case, the discriminant function looks like this:</p>
+<p><span class="math display">\[ \delta_c(x) = -\frac{1}{2} \log \lvert\Sigma_c\rvert - \frac{1}{2}(x-\mu_c)^\top \Sigma_c^{-1}(x-\mu_c) + \log \pi_c \]</span></p>
+<p>where <span class="math inline">\(\pi_c = p(C = c)\)</span> is the prior probability of class <span class="math inline">\(c\)</span>. The optimal decision boundary is formed where the contours of the class-conditional densities intersect – because this is where the classes’ discriminant functions are equal – and it is the covariance matricies <span class="math inline">\(\Sigma_k\)</span> that determine the shape of these contours. And so, by making additional assumptions about how the covariance should be modeled, we can try to tune the performance of our classifier to the data of interest.</p>
+<p>In this post, we’ll look at a few simple assumptions we can make about <span class="math inline">\(\Sigma_k\)</span> and how that affects the kinds of decisions the classifier will arrive at. In particular, we’ll see that there are <em>six kinds</em> of models we can produce depending on <em>three</em> different assumptions.</p>
+<figure>
+<video autoplay loop mutued playsinline class="wide">
+  <source src="/images/fitting.webm" type="video/webm">
+  <source src="/images/fitting.mp4" type="video/mp4">
+  Can't play the video for some reason! Click <a href="/images/fitting_lda.gif">here</a> and <a href="/images/fitting_qda.gif">here</a> to download a gif.
+</video>
+<figcaption>The decision boundaries of two GDA models. <b>Left:</b> Quadratic discriminant analysis. <b>Right:</b> Linear discriminant analysis.</figcaption>
+</figure>
+
+<h1 id="three-questionssix-kinds">Three Questions/Six Kinds</h1>
+<p>Let’s phrase these assumptions as questions. The first question regards the relationship between the covariance matricies of all the classes. The second and third are about the relationship of the features within a class.</p>
+<p><strong>I.</strong> Are all the covariance matrices modeled separately, or is there one that they share? If separate, then the decision boundaries will be <em>quadratic</em>. If shared, then the decision boundaries will be <em>linear</em>. (<em>Separate</em> means <span class="math inline">\(\Sigma_c \neq \Sigma_d\)</span> when <span class="math inline">\(c \neq d\)</span>. <em>Shared</em> means <span class="math inline">\(\Sigma_c = \Sigma\)</span> for all <span class="math inline">\(c\)</span>.)</p>
+<figure>
+<img src="/images/quadratic-linear.png" title="quadratic-linear" alt="Left: A quadratic decision boundary. Right: A linear decision boundary." width="800" /><figcaption><strong>Left:</strong> A quadratic decision boundary. <strong>Right:</strong> A linear decision boundary.</figcaption>
+</figure>
+<p><strong>II.</strong> May the features within a class be correlated? If correlated, then the elliptical contours of the distribution will be at an angle. If independent, then they can only vary independently along each axis (up and down, left and right). (<em>Independent</em> means <span class="math inline">\(\Sigma_k\)</span> is a diagonal matrix for all <span class="math inline">\(k\)</span>.)</p>
+<figure>
+<img src="/images/correlated-uncorrelated.png" title="correlated-uncorrelated" alt="Left: Distribution with correlated features. Right: Distribution with uncorrelated features." width="800" /><figcaption><strong>Left:</strong> Distribution with <em>correlated</em> features. <strong>Right:</strong> Distribution with <em>uncorrelated</em> features.</figcaption>
+</figure>
+<p><strong>III.</strong> If the features within a class are uncorrelated, might they still differ by their standard deviations? If so, then the contours of the distribution can be <em>elliptical</em>. If not, then the contours will be <em>spherical</em>. (“No” means <span class="math inline">\(\Sigma_k = \sigma_k I\)</span> for each <span class="math inline">\(k\)</span>, a multiple of the identity matrix.)</p>
+<figure>
+<img src="/images/elliptical-spherical.png" title="elliptical-spherical" alt="Left: An elliptical feature distribution. Right: Spherical feature distribution." width="800" /><figcaption><strong>Left:</strong> An elliptical feature distribution. <strong>Right:</strong> Spherical feature distribution.</figcaption>
+</figure>
+<p>This gives us <em>six</em> different kinds of Gaussian disciminant analysis.</p>
+<figure>
+<img src="/images/six-kinds.png" title="six-kinds" alt="Upper Row: QDA, Diagonal QDA, Spherical QDA. Lower Row: LDA, Diagonal LDA, Spherical LDA." width="1600" /><figcaption><strong>Upper Row:</strong> QDA, Diagonal QDA, Spherical QDA. <strong>Lower Row:</strong> LDA, Diagonal LDA, Spherical LDA.</figcaption>
+</figure>
+<p>The more “no”s to these questions, the more restrictive the model is, and the more stable its decision boundary will be.</p>
+<p>Whether this is good or bad depends on the data to which the model is applied. If there are a large number of observations relative to the number of features (a very <em>long</em> dataset), then the data can support a model with weaker assumptions. More flexible models require larger datasets in order to learn properties of the distributions that were not “built-in” by assumptions. The payoff is that there is less chance that the resulting model will differ a great deal from the true model.</p>
+<p>But a model with the regularizing effect of strong assumptions might perform better when the number of observations is small relative to the number of features (a very <em>wide</em> dataset). Especially in high dimenions, the data may be so sparse that the classes are still well-separated by linear boundaries, even if the true boundaries are not linear. In very high-dimensional spaces (<span class="math inline">\(p &gt; N\)</span>, there is not even enough data to obtain the MLE estimate, in which case some kind of regularization is necessary to even begin the problem.</p>
+<p>So so that we know what kinds of assumptions we can make about <span class="math inline">\(\Sigma_k\)</span>, let’s take a look at how they affect the properties of the classifier.</p>
+<h2 id="quadratic-vs-linear">Quadratic vs Linear</h2>
+<p>The most common distinction in discriminant classifiers is the distinction between those that have <em>quadratic</em> boundaries and those that have <em>linear</em> boundaries. As mentioned, the former go by <em>quadratic discriminant analysis</em> and the latter by <em>linear discriminant analysis</em>.</p>
+<p>Recall the discriminant function for the general case:</p>
+<p><span class="math display">\[ \delta_c(x) = -\frac{1}{2}(x - \mu_c)^\top \Sigma_c^{-1} (x - \mu_c) - \frac{1}{2}\log |\Sigma_c| + \log \pi_c \]</span></p>
+<p>Notice that this is a quadratic function: <span class="math inline">\(x\)</span> occurs twice in the first term. We obtain the decision boundary between two classes <span class="math inline">\(c\)</span> and <span class="math inline">\(d\)</span> by setting equal their discriminant functions <span class="math inline">\( \delta_c(x) - \delta_d(x) = 0 \)</span>. The set of solutions to this equation is the decision boundary. Whenever the covariance matrices <span class="math inline">\(\Sigma_c\)</span> and <span class="math inline">\(\Sigma_d\)</span> are <em>distinct</em>, this will be a <a href="https://en.wikipedia.org/wiki/Quadric">quadric</a> equation forming a quadric surface. In two dimensions, these surfaces are the <a href="https://en.wikipedia.org/wiki/Conic_section">conic sections</a>: parabolas, hyperbolas, and ellipses.</p>
+<figure>
+<video autoplay loop mutued playsinline>
+  <source src="/images/quadratic_mean.webm" type="video/webm">
+  <source src="/images/quadratic_mean.mp4" type="video/mp4">
+  Can't play the video for some reason! Click <a href="/images/quadratic_mean.gif">here</a> to download a gif.
+</video>
+<figcaption>The optimal decision boundary generated by pairs of unequal covariance matrices.</figcaption> 
+</figure>
+
+<p>Now let’s assume the covariance matrix <span class="math inline">\(\Sigma\)</span> is the <em>same</em> for every class. After simplification of the equation <span class="math inline">\(\delta_c(x) - \delta_d(x) = 0\)</span>, there remains in this case only a single term depending on <span class="math inline">\(x\)</span></p>
+<p><span class="math display">\[ x^\top \Sigma^{-1}(\mu_c - \mu_d) \]</span></p>
+<p>which is <em>linear</em> in <span class="math inline">\(x\)</span>. This means the decision boundary is given by a <a href="https://en.wikipedia.org/wiki/System_of_linear_equations">linear equation</a>, and the boundary is a <a href="https://en.wikipedia.org/wiki/Hyperplane">hyperplane</a>, which in two dimensions is a line.</p>
+<figure>
+<video autoplay loop mutued playsinline>
+  <source src="/images/linear_mean.webm" type="video/webm">
+  <source src="/images/linear_mean.mp4" type="video/mp4">
+  Can't play the video for some reason! Click <a href="/images/linear_mean.gif">here</a> to download a gif.
+</video>
+<figcaption>The optimal decision bounary generated by two equal covariance matrices.</figcaption>
+</figure>
+
+<h2 id="correlated-vs-uncorrelated">Correlated vs Uncorrelated</h2>
+<p>The first question (quadratic vs. linear) concerned the relationship <em>between</em> the features of each class and thus determined the shape of the boundaries that separate them. The next two questions are about the classes individually. These questions concern the shape of the distributions themselves.</p>
+<p>The second question asks whether we model the features within a class as being correlated or not. Recall the form of a covariance matrix for two variables,</p>
+<p><span class="math display">\[\Sigma = \begin{bmatrix}\operatorname{Var}(X_1) &amp; \operatorname{Cov}(X_1, X_2) \\
+\operatorname{Cov}(X_2, X_1) &amp; \operatorname{Var}(X_2)\end{bmatrix}\]</span></p>
+<p>Whenever the RVs are <em>uncorrelated</em>, the covariance entries will equal 0, and the matrix becomes diagonal,</p>
+<p><span class="math display">\[\Sigma = \begin{bmatrix}\operatorname{Var}(X_1) &amp; 0 \\
+0 &amp; \operatorname{Var}(X_2)\end{bmatrix}\]</span></p>
+<p>In this case, each feature can only vary individually along its own axis. Thinking about the covariance matrix as a linear transformation, this means that the distribution’s elliptical contours are obtained through a <em>scaling transform</em> applied to circles. In other words, the contours can vary through stretching and shrinking along an axis, but <em>not</em> through a rotation.</p>
+<figure>
+<video autoplay loop mutued playsinline>
+  <source src="/images/uncorrelated.webm" type="video/webm">
+  <source src="/images/uncorrelated.mp4" type="video/mp4">
+  Can't play the video for some reason! Click <a href="/images/uncorrelated.gif">here</a> to download a gif.
+</video>
+<figcaption>The optimal decision bounary generated by two diagonal covariance matrices.</figcaption>
+</figure>
+
+<p>The boundaries formed are quadratic because the two distributions have unequal covariances. If we kept the covariance matrices the same, all of the boundaries would remain linear.</p>
+<p>When normally distributed variables are uncorrelated, they are also independent. This means that the diagonal models here are <a href="https://en.wikipedia.org/wiki/Naive_Bayes_classifier">Naive Bayes classifiers</a>.</p>
+<h2 id="elliptical-vs-spherical">Elliptical vs Spherical</h2>
+<p>The final question question concerns whether we put an additional constraint on diagonal covariance matricies, namely, whether we restrict the variances of the two features within a class to be equal. Calling this common variance <span class="math inline">\(\sigma^2\)</span>, such matrices look like</p>
+<p><span class="math display">\[\Sigma = \begin{bmatrix} \sigma^2 &amp; 0 \\
+0 &amp; \sigma^2 \end{bmatrix} = \sigma^2 \begin{bmatrix} 1 &amp; 0 \\ 0 &amp; 1 \end{bmatrix} = \sigma^2 I\]</span></p>
+<p>So, such matrices are simply scalar multiples of an identity matrix. The contours of the class-conditional distributions are spheres, and the decision boundaries themselves are also spherical.</p>
+<figure>
+<video autoplay loop mutued playsinline>
+  <source src="/images/spherical.webm" type="video/webm">
+  <source src="/images/spherical.mp4" type="video/mp4">
+  Can't play the video for some reason! Click <a href="/images/spherical.gif">here</a> to download a gif.
+</video>
+<figcaption>The optimal decision boundary generated by two covariance matricies that are multiples of the identity.</figcaption>
+</figure>
+
+<p>Applied to standardized observations, a model of this sort would simply classify observations based upon their distance to the class means. In this way, Spherical LDA is equivalent to the <strong><a href="https://en.wikipedia.org/wiki/Nearest_centroid_classifier">nearest centroid classifier</a></strong>.</p>
+<h1 id="model-mis-specification">Model Mis-specification</h1>
+<p>The performance of a classifier will depend on how well its decision rule models the true data-generating distribution. The GDA family attempts to model the true distribution directly, and its performance will depend on how closely the true distribution resembles the chosen <span class="math inline">\(Normal(\mu_c, \Sigma_c)\)</span>.</p>
+<p>What happens when the model diverges from the truth? Generally, the model will either not be flexible enough to fit the true decision boundary (inducing <a href="https://en.wikipedia.org/wiki/Bias_of_an_estimator">bias</a>), or it will be overly flexible and will tend to overfit the data (inducing <a href="https://en.wikipedia.org/wiki/Variance">variance</a>). In the first case, no amount of data will ever achieve the optimal error rate, while in the second case, the classifier does not use its data efficiently; in high dimensional domains, the amount of data needed to fit an under-specified model may be intractable.</p>
+<p>To get a sense for these phenomena, let’s observe the behavior of a few of our GDA classifiers when we fit them on another distribution’s data model.</p>
+<h2 id="example">Example</h2>
+<p>In this example, the data was generated from a Diagonal QDA model. Show below are the LDA, Diagonal QDA, and QDA classifiers being fit to samples of increasing size.</p>
+<figure>
+<video autoplay loop mutued playsinline class="verywide">
+  <source src="/images/misspecification.webm" type="video/webm">
+  <source src="/images/misspecification.mp4" type="video/mp4">
+  Can't play the video for some reason! Click <a href="/images/misspecification.gif">here</a> to download a gif.
+</video>
+<figcaption>Three discriminant classifiers being fit to data from a Diagonal QDA model. The optimal boundary is shown as a dashed line. <b>Left:</b> LDA. <b>Center:</b> Diagonal QDA. <b>Right:</b> QDA.</figcaption>
+</figure>
+
+<p>What we should notice is that the LDA model never achieves a good fit to the optimal boundary because it is constrained in a way inconsistent with the true model. On the other hand, the QDA model does achieve a good fit, but it requires more data to do so than the Diagonal QDA model. (Incidentally, I think the odd shape of the Diagonal QDA model in the center is an artifact of the way the <code>{sparsediscrim}</code> package constructs its decision rule. Apparently, it does so through some kind of linear sum. In any case, it seems quite efficient.)</p>]]></description>
+    <pubDate>Thu, 19 Mar 2020 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/discriminant-analysis/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
 
     </channel>
 </rss>

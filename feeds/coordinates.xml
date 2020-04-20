@@ -152,8 +152,8 @@ y\end{bmatrix}\\
 <p><span class="math display">\[\formbox{\begin{array}{llr} 
 e&#39;   &amp;= e A      &amp; &amp;(1)\\ 
 v&#39;   &amp;= A^{-1} v &amp; &amp;(2)\\
-e&#39;^* &amp;= A^{-1} e &amp; &amp;(3)\\
-v&#39;^* &amp;= v A      &amp; &amp;(4)
+e&#39;^* &amp;= A^{-1} e^* &amp; &amp;(3)\\
+v&#39;^* &amp;= v^* A      &amp; &amp;(4)
 \end{array} }\]</span></p>
 <p>Suppose <span class="math inline">\((1)\)</span>, that <span class="math inline">\(e&#39; = e A\)</span>, where <span class="math inline">\(A\)</span> is a non-singular matrix.</p>
 <p><strong>Proof of (2):</strong> We know <span class="math inline">\(e v = e&#39; v&#39;\)</span>. Now</p>

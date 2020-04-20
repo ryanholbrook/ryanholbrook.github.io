@@ -84,6 +84,10 @@
                 <ul>
     
         <li>
+          <a href="../posts/discriminant-analysis/">Six Varieties of Gaussian Discriminant Analysis</a>
+        </li>
+    
+        <li>
           <a href="../posts/decision/">Optimal Decision Boundaries</a>
         </li>
     
@@ -119,10 +123,6 @@
           <a href="../posts/permitted-and-forbidden-sets/">Journal Review: Permitted and Forbidden Sets in STLNs</a>
         </li>
     
-        <li>
-          <a href="../posts/change-of-basis-for-vectors-and-covectors/">Change of Basis for Vectors and Covectors</a>
-        </li>
-    
 </ul>
 
               </div>
@@ -132,6 +132,164 @@
           <div class="my-2">
           <div role="main" id="main">
   
+  
+  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
+
+        <!-- Post Header  -->
+<div class="Subhead">
+  <div class="Subhead-heading">
+      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/eigenvalues-and-singular-values/">Understanding Eigenvalues and Singular Values</a></h2>
+  </div>
+  <div class="Subhead-description">
+    
+      <a href="../tags/tutorial/">tutorial</a>, <a href="../tags/linear-algebra/">linear-algebra</a>, <a href="../tags/eigenvalues/">eigenvalues</a>, <a href="../tags/singular-values/">singular-values</a>
+    
+    <div class="float-md-right" style="text-align=right">
+      Published: November 15, 2019
+      
+    </div>
+  </div>
+</div>
+
+<article>
+  
+  <div id="toc" class="Box mb-3">
+    <h1>Table of Contents</h1>
+    <ul class="incremental">
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#eigenvalues-and-eigenvectors">Eigenvalues and Eigenvectors</a></li>
+<li><a href="#singular-values-and-singular-vectors">Singular Values and Singular Vectors</a></li>
+<li><a href="#matrix-approximation-with-svd">Matrix Approximation with SVD</a></li>
+</ul>
+  </div>
+  
+  
+  <section id="content" class="pb-2 mb-4 border-bottom">
+    <h1 id="introduction">Introduction</h1>
+<p>What are eigenvalues? What are singular values? They both describe the behavior of a matrix on a certain set of vectors. The difference is this: The eigenvectors of a matrix describe the directions of its <em>invariant</em> action. The singular vectors of a matrix describe the directions of its <em>maximum</em> action. And the corresponding eigen- and singular values describe the magnitude of that action.</p>
+<p>They are defined this way. A scalar <span class="math inline">\(\lambda\)</span> is an <strong><a href="https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors">eigenvalue</a></strong> of a linear transformation <span class="math inline">\(A\)</span> if there is a vector <span class="math inline">\(v\)</span> such that <span class="math inline">\(A v = \lambda v\)</span>, and <span class="math inline">\(v\)</span> is called an <strong>eigenvector</strong> of <span class="math inline">\(\lambda\)</span>. A scalar <span class="math inline">\(\sigma\)</span> is a <strong><a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value</a></strong> of <span class="math inline">\(A\)</span> if there are (unit) vectors <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> such that <span class="math inline">\(A v = \sigma u\)</span> and <span class="math inline">\(A^* u = \sigma v\)</span>, where <span class="math inline">\(A^*\)</span> is the <a href="https://en.wikipedia.org/wiki/Conjugate_transpose">conjugate transpose</a> of <span class="math inline">\(A\)</span>; the vectors <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are <strong>singular vectors</strong>. The vector <span class="math inline">\(u\)</span> is called a <strong>left</strong> singular vector and <span class="math inline">\(v\)</span> a <strong>right</strong> singular vector.</p>
+<h1 id="eigenvalues-and-eigenvectors">Eigenvalues and Eigenvectors</h1>
+<p>That eigenvectors give the directions of invariant action is obvious from the definition. The definition says that when <span class="math inline">\(A\)</span> acts on an eigenvector, it just multiplies it by a constant, the corresponding eigenvalue. In other words, when a linear transformation acts on one of its eigenvectors, it shrinks the vector or stretches it and reverses its direction if <span class="math inline">\(\lambda\)</span> is negative, but never changes the direction otherwise. The action is invariant.</p>
+<p>Take this matrix, for instance:</p>
+<p><span class="math display">\[ A = \begin{bmatrix}
+0 &amp; 2 \\
+2 &amp; 0
+\end{bmatrix} \]</span></p>
+<figure>
+<img src="../images/eigen-circle-1.png" title="eigen-circle-1" alt="Eigenvectors of A" width="400" /><figcaption>Eigenvectors of <span class="math inline">\(A\)</span></figcaption>
+</figure>
+<p>We can see how the transformation just stretches the red vector by a factor of 2, while the blue vector it stretches but also reflects over the origin.</p>
+<p>And this matrix:</p>
+<p><span class="math display">\[ A = \begin{bmatrix}
+1 &amp; \frac{1}{3} \\
+\frac{4}{3} &amp; 1
+\end{bmatrix} \]</span></p>
+<figure>
+<img src="../images/eigen-circle-2.png" title="eigen-circle-2" alt="Eigenvectors of A" width="400" /><figcaption>Eigenvectors of <span class="math inline">\(A\)</span></figcaption>
+</figure>
+<p>It stretches the red vector and shrinks the blue vector, but reverses neither.</p>
+<p>The point is that in every case, when a matrix acts on one of its eigenvectors, the action is always in a parallel direction.</p>
+<h1 id="singular-values-and-singular-vectors">Singular Values and Singular Vectors</h1>
+<p>This invariant direction does not necessarily give the transformation’s direction of <em>greatest effect</em>, however. You can see that in the previous example. But say <span class="math inline">\(\sigma_1\)</span> is the <em>largest</em> singular value of <span class="math inline">\(A\)</span> with right singular vector <span class="math inline">\(v\)</span>. Then <span class="math inline">\(v\)</span> is a solution to</p>
+<p><span class="math display">\[ \operatorname*{argmax}_{x, ||x||=1} ||A x|| \]</span></p>
+<p>In other words, <span class="math inline">\( ||A v|| = \sigma_1 \)</span> is at least as big as <span class="math inline">\( ||A x|| \)</span> for any other unit vector <span class="math inline">\(x\)</span>. It’s not necessarily the case that <span class="math inline">\(A v\)</span> is parallel to <span class="math inline">\(v\)</span>, though.</p>
+<p>Compare the eigenvectors of the matrix in the last example to its singular vectors:</p>
+<figure>
+<img src="../images/singular-circle-1.png" title="singular-circle-1" alt="Singular vectors of A" width="400" /><figcaption>Singular vectors of <span class="math inline">\(A\)</span></figcaption>
+</figure>
+<p>The directions of maximum effect will be exactly the semi-axes of the ellipse, the ellipse which is the image of the unit circle under <span class="math inline">\(A\)</span>.</p>
+<p>Let’s extend this idea to 3-dimensional space to get a better idea of what’s going on. Consider this transformation:</p>
+<p><span class="math display">\[A = \begin{bmatrix}
+\frac{3}{2} \, \sqrt{2} &amp; -\sqrt{2} &amp; 0 \\
+\frac{3}{2} \, \sqrt{2} &amp; \sqrt{2} &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>This will have the effect of transforming the unit sphere into an <a href="https://en.wikipedia.org/wiki/Ellipsoid">ellipsoid</a>:</p>
+<figure>
+<img src="../images/transform3d-0.png" title="transform3d-0" alt="The unit sphere transformed into an ellipsoid." width="800" /><figcaption>The unit sphere transformed into an ellipsoid.</figcaption>
+</figure>
+<p>Its singular values are 3, 2, and 1. You can see how they again form the semi-axes of the resulting figure.</p>
+<figure>
+<img src="../images/transform3d-1.png" title="transform3d-1" alt="The singular vectors as semi-axes in the ellipsoid." width="800" /><figcaption>The singular vectors as semi-axes in the ellipsoid.</figcaption>
+</figure>
+<h1 id="matrix-approximation-with-svd">Matrix Approximation with SVD</h1>
+<p>Now, the <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) will tell us what <span class="math inline">\(A\)</span>’s singular values are:</p>
+<p><span class="math display">\[ A = U \Sigma V^* = 
+\begin{bmatrix}
+\frac{\sqrt{2}}{2} &amp; -\frac{\sqrt{2}}{2} &amp; 0.0 \\
+\frac{\sqrt{2}}{2} &amp; \frac{\sqrt{2}}{2} &amp; 0.0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+3 &amp; 0 &amp; 0 \\
+0 &amp; 2 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>The diagonal entries of the matrix <span class="math inline">\(\Sigma\)</span> are the singular values of <span class="math inline">\(A\)</span>. We can obtain a lower-dimensional approximation to <span class="math inline">\(A\)</span> by setting one or more of its singular values to 0.</p>
+<p>For instance, say we set the largest singular value, 3, to 0. We then get this matrix:</p>
+<p><span class="math display">\[ A_1 = \begin{bmatrix}
+\frac{\sqrt{2}}{2} &amp; -\frac{\sqrt{2}}{2} &amp; 0.0 \\
+\frac{\sqrt{2}}{2} &amp; \frac{\sqrt{2}}{2} &amp; 0.0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+0 &amp; 0 &amp; 0 \\
+0 &amp; 2 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} = \begin{bmatrix}
+0 &amp; -\frac{\sqrt{2}}{2} &amp; 0 \\
+0 &amp; \frac{\sqrt{2}}{2} &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>which transforms the unit sphere like this:</p>
+<figure>
+<img src="../images/ellipse-2.png" title="ellipse-2" alt="The transformation with the largest singular value set to 0." width="400" /><figcaption>The transformation with the largest singular value set to 0.</figcaption>
+</figure>
+<p>The resulting figure now lives in a 2-dimensional space. Further, the largest singular value of <span class="math inline">\(A_1\)</span> is now 2. Set it to 0:</p>
+<p><span class="math display">\[ A_2 = \begin{bmatrix}
+\frac{\sqrt{2}}{2} &amp; -\frac{\sqrt{2}}{2} &amp; 0.0 \\
+\frac{\sqrt{2}}{2} &amp; \frac{\sqrt{2}}{2} &amp; 0.0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \begin{bmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} = \begin{bmatrix}
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>And we get a 1-dimensional figure, and a final largest singular value of 1:</p>
+<figure>
+<img src="../images/ellipse-1.png" title="ellipse-1" alt="The transformation with the two largest singular values set to 0." width="400" /><figcaption>The transformation with the two largest singular values set to 0.</figcaption>
+</figure>
+<p>This is the point: Each set of singular vectors will form an <a href="https://en.wikipedia.org/wiki/Orthonormal_basis">orthonormal basis</a> for some <a href="https://en.wikipedia.org/wiki/Linear_subspace">linear subspace</a> of <span class="math inline">\(\mathbb{R}^n\)</span>. A singular value and its singular vectors give the direction of maximum action among all directions orthogonal to the singular vectors of any larger singular value.</p>
+<p>This has important applications. There are many problems in statistics and machine learning that come down to finding a <a href="https://en.wikipedia.org/wiki/Low-rank_approximation">low-rank approximation</a> to some matrix at hand. <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">Principal component analysis</a> is a problem of this kind. It says: approximate some matrix <span class="math inline">\(X\)</span> of observations with a number of its uncorrelated components of maximum variance. This problem is solved by computing its singular value decomposition and setting some of its smallest singular values to 0.</p>
+<figure>
+<img src="../images/approximations.png" title="approximations" alt="Low-rank approximations of A." width="1000" /><figcaption>Low-rank approximations of <span class="math inline">\(A\)</span>.</figcaption>
+</figure>
+  </section>
+  
+</article>
+
+
+        <!-- Post Footer -->
+        <div>
+
+        </div>
+
+    
+  </div>
   
   <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
 
@@ -432,124 +590,6 @@ d_1 &amp; 0   \\
     
   </div>
   
-  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
-
-        <!-- Post Header  -->
-<div class="Subhead">
-  <div class="Subhead-heading">
-      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/investmentsim/">investmentsim - an R Package for Simulating Investment Portfolios</a></h2>
-  </div>
-  <div class="Subhead-description">
-    
-      <a href="../tags/finance/">finance</a>, <a href="../tags/investing/">investing</a>, <a href="../tags/R/">R</a>, <a href="../tags/simulation/">simulation</a>
-    
-    <div class="float-md-right" style="text-align=right">
-      Published: September 11, 2019
-      
-    </div>
-  </div>
-</div>
-
-<article>
-  
-  
-  <section id="content" class="pb-2 mb-4 border-bottom">
-    <p>I wrote a little package recently for a project I’ve been working on. I’ve mostly been using it to help out with Monte Carlo simulations for personal finance planning. It’s a little rough at the moment, but for the adventurous it’s on Github here: <a href="https://github.com/ryanholbrook/investmentsim">investmentsim</a>. And here’s a quick tutorial on how to use it.</p>
-<p>The <code>investmentsim</code> package implements a function <code>make_path</code> to simulate an investment portfolio. It supports time-varying allocation of assets, automatic rebalancing, and planned transactions. The purpose of the package is to backtest investment plans as one might do for retirement accounts. (It does not have support for taxes or fees.)</p>
-<p>This example will demonstrate how to create an investment portfolio with defined allocations and transactions, and then simulate the balance of the portfolio over a period of time.</p>
-<pre class="r"><code>library(tidyverse)
-library(xts)
-library(lubridate)
-library(investmentsim)</code></pre>
-<p>First let’s create a portfolio. The <code>simreturns</code> data contains an <code>xts</code> time-series with fictional yearly returns for a stock fund and a bond fund over the years 1928 to 2018.</p>
-<pre class="r"><code>data(simreturns)
-head(simreturns)
-#&gt;            Stock.Returns Bond.Returns
-#&gt; 1928-01-01    0.11867241   0.01866146
-#&gt; 1929-01-01    0.04008497   0.02362385
-#&gt; 1930-01-01    0.16592113   0.04912787
-#&gt; 1931-01-01    0.18508859  -0.03370055
-#&gt; 1932-01-01    0.05509245   0.06772749
-#&gt; 1933-01-01    0.07558251   0.04195868</code></pre>
-<p>An <code>asset</code> in the <code>investmentsim</code> package is a function with parameters <code>start</code> and <code>end</code> that returns the percent change in the asset over the dates from <code>start</code> to <code>end</code>. The <code>make_historical</code> function will construct an asset given a time-series of returns. This function is supposed to be used when you want to use predetermined data as opposed to something generated at runtime.</p>
-<pre class="r"><code>simstock_asset &lt;- make_historical(simreturns$Stock.Returns)
-simbond_asset &lt;- make_historical(simreturns$Bond.Returns)</code></pre>
-<p>Next we define a portfolio with the <code>make_portfolio</code> function. It takes a list of names for the assets together with the functions defining them and a list for their initial balances. Also, let’s define a sequences of dates over which we’ll run the simulation.</p>
-<pre class="r"><code>asset_names &lt;- c(&quot;Stocks&quot;, &quot;Bonds&quot;)
-port &lt;- make_portfolio(asset_names,
-                       c(simstock_asset,
-                         simbond_asset),
-                       c(2500, 2500))
-dates &lt;- seq(ymd(&quot;1940-01-01&quot;), ymd(&quot;2010-01-01&quot;), by=&quot;years&quot;)</code></pre>
-<p>Then we can define our desired allocations with <code>make_linear_allocation</code>. It needs a list of dates and also a list of percentages for each asset.</p>
-<pre class="r"><code>alloc &lt;- make_linear_allocation_path(asset_names,
-                                     c(ymd(&quot;1970-01-01&quot;),
-                                       ymd(&quot;2000-01-01&quot;)),
-                                     list(c(0.9, 0.1),
-                                          c(0.4, 0.6)))</code></pre>
-<p>It’s easiest to see how it works by looking at a graph.</p>
-<pre class="r"><code>as &lt;- map(dates,
-          alloc) %&gt;%
-    do.call(rbind, .) %&gt;%
-    xts(order.by = dates)
-
-plot(as, ylim = c(0, 1),
-     col = c(&quot;red&quot;, &quot;blue&quot;),
-     main = &quot;Asset Allocation&quot;)
-addLegend(&quot;topright&quot;,
-          asset_names,
-          col = c(&quot;red&quot;, &quot;blue&quot;),
-          lty = 1, cex = 1,
-          bty = &quot;o&quot;)</code></pre>
-<figure>
-<img src="../images/allocation.png" alt="The allocation path for the portfolio." /><figcaption>The allocation path for the portfolio.</figcaption>
-</figure>
-<p>You can see that it is constant before the first date given and constant after the last date, and that it linearly interpolates the allocation when moving from one date to the next.</p>
-<p>Finally, we can define our desired transactions and collect everything together in a model. The <code>make_transactions_on_dates</code> function does what it sounds like it does: defines for the model a specified deposit (a positive value) or a specified withdrawal (a negative value). Within the simulation, transactions are applied at the end of the years given. So this transaction path just makes a $1000 deposit at the end of each year.</p>
-<pre class="r"><code>trans &lt;- make_transactions_on_dates(rep(1000, length(dates)),
-                                    dates)
-model &lt;- make_model(port, alloc, trans, dates)</code></pre>
-<p>Lastly, we evaluate <code>make_path</code> on the model to run the simulation.</p>
-<pre class="r"><code>path &lt;- make_path(model)
-c(head(path), tail(path))
-#&gt;                  Stocks        Bonds        Total Transaction
-#&gt; 1940-01-01     2500.000 2.500000e+03     5000.000           0
-#&gt; 1941-01-01     6090.672 6.767413e+02     6767.413        1000
-#&gt; 1942-01-01     7606.609 8.451788e+02     8451.788        1000
-#&gt; 1943-01-01     7997.775 8.886416e+02     8886.416        1000
-#&gt; 1944-01-01    11848.487 1.316499e+03    13164.986        1000
-#&gt; 1945-01-01    13939.015 1.548779e+03    15487.794        1000
-#&gt; 2005-01-01 11137858.729 1.670679e+07 27844646.822        1000
-#&gt; 2006-01-01 12831289.074 1.924693e+07 32078222.685        1000
-#&gt; 2007-01-01 14673102.513 2.200965e+07 36682756.282        1000
-#&gt; 2008-01-01 16844539.341 2.526681e+07 42111348.352        1000
-#&gt; 2009-01-01 16949487.079 2.542423e+07 42373717.697        1000
-#&gt; 2010-01-01 20340375.373 3.051056e+07 50850938.433        1000</code></pre>
-<pre class="r"><code>plot(path[,1:3],
-     col = c(&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;),
-     main = &quot;Investment Path&quot;)
-addLegend(&quot;topleft&quot;,
-          c(asset_names, &quot;Total&quot;),
-          col = c(&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;),
-          lty = 1, cex = 1,
-          bty = &quot;o&quot;)</code></pre>
-<figure>
-<img src="../images/path.png" alt="The value of the portfolio over time." /><figcaption>The value of the portfolio over time.</figcaption>
-</figure>
-<p>We’re rich!</p>
-  </section>
-  
-</article>
-
-
-        <!-- Post Footer -->
-        <div>
-
-        </div>
-
-    
-  </div>
-  
 
 <!-- Pagination -->
 <nav class="paginate-container" aria-label="Pagination">
@@ -574,7 +614,7 @@ addLegend(&quot;topleft&quot;,
             <div id="side">
               <div>
                 <h1>Tags</h1>
-                <a style="font-size: 105%" href="../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../tags/category-theory/">category-theory</a> <a style="font-size: 100%" href="../tags/classification/">classification</a> <a style="font-size: 100%" href="../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../tags/cql/">cql</a> <a style="font-size: 110%" href="../tags/data-science/">data-science</a> <a style="font-size: 100%" href="../tags/decision-boundaries/">decision-boundaries</a> <a style="font-size: 100%" href="../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../tags/engrams/">engrams</a> <a style="font-size: 105%" href="../tags/finance/">finance</a> <a style="font-size: 100%" href="../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../tags/generalized-inverse/">generalized-inverse</a> <a style="font-size: 100%" href="../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../tags/investing/">investing</a> <a style="font-size: 100%" href="../tags/julia/">julia</a> <a style="font-size: 100%" href="../tags/least-squares/">least-squares</a> <a style="font-size: 115%" href="../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../tags/linear-equations/">linear-equations</a> <a style="font-size: 100%" href="../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../tags/memory/">memory</a> <a style="font-size: 100%" href="../tags/moore-penrose-inverse/">moore-penrose-inverse</a> <a style="font-size: 100%" href="../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../tags/numpy/">numpy</a> <a style="font-size: 100%" href="../tags/python/">python</a> <a style="font-size: 110%" href="../tags/R/">R</a> <a style="font-size: 100%" href="../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../tags/review/">review</a> <a style="font-size: 100%" href="../tags/sage/">sage</a> <a style="font-size: 100%" href="../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../tags/talk/">talk</a> <a style="font-size: 100%" href="../tags/tensors/">tensors</a> <a style="font-size: 110%" href="../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../tags/vectors/">vectors</a>
+                <a style="font-size: 105%" href="../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../tags/category-theory/">category-theory</a> <a style="font-size: 105%" href="../tags/classification/">classification</a> <a style="font-size: 100%" href="../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../tags/cql/">cql</a> <a style="font-size: 115%" href="../tags/data-science/">data-science</a> <a style="font-size: 105%" href="../tags/decision-boundaries/">decision-boundaries</a> <a style="font-size: 100%" href="../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../tags/engrams/">engrams</a> <a style="font-size: 105%" href="../tags/finance/">finance</a> <a style="font-size: 100%" href="../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../tags/generalized-inverse/">generalized-inverse</a> <a style="font-size: 100%" href="../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../tags/investing/">investing</a> <a style="font-size: 100%" href="../tags/julia/">julia</a> <a style="font-size: 100%" href="../tags/LDA/">LDA</a> <a style="font-size: 100%" href="../tags/least-squares/">least-squares</a> <a style="font-size: 115%" href="../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../tags/linear-equations/">linear-equations</a> <a style="font-size: 100%" href="../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../tags/memory/">memory</a> <a style="font-size: 100%" href="../tags/moore-penrose-inverse/">moore-penrose-inverse</a> <a style="font-size: 100%" href="../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../tags/numpy/">numpy</a> <a style="font-size: 100%" href="../tags/python/">python</a> <a style="font-size: 100%" href="../tags/QDA/">QDA</a> <a style="font-size: 110%" href="../tags/R/">R</a> <a style="font-size: 100%" href="../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../tags/review/">review</a> <a style="font-size: 100%" href="../tags/sage/">sage</a> <a style="font-size: 100%" href="../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../tags/talk/">talk</a> <a style="font-size: 100%" href="../tags/tensors/">tensors</a> <a style="font-size: 110%" href="../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../tags/vectors/">vectors</a>
               </div>
               <div>
                 <h1>Links</h1>
