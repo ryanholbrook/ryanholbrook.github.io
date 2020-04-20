@@ -7,7 +7,7 @@
         <description><![CDATA[A blog about data science and machine learning, with a lot of math.]]></description>
         <atom:link href="https://mathformachines.com/feeds/QDA.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Thu, 19 Mar 2020 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Sun, 19 Apr 2020 00:00:00 UT</lastBuildDate>
         <item>
     <title>Six Varieties of Gaussian Discriminant Analysis</title>
     <link>https://mathformachines.com/posts/discriminant-analysis/index.html</link>
@@ -137,7 +137,7 @@
 </figure>
 
 <p>What we should notice is that the LDA model never achieves a good fit to the optimal boundary because it is constrained in a way inconsistent with the true model. On the other hand, the QDA model does achieve a good fit, but it requires more data to do so than the Diagonal QDA model. (Incidentally, I think the odd shape of the Diagonal QDA model in the center is an artifact of the way the <code>{sparsediscrim}</code> package constructs its decision rule. Apparently, it does so through some kind of linear sum. In any case, it seems quite efficient.)</p>]]></description>
-    <pubDate>Thu, 19 Mar 2020 00:00:00 UT</pubDate>
+    <pubDate>Sun, 19 Apr 2020 00:00:00 UT</pubDate>
     <guid>https://mathformachines.com/posts/discriminant-analysis/index.html</guid>
     <dc:creator>Ryan Holbrook</dc:creator>
 </item>
