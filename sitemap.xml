@@ -8,6 +8,15 @@
 
 
   <url>
+    <loc>https://mathformachines.com/posts/getting-started-with-tpus/</loc>
+    
+    <lastmod>2020-07-10</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://mathformachines.com/posts/discriminant-analysis/</loc>
     
     <lastmod>2020-04-19</lastmod>

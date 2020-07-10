@@ -1,0 +1,16 @@
+---
+title: "Getting Started with TPUs on Kaggle"
+published: July 10, 2020
+tags: kaggle, tpus, tensorflow
+usetoc: false
+---
+
+
+# Created 2020-07-10 Fri 08:32
+#+TITLE: Getting Started with TPUs on Kaggle
+#+AUTHOR: Ryan Holbrook
+[[https://www.kaggle.com/c/tpu-getting-started/overview/faq][
+
+*Petals to the Metal*]] is Kaggle's newest [[https://www.kaggle.com/c/tpu-getting-started/overview/faq][Getting Started]] competition, highlighting *Tensor Processing Units*. A TPU is an accelerator developed by Google especially for machine learning. They can be used in TensorFlow much like GPUs and are quite powerful. I had the pleasure of writing a tutorial to go along with the competition. Check it out!
+
+[[https://www.kaggle.com/ryanholbrook/create-your-first-submission][Getting Started with TPUs]]

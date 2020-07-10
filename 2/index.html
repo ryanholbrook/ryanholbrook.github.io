@@ -84,6 +84,10 @@
                 <ul>
     
         <li>
+          <a href="../posts/getting-started-with-tpus/">Getting Started with TPUs on Kaggle</a>
+        </li>
+    
+        <li>
           <a href="../posts/discriminant-analysis/">Six Varieties of Gaussian Discriminant Analysis</a>
         </li>
     
@@ -119,10 +123,6 @@
           <a href="../posts/retirement-formula/">A Somewhat Better Retirement Formula</a>
         </li>
     
-        <li>
-          <a href="../posts/permitted-and-forbidden-sets/">Journal Review: Permitted and Forbidden Sets in STLNs</a>
-        </li>
-    
 </ul>
 
               </div>
@@ -132,6 +132,223 @@
           <div class="my-2">
           <div role="main" id="main">
   
+  
+  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
+
+        <!-- Post Header  -->
+<div class="Subhead">
+  <div class="Subhead-heading">
+      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/least-squares-with-the-mp-inverse/">Least Squares with the Moore-Penrose Inverse</a></h2>
+  </div>
+  <div class="Subhead-description">
+    
+      <a href="../tags/tutorial/">tutorial</a>, <a href="../tags/linear-algebra/">linear-algebra</a>, <a href="../tags/moore-penrose-inverse/">moore-penrose-inverse</a>, <a href="../tags/generalized-inverse/">generalized-inverse</a>, <a href="../tags/least-squares/">least-squares</a>, <a href="../tags/linear-equations/">linear-equations</a>
+    
+    <div class="float-md-right" style="text-align=right">
+      Published: November 21, 2019
+      
+    </div>
+  </div>
+</div>
+
+<article>
+  
+  <div id="toc" class="Box mb-3">
+    <h1>Table of Contents</h1>
+    <ul class="incremental">
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#example---system-with-an-invertible-matrix">Example - System with an Invertible Matrix</a></li>
+<li><a href="#constructing-inverses-with-the-svd">Constructing Inverses with the SVD</a><ul class="incremental">
+<li><a href="#example">Example</a></li>
+</ul></li>
+<li><a href="#constructing-mp-inverses-with-the-svd">Constructing MP-Inverses with the SVD</a><ul class="incremental">
+<li><a href="#example---an-inconsistent-system">Example - An Inconsistent System</a></li>
+</ul></li>
+</ul>
+  </div>
+  
+  
+  <section id="content" class="pb-2 mb-4 border-bottom">
+    <h1 id="introduction">Introduction</h1>
+<p>The <strong><a href="https://en.wikipedia.org/wiki/Invertible_matrix">inverse</a></strong> of a matrix <span class="math inline">\(A\)</span> is another matrix <span class="math inline">\(A^{-1}\)</span> that has this property:</p>
+<span class="math display">\[\begin{align*}
+A A^{-1} &amp;= I \\
+A^{-1} A &amp;= I
+\end{align*}
+\]</span>
+<p>where <span class="math inline">\(I\)</span> is the <em>identity matrix</em>. This is a nice property for a matrix to have, because then we can work with it in equations just like we might with ordinary numbers. For instance, to solve some <a href="https://en.wikipedia.org/wiki/System_of_linear_equations">linear system of equations</a> <span class="math display">\[ A x = b \]</span> we can just multiply the inverse of <span class="math inline">\(A\)</span> to both sides <span class="math display">\[ x = A^{-1} b \]</span> and then we have some unique solution vector <span class="math inline">\(x\)</span>. Again, this is just like we would do if we were trying to solve a real-number equation like <span class="math inline">\(a x = b\)</span>.</p>
+<p>Now, a matrix has an inverse whenever it is square and its rows are linearly independent. But not every system of equations we might care about will give us a matrix that satisfies these properties. The coefficient matrix <span class="math inline">\(A\)</span> would fail to be invertible if the system did not have the same number of equations as unknowns (<span class="math inline">\(A\)</span> is not square), or if the system had dependent equations (<span class="math inline">\(A\)</span> has dependent rows).</p>
+<p><a href="https://en.wikipedia.org/wiki/Generalized_inverse">Generalized inverses</a> are meant to solve this problem. They are meant to solve equations like <span class="math inline">\(A x = b\)</span> in the “best way possible” when <span class="math inline">\(A^{-1}\)</span> fails to exist. There are many kinds of generalized inverses, each with its own “best way.” (They can be used to solve <a href="https://en.wikipedia.org/wiki/Tikhonov_regularization">ridge regression</a> problems, for instance.)</p>
+<p>The most common is the <strong><a href="https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse">Moore-Penrose inverse</a></strong>, or sometimes just the <strong>pseudoinverse</strong>. It solves the <a href="https://en.wikipedia.org/wiki/Ordinary_least_squares">least-squares</a> problem for linear systems, and therefore will give us a solution <span class="math inline">\(\hat{x}\)</span> so that <span class="math inline">\(A \hat{x}\)</span> is as close as possible in ordinary <a href="https://en.wikipedia.org/wiki/Euclidean_distance">Euclidean distance</a> to the vector <span class="math inline">\(b\)</span>.</p>
+<p>The notation for the Moore-Penrose inverse is <span class="math inline">\(A^+\)</span> instead of <span class="math inline">\(A^{-1}\)</span>. If <span class="math inline">\(A\)</span> is invertible, then in fact <span class="math inline">\(A^+ = A^{-1}\)</span>, and in that case the solution to the least-squares problem is the same as the ordinary solution (<span class="math inline">\(A^+ b = A^{-1} b\)</span>). So, the MP-inverse is strictly more general than the ordinary inverse: we can always use it and it will always give us the same solution as the ordinary inverse whenever the ordinary inverse exists.</p>
+<p>We will look at how we can construct the Moore-Penrose inverse using the SVD. This turns out to be an easy extension to constructing the ordinary matrix inverse with the SVD. We will then see how solving a least-squares problem is just as easy as solving an ordinary equation.</p>
+<h1 id="example---system-with-an-invertible-matrix">Example - System with an Invertible Matrix</h1>
+<p>First let’s recall how to solve a system whose coefficient matrix is invertible. In this case, we have the same number of equations as unknowns and the equations are all independent. Then <span class="math inline">\(A^{-1}\)</span> exists and we can find a unique solution for <span class="math inline">\(x\)</span> by multiplying <span class="math inline">\(A^{-1}\)</span> on both sides.</p>
+<p>For instance, say we have</p>
+<p><span class="math display">\[ \left\{\begin{align*}
+x_1 - \frac{1}{2}x_2 &amp;= 1 \\
+-\frac{1}{2} x_1 + x_2 &amp;= -1
+\end{align*}\right. \]</span></p>
+<p>Then</p>
+<p><span class="math display">\[ \begin{array}{c c}
+A = \begin{bmatrix}
+1 &amp; -1/2 \\
+-1/2 &amp; 1
+\end{bmatrix},
+&amp;A^{-1} = \begin{bmatrix}
+4/3 &amp; 2/3 \\
+2/3 &amp; 4/3
+\end{bmatrix} \end{array} \]</span></p>
+<p>and</p>
+<p><span class="math display">\[x = A^{-1}b = \begin{bmatrix}
+4/3 &amp; 2/3 \\
+2/3 &amp; 4/3
+\end{bmatrix} \begin{bmatrix}
+1 \\ 
+-1
+\end{bmatrix} = \begin{bmatrix}
+2/3 \\
+-2/3
+\end{bmatrix}
+\]</span></p>
+<p>So <span class="math inline">\(x_1 = \frac{2}{3}\)</span> and <span class="math inline">\(x_2 = -\frac{2}{3}\)</span>.</p>
+<h1 id="constructing-inverses-with-the-svd">Constructing Inverses with the SVD</h1>
+<p>The <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) gives us an intuitive way constructing an inverse matrix. We will be able to see how the geometric transforms of <span class="math inline">\(A^{-1}\)</span> undo the transforms of <span class="math inline">\(A\)</span>.</p>
+<p>The SVD says that for any matrix <span class="math inline">\(A\)</span>,</p>
+<p><span class="math display">\[ A = U \Sigma V^* \]</span></p>
+<p>where <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> are orthogonal matricies and <span class="math inline">\(\Sigma\)</span> is a diagonal matrix.</p>
+<p>Now, if <span class="math inline">\(A\)</span> is invertible, we can use its SVD to find <span class="math inline">\(A^{-1}\)</span> like so:</p>
+<p><span class="math display">\[ A^{-1} = V \Sigma^{-1} U^* \]</span></p>
+<p>If we have the SVD of <span class="math inline">\(A\)</span>, we can construct its inverse by swapping the orthogonal matrices <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> and finding the inverse of <span class="math inline">\(\Sigma\)</span>. Since <span class="math inline">\(\Sigma\)</span> is diagonal, we can do this by just taking reciprocals of its diagonal entries.</p>
+<h2 id="example">Example</h2>
+<p>Let’s look at our earlier matrix again:</p>
+<p><span class="math display">\[ A = \begin{bmatrix}
+1 &amp; -1/2 \\
+-1/2 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>It has SVD</p>
+<p><span class="math display">\[ A = U \Sigma V^* = \begin{bmatrix}
+\sqrt{2}/2 &amp; -\sqrt{2}/2 \\
+\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \begin{bmatrix}
+3/2 &amp; 0 \\
+0 &amp; 1/2
+\end{bmatrix} \begin{bmatrix}
+\sqrt{2}/2 &amp; \sqrt{2}/2 \\
+-\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \]</span></p>
+<p>And so,</p>
+<p><span class="math display">\[ A^{-1} = V \Sigma^{-1} U^* = \begin{bmatrix}
+\sqrt{2}/2 &amp; -\sqrt{2}/2 \\
+\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \begin{bmatrix}
+2/3 &amp; 0 \\
+0 &amp; 2
+\end{bmatrix} \begin{bmatrix}
+\sqrt{2}/2 &amp; \sqrt{2}/2 \\
+-\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \]</span></p>
+<p>and after multiplying everything out, we get</p>
+<p><span class="math display">\[ A^{-1} = \begin{bmatrix}
+4/3 &amp; 2/3 \\
+2/3 &amp; 4/3
+\end{bmatrix} \]</span></p>
+<p>just like we had before.</p>
+<p>In an <a href="../posts/visualizing-linear-transformations/">earlier post</a>, we saw how we could use the SVD to visualize a matrix as a sequence of geometric transformations. Here is the matrix <span class="math inline">\(A\)</span> followed by <span class="math inline">\(A^{-1}\)</span>, acting on the unit circle:</p>
+<video autoplay loop mutued playsinline controls>
+  <source src="../../images/invertible-equation.webm" type="video/webm">
+  <source src="../../images/invertible-equation.mp4" type="video/mp4">
+  <source src="../../images/invertible-equation.webm" type="video/ogg">
+</video>
+
+<p>The inverse matrix <span class="math inline">\(A^{-1}\)</span> reverses exactly the action of <span class="math inline">\(A\)</span>. The matrix <span class="math inline">\(A\)</span> will map any circle to a unique ellipse, with no overlap. So, <span class="math inline">\(A^{-1}\)</span> can map ellipses back to those same circles without any ambiguity. We don’t “lose information” by applying <span class="math inline">\(A\)</span>.</p>
+<h1 id="constructing-mp-inverses-with-the-svd">Constructing MP-Inverses with the SVD</h1>
+<p>We can in fact do basically the same thing for <em>any</em> matrix, not just the invertible ones. The SVD always exists, so for some matrix <span class="math inline">\(A\)</span>, first write</p>
+<p><span class="math display">\[ A = U \Sigma V^* \]</span></p>
+<p>And then find the MP-inverse by</p>
+<p><span class="math display">\[ A^+ = V \Sigma^+ U^* \]</span></p>
+<p>Now, the matrix <span class="math inline">\(A\)</span> might not be invertible. If it is not square, then, to find <span class="math inline">\(\Sigma^+\)</span>, we need to take the transpose of <span class="math inline">\(\Sigma\)</span> to make sure all the dimensions are conformable in the multiplication. It <span class="math inline">\(A\)</span> is singular (dependent rows), then <span class="math inline">\(\Sigma\)</span> will have 0’s on its diagaonal, so we need to make sure only take reciprocals of the non-zero entries.</p>
+<p>Summarizing, to find the Moore-Penrose inverse of a matrix <span class="math inline">\(A\)</span>:</p>
+<ol>
+<li>Find the Singular Value Decomposition: <span class="math inline">\(A = U \Sigma V^*\)</span> (using <a href="https://www.rdocumentation.org/packages/base/versions/3.6.1/topics/svd">R</a> or <a href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.svd.html">Python</a>, if you like).</li>
+<li>Find <span class="math inline">\(\Sigma^+\)</span> by transposing <span class="math inline">\(\Sigma\)</span> and taking the reciprocal of all its non-zero diagonal entries.</li>
+<li>Compute <span class="math inline">\(A^+ = V \Sigma^+ U^*\)</span></li>
+</ol>
+<h2 id="example---an-inconsistent-system">Example - An Inconsistent System</h2>
+<p>Let’s find the MP-inverse of a singular matrix. Let’s take</p>
+<p><span class="math display">\[A = \begin{bmatrix}
+1 &amp; 1 \\
+1 &amp; 1
+\end{bmatrix}
+\]</span></p>
+<p>Because the rows of this matrix are linearly dependent, <span class="math inline">\(A^{-1}\)</span> does not exist. But we can still find the more general MP-inverse by following the procedure above.</p>
+<p>So, first we find the SVD of <span class="math inline">\(A\)</span>:</p>
+<p><span class="math display">\[ A = U \Sigma V^* = \begin{bmatrix}
+\sqrt{2}/2 &amp; -\sqrt{2}/2 \\
+\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \begin{bmatrix}
+2 &amp; 0 \\
+0 &amp; 0
+\end{bmatrix} \begin{bmatrix}
+\sqrt{2}/2 &amp; \sqrt{2}/2 \\
+-\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \]</span></p>
+<p>Then we apply the procedure above to find <span class="math inline">\(A^+\)</span>:</p>
+<p><span class="math display">\[ A^+ = V \Sigma^+ U^* = \begin{bmatrix}
+\sqrt{2}/2 &amp; -\sqrt{2}/2 \\
+\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \begin{bmatrix}
+1/2 &amp; 0 \\
+0 &amp; 0
+\end{bmatrix} \begin{bmatrix}
+\sqrt{2}/2 &amp; \sqrt{2}/2 \\
+-\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \]</span></p>
+<p>And now we multiply everything out to get:</p>
+<p><span class="math display">\[ A^+ = \begin{bmatrix}
+1/4 &amp; 1/4 \\
+1/4 &amp; 1/4 \end{bmatrix} \]</span></p>
+<p>This is the Moore-Penrose inverse of <span class="math inline">\(A\)</span>.</p>
+<p>Like we did for the invertible matrix before, let’s get an idea of what <span class="math inline">\(A\)</span> and <span class="math inline">\(A^+\)</span> are doing geometrically. Here they are acting on the unit circle:</p>
+<video autoplay loop mutued playsinline controls>
+  <source src="../../images/dependent-equation.webm" type="video/webm">
+  <source src="../../images/dependent-equation.mp4" type="video/mp4">
+  <source src="../../images/dependent-equation.ogg" type="video/ogg">
+</video>
+
+<p>Notice how <span class="math inline">\(A\)</span> now collapses the circle onto a one-dimensional space. This is a consequence of it having dependent columns. For matricies with dependent columns, its image will be of lesser dimension than the space it’s mapping into. Another way of saying this is that it has a non-trivial <a href="https://en.wikipedia.org/wiki/Kernel_(linear_algebra)">null space</a>. It “zeroes out” some of the dimensions in its domain during the transformation.</p>
+<p>What if <span class="math inline">\(A\)</span> were the coefficient matrix of a system of equations? We might have:</p>
+<p><span class="math display">\[ \left\{ \begin{align*}
+x_1 + x_2 &amp;= b_1 \\
+x_1 + x_2 &amp;= b_2
+\end{align*} \right. \]</span></p>
+<p>for some <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span>.</p>
+<p>Now, unless <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span> are equal, this system won’t have an exact solution for <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>. It will be <em>inconsistent</em>. But, with <span class="math inline">\(A^+\)</span>, we can still find values for <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> that minimize the distance between <span class="math inline">\(A x\)</span> and <span class="math inline">\(b\)</span>. More specifically, let <span class="math inline">\(\hat{x} = A^{+}b\)</span>. Then <span class="math inline">\(\hat{x}\)</span> will minimize <span class="math inline">\(|| b - A x ||^2  \)</span>, the <em>squared error</em>, and <span class="math inline">\( \hat{b} = A \hat{x} = A A^{+} x \)</span> is the closest we can come to <span class="math inline">\(b\)</span>. (The vector <span class="math inline">\(b - A \hat{x}\)</span> is sometimes called the <strong><a href="https://en.wikipedia.org/wiki/Residual_(numerical_analysis)">residual</a></strong> vector.)</p>
+<p>We have</p>
+<p><span class="math display">\[ \hat{x} = A^{+} b = \begin{bmatrix}
+1/4 (b_1 + b_2) \\
+1/4 (b_1 + b_2) \end{bmatrix} \]</span></p>
+<p>so <span class="math inline">\(x_1 = \frac{1}{4} (b_1 + b_2)\)</span> and <span class="math inline">\(x_2 = \frac{1}{4} (b_1 + b_2)\)</span>. And the closest we can get to <span class="math inline">\(b\)</span> is</p>
+<p><span class="math display">\[ \hat{b} = A \hat{x} = \begin{bmatrix}
+1/2 (b_1 + b_2) \\
+1/2 (b_1 + b_2) \end{bmatrix} \]</span></p>
+<p>In other words, if we have to make <span class="math inline">\(x_1 + x_2\)</span> as close as possible to two different values <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span>, the best we can do is to choose <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> so as to get the average of <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span>.</p>
+<figure>
+<img src="../../images/least-squares.png" title="least-squares" alt="The vector b = (1, 3) and its orthogonal projection \hat{b} = (2, 2)." width="400" /><figcaption>The vector <span class="math inline">\(b = (1, 3)\)</span> and its orthogonal projection <span class="math inline">\(\hat{b} = (2, 2)\)</span>.</figcaption>
+</figure>
+<p>Or we could think about this problem geometrically. In order for there to be a solution to <span class="math inline">\(A x = b\)</span>, the vector <span class="math inline">\(b\)</span> has to reside in the image of <span class="math inline">\(A\)</span>. The image of <span class="math inline">\(A\)</span> is the span of its columns, which is all vectors like <span class="math inline">\(c(1, 1)\)</span> for a scalar <span class="math inline">\(c\)</span>. This is just the line through the origin in the picture above. But <span class="math inline">\(b = (b_1, b_2)\)</span> is not on that line if <span class="math inline">\(b_1 \neq b_2\)</span>, and so instead we minimize the distance between the two with its orthogonal projection <span class="math inline">\(\hat b\)</span>. The error or residual is the difference <span class="math inline">\(\epsilon = b - \hat{b}\)</span>.</p>
+  </section>
+  
+</article>
+
+
+        <!-- Post Footer -->
+        <div>
+
+        </div>
+
+    
+  </div>
   
   <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
 
@@ -482,114 +699,6 @@ d_1 &amp; 0   \\
     
   </div>
   
-  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
-
-        <!-- Post Header  -->
-<div class="Subhead">
-  <div class="Subhead-heading">
-      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/bayes-and-means/">What I'm Reading 1: Bayes and Means</a></h2>
-  </div>
-  <div class="Subhead-description">
-    
-      <a href="../tags/R/">R</a>, <a href="../tags/bayesian/">bayesian</a>, <a href="../tags/data-science/">data-science</a>, <a href="../tags/stacking/">stacking</a>, <a href="../tags/BMA/">BMA</a>, <a href="../tags/review/">review</a>
-    
-    <div class="float-md-right" style="text-align=right">
-      Published: October  4, 2019
-      
-    </div>
-  </div>
-</div>
-
-<article>
-  
-  <div id="toc" class="Box mb-3">
-    <h1>Table of Contents</h1>
-    <ul class="incremental">
-<li><a href="#bayesian-aggregation">Bayesian Aggregation</a></li>
-<li><a href="#bayesian-stacking">Bayesian Stacking</a></li>
-</ul>
-  </div>
-  
-  
-  <section id="content" class="pb-2 mb-4 border-bottom">
-    <h1 id="bayesian-aggregation">Bayesian Aggregation</h1>
-<p>Yang, Y., &amp; Dunson, D. B., <em>Minimax Optimal Bayesian Aggregation</em> 2014 (<a href="https://arxiv.org/abs/1403.1345">arXiv</a>)</p>
-<p>Say we have a number of estimators <span class="math inline">\(\hat f_1, \ldots, \hat f_K\)</span> derived from a number of models <span class="math inline">\(M_1, \ldots, M_K\)</span> for some regression problem <span class="math inline">\(Y = f(X) + \epsilon\)</span>, but, as is the nature of things when estimating with limited data, we don’t know which estimator represents the true model (assuming the true model is in our list). The Bayesian habit is to stick a prior on the uncertainty, compute posteriors probabilities, and then average across the unknown parameter using the posterior probabilities as weights. Since the posterior probabilities (call them <span class="math inline">\(\lambda_1, \ldots, \lambda_K\)</span>) have to sum to 1, we obtain a <em>convex combination</em> of our estimators <span class="math display">\[ \hat f = \sum_{1\leq i \leq K} \lambda_i \hat f_i \]</span> This is the approach of <a href="https://www.stat.colostate.edu/~jah/papers/statsci.pdf">Bayesian Model Averaging</a> (BMA). Yang <em>et al.</em> propose to find such combinations using a <a href="https://en.wikipedia.org/wiki/Dirichlet_distribution">Dirichlet prior</a> on the weights <span class="math inline">\(\lambda_i\)</span>. If we remove the restriction that the weights sum to 1 and instead only ask that they have finite sum in absolute value, then we obtain <span class="math inline">\(\hat f\)</span> as a <em>linear combination</em> of <span class="math inline">\(\hat f_i\)</span>. The authors then place a Gamma prior on <span class="math inline">\(A = \sum_i |\lambda_i|\)</span> and a Dirichlet prior on <span class="math inline">\(\mu_i = \frac{|\lambda_i|}{A}\)</span>. In both the linear and the convex cases they show that the resulting estimator is minimax optimal in the sense that it will give the best worst-case predictions for a given number of observations, including the case where a sparsity restriction is placed on the number of estimators <span class="math inline">\(\hat f_i\)</span>; in other words, <span class="math inline">\(\hat f\)</span> converges to the true estimator as the number of observations increases with minimax optimal risk. The advantage to previous non-bayesian methods of linear or convex aggregation is that the sparsity parameter can be learned from the data. The Dirichlet convex combination gives good performance against Best Model selection, Majority Voting, and <a href="https://biostats.bepress.com/ucbbiostat/paper266/">SuperLearner</a>, especially when there are both a large number of observations and a large number of estimators.</p>
-<p>I implemented the convex case in R for use with <a href="https://github.com/paul-buerkner/brms">brms</a>. The Dirichlet distribution has been <a href="https://en.wikipedia.org/wiki/Dirichlet_distribution#Gamma_distribution">reparameterized</a> as a sum of Gamma RVs to aid in sampling. The Dirichlet concentration parameter is <span class="math inline">\(\frac{\alpha}{K^\gamma}\)</span>; the authors recommend choosing <span class="math inline">\(\alpha = 1\)</span> and <span class="math inline">\(\gamma = 2\)</span>.</p>
-<pre class="r" data-org-language="R"><code>convex_regression &lt;- function(formula, data,
-                              family = &quot;gaussian&quot;,
-                              ## Yang (2014) recommends alpha = 1, gamma = 2
-                              alpha = 1, gamma = 2,
-                              verbose = 0,
-                              ...) {
-  if (gamma &lt;= 1) {
-    warning(paste(&quot;Parameter gamma should be greater than 1. Given:&quot;, gamma))
-  }
-  if (alpha &lt;= 0) {
-    warning(paste(&quot;Parameter alpha should be greater than 0. Given:&quot;, alpha))
-  }
-  ## Set up priors.
-  K &lt;- length(terms(formula))
-  alpha_K &lt;- alpha / (K^gamma)
-  stanvars &lt;-
-    stanvar(alpha_K,
-      &quot;alpha_K&quot;,
-      block = &quot;data&quot;,
-      scode = &quot;  real&lt;lower = 0&gt; alpha_K;  // dirichlet parameter&quot;
-    ) +
-    stanvar(
-      name = &quot;b_raw&quot;,
-      block = &quot;parameters&quot;,
-      scode = &quot;  vector&lt;lower = 0&gt;[K] b_raw; &quot;
-    ) +
-    stanvar(
-      name = &quot;b&quot;,
-      block = &quot;tparameters&quot;,
-      scode = &quot;  vector[K] b = b_raw / sum(b_raw);&quot;
-    )
-  prior &lt;- prior(&quot;target += gamma_lpdf(b_raw | alpha_K, 1)&quot;,
-    class = &quot;b_raw&quot;, check = FALSE
-  )
-  f &lt;- update.formula(formula, . ~ . - 1)
-  if (verbose &gt; 0) {
-    make_stancode(f,
-      prior = prior,
-      data = data,
-      stanvars = stanvars
-    ) %&gt;% message()
-  }
-  fit_dir &lt;- brm(f,
-    prior = prior,
-    family = family,
-    data = data,
-    stanvars = stanvars,
-    ...
-  )
-  fit_dir
-}
-</code></pre>
-<p>Here is a <a href="https://gist.github.com/ryanholbrook/b5c7d44c0c7642eeee1a3034b48f29d7">gist</a> that includes an interface to <a href="https://tidymodels.github.io/parsnip/">parsnip</a>.</p>
-<p>In my own experiments, I found the performance of the convex aggregator to be comparable to a <a href="https://en.wikipedia.org/wiki/Lasso_(statistics)">LASSO</a> SuperLearner at the cost of the lengthier training that goes with MCMC methods and the finicky convergence of sparse priors. So I would likely reserve this for when I had lots of features and lots of estimators to work through, where I presume it would show an advantage. But in that case it would definitely be on my list of things to try.</p>
-<h1 id="bayesian-stacking">Bayesian Stacking</h1>
-<p>Yao, Y., Vehtari, A., Simpson, D., &amp; Gelman, A., <em>Using Stacking to Average Bayesian Predictive Distributions</em> (<a href="https://projecteuclid.org/euclid.ba/1516093227">pdf</a>)</p>
-<p>Another approach to model combination is <a href="https://doi.org/10.1080/01621459.1996.10476733">stacking</a>. With stacking, model weights are chosen by cross-validation to minimize <a href="https://en.wikipedia.org/wiki/Root-mean-square_deviation">RMSE</a> predictive error. Now, BMA finds the aggregated model that best fits the data, while stacking finds the aggregated model that gives the best predictions. Stacking therefore is usually better when predictions are what you want. A drawback is that stacking produces models through <em>point</em> estimates. So, they don’t give you all the information of a full distribution like BMA would. Yao <em>et al.</em> propose a method of stacking that instead finds the optimal <a href="https://en.wikipedia.org/wiki/Posterior_predictive_distribution">predictive distribution</a> by convex combinations of distributions with weights chosen by some scoring rule: the authors use the minimization of KL-divergence. Hence, they choose weights <span class="math inline">\(w\)</span> empirically through <a href="https://en.wikipedia.org/wiki/Cross-validation_(statistics)#Leave-one-out_cross-validation">LOO</a> by <span class="math display">\[ \max_w \frac{1}{n} \sum_{1\leq i \leq n} \log \sum_{1\leq k \leq K} w_k p(y_i | y_{-i}, M_k) \]</span> where <span class="math inline">\(y_1, \ldots, y_n\)</span> are the observed data and <span class="math inline">\(y_{-i}\)</span> is the data with <span class="math inline">\(y_i\)</span> left out. The following figure shows how stacking of predictive distributions gives the “best of both worlds” for BMA and point prediction stacking.</p>
-<figure>
-<img src="../images/stacking.png" alt="From Yao (2018)" /><figcaption>From Yao (2018)</figcaption>
-</figure>
-<p>They have implemented stacking for <a href="https://mc-stan.org/users/interfaces/rstan">Stan</a> models in the R package <a href="https://cran.r-project.org/web/packages/loo/vignettes/loo2-weights.html">loo</a>.</p>
-  </section>
-  
-</article>
-
-
-        <!-- Post Footer -->
-        <div>
-
-        </div>
-
-    
-  </div>
-  
 
 <!-- Pagination -->
 <nav class="paginate-container" aria-label="Pagination">
@@ -614,7 +723,7 @@ d_1 &amp; 0   \\
             <div id="side">
               <div>
                 <h1>Tags</h1>
-                <a style="font-size: 105%" href="../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../tags/category-theory/">category-theory</a> <a style="font-size: 105%" href="../tags/classification/">classification</a> <a style="font-size: 100%" href="../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../tags/cql/">cql</a> <a style="font-size: 115%" href="../tags/data-science/">data-science</a> <a style="font-size: 105%" href="../tags/decision-boundaries/">decision-boundaries</a> <a style="font-size: 100%" href="../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../tags/engrams/">engrams</a> <a style="font-size: 105%" href="../tags/finance/">finance</a> <a style="font-size: 100%" href="../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../tags/generalized-inverse/">generalized-inverse</a> <a style="font-size: 100%" href="../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../tags/investing/">investing</a> <a style="font-size: 100%" href="../tags/julia/">julia</a> <a style="font-size: 100%" href="../tags/LDA/">LDA</a> <a style="font-size: 100%" href="../tags/least-squares/">least-squares</a> <a style="font-size: 115%" href="../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../tags/linear-equations/">linear-equations</a> <a style="font-size: 100%" href="../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../tags/memory/">memory</a> <a style="font-size: 100%" href="../tags/moore-penrose-inverse/">moore-penrose-inverse</a> <a style="font-size: 100%" href="../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../tags/numpy/">numpy</a> <a style="font-size: 100%" href="../tags/python/">python</a> <a style="font-size: 100%" href="../tags/QDA/">QDA</a> <a style="font-size: 110%" href="../tags/R/">R</a> <a style="font-size: 100%" href="../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../tags/review/">review</a> <a style="font-size: 100%" href="../tags/sage/">sage</a> <a style="font-size: 100%" href="../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../tags/talk/">talk</a> <a style="font-size: 100%" href="../tags/tensors/">tensors</a> <a style="font-size: 110%" href="../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../tags/vectors/">vectors</a>
+                <a style="font-size: 105%" href="../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../tags/category-theory/">category-theory</a> <a style="font-size: 105%" href="../tags/classification/">classification</a> <a style="font-size: 100%" href="../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../tags/cql/">cql</a> <a style="font-size: 115%" href="../tags/data-science/">data-science</a> <a style="font-size: 105%" href="../tags/decision-boundaries/">decision-boundaries</a> <a style="font-size: 100%" href="../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../tags/engrams/">engrams</a> <a style="font-size: 105%" href="../tags/finance/">finance</a> <a style="font-size: 100%" href="../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../tags/generalized-inverse/">generalized-inverse</a> <a style="font-size: 100%" href="../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../tags/investing/">investing</a> <a style="font-size: 100%" href="../tags/julia/">julia</a> <a style="font-size: 100%" href="../tags/kaggle/">kaggle</a> <a style="font-size: 100%" href="../tags/LDA/">LDA</a> <a style="font-size: 100%" href="../tags/least-squares/">least-squares</a> <a style="font-size: 115%" href="../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../tags/linear-equations/">linear-equations</a> <a style="font-size: 100%" href="../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../tags/memory/">memory</a> <a style="font-size: 100%" href="../tags/moore-penrose-inverse/">moore-penrose-inverse</a> <a style="font-size: 100%" href="../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../tags/numpy/">numpy</a> <a style="font-size: 100%" href="../tags/python/">python</a> <a style="font-size: 100%" href="../tags/QDA/">QDA</a> <a style="font-size: 110%" href="../tags/R/">R</a> <a style="font-size: 100%" href="../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../tags/review/">review</a> <a style="font-size: 100%" href="../tags/sage/">sage</a> <a style="font-size: 100%" href="../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../tags/talk/">talk</a> <a style="font-size: 100%" href="../tags/tensorflow/">tensorflow</a> <a style="font-size: 100%" href="../tags/tensors/">tensors</a> <a style="font-size: 100%" href="../tags/tpus/">tpus</a> <a style="font-size: 110%" href="../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../tags/vectors/">vectors</a>
               </div>
               <div>
                 <h1>Links</h1>
