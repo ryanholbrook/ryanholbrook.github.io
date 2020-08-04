@@ -16,7 +16,7 @@
 <p>In this post, we will look at a problem’s <em>optimal</em> decision boundary, which we can find when we know exactly how our data was generated. The optimal decision boundary represents the “best” solution possible for that problem. Consequently, by looking at the complexity of this boundary and at how much error it produces, we can get an idea of the inherent difficulty of the problem.</p>
 <p>Unless we have generated the data ourselves, we won’t usually be able to find the optimal boundary. Instead, we approximate it using a classifier. A good machine learning classifier tries to approximate the optimal boundary for a problem as closely as possible.</p>
 <p>In future posts, we will look at the approximating boundary created by various classification algorithms. We will investigate the strategy the classifier uses to create this boundary and how this boundary evolves as the classifier is trained on more and more data. There are many classification algorithms available to a data scientist – regression, discriminant analysis, decision trees, neural networks, to name a few – and it is important to understand which algorithm is appropritate for the problem at hand. Decision boundaries can help us to do this.</p>
-<video autoplay loop mutued playsinline>
+<video autoplay loop mutued playsinline controls>
   <source src="/images/rf_mix.webm" type="video/webm">
   <source src="/images/rf_mix.mp4" type="video/mp4">
   Can't play the video for some reason! Click <a href="/images/rf_mix.gif">here</a> to download a gif.
@@ -621,7 +621,7 @@ anim
 <p>where <span class="math inline">\(\pi_c = p(C = c)\)</span> is the prior probability of class <span class="math inline">\(c\)</span>. The optimal decision boundary is formed where the contours of the class-conditional densities intersect – because this is where the classes’ discriminant functions are equal – and it is the covariance matricies <span class="math inline">\(\Sigma_k\)</span> that determine the shape of these contours. And so, by making additional assumptions about how the covariance should be modeled, we can try to tune the performance of our classifier to the data of interest.</p>
 <p>In this post, we’ll look at a few simple assumptions we can make about <span class="math inline">\(\Sigma_k\)</span> and how that affects the kinds of decisions the classifier will arrive at. In particular, we’ll see that there are <em>six kinds</em> of models we can produce depending on <em>three</em> different assumptions.</p>
 <figure>
-<video autoplay loop mutued playsinline class="wide">
+<video autoplay loop mutued playsinline controls class="wide">
   <source src="/images/fitting.webm" type="video/webm">
   <source src="/images/fitting.mp4" type="video/mp4">
   Can't play the video for some reason! Click <a href="/images/fitting_lda.gif">here</a> and <a href="/images/fitting_qda.gif">here</a> to download a gif.
@@ -657,7 +657,7 @@ anim
 <p><span class="math display">\[ \delta_c(x) = -\frac{1}{2}(x - \mu_c)^\top \Sigma_c^{-1} (x - \mu_c) - \frac{1}{2}\log |\Sigma_c| + \log \pi_c \]</span></p>
 <p>Notice that this is a quadratic function: <span class="math inline">\(x\)</span> occurs twice in the first term. We obtain the decision boundary between two classes <span class="math inline">\(c\)</span> and <span class="math inline">\(d\)</span> by setting equal their discriminant functions <span class="math inline">\( \delta_c(x) - \delta_d(x) = 0 \)</span>. The set of solutions to this equation is the decision boundary. Whenever the covariance matrices <span class="math inline">\(\Sigma_c\)</span> and <span class="math inline">\(\Sigma_d\)</span> are <em>distinct</em>, this will be a <a href="https://en.wikipedia.org/wiki/Quadric">quadric</a> equation forming a quadric surface. In two dimensions, these surfaces are the <a href="https://en.wikipedia.org/wiki/Conic_section">conic sections</a>: parabolas, hyperbolas, and ellipses.</p>
 <figure>
-<video autoplay loop mutued playsinline>
+<video autoplay loop mutued playsinline controls>
   <source src="/images/quadratic_mean.webm" type="video/webm">
   <source src="/images/quadratic_mean.mp4" type="video/mp4">
   Can't play the video for some reason! Click <a href="/images/quadratic_mean.gif">here</a> to download a gif.
@@ -669,7 +669,7 @@ anim
 <p><span class="math display">\[ x^\top \Sigma^{-1}(\mu_c - \mu_d) \]</span></p>
 <p>which is <em>linear</em> in <span class="math inline">\(x\)</span>. This means the decision boundary is given by a <a href="https://en.wikipedia.org/wiki/System_of_linear_equations">linear equation</a>, and the boundary is a <a href="https://en.wikipedia.org/wiki/Hyperplane">hyperplane</a>, which in two dimensions is a line.</p>
 <figure>
-<video autoplay loop mutued playsinline>
+<video autoplay loop mutued playsinline controls>
   <source src="/images/linear_mean.webm" type="video/webm">
   <source src="/images/linear_mean.mp4" type="video/mp4">
   Can't play the video for some reason! Click <a href="/images/linear_mean.gif">here</a> to download a gif.
@@ -687,7 +687,7 @@ anim
 0 &amp; \operatorname{Var}(X_2)\end{bmatrix}\]</span></p>
 <p>In this case, each feature can only vary individually along its own axis. Thinking about the covariance matrix as a linear transformation, this means that the distribution’s elliptical contours are obtained through a <em>scaling transform</em> applied to circles. In other words, the contours can vary through stretching and shrinking along an axis, but <em>not</em> through a rotation.</p>
 <figure>
-<video autoplay loop mutued playsinline>
+<video autoplay loop mutued playsinline controls>
   <source src="/images/uncorrelated.webm" type="video/webm">
   <source src="/images/uncorrelated.mp4" type="video/mp4">
   Can't play the video for some reason! Click <a href="/images/uncorrelated.gif">here</a> to download a gif.
@@ -703,7 +703,7 @@ anim
 0 &amp; \sigma^2 \end{bmatrix} = \sigma^2 \begin{bmatrix} 1 &amp; 0 \\ 0 &amp; 1 \end{bmatrix} = \sigma^2 I\]</span></p>
 <p>So, such matrices are simply scalar multiples of an identity matrix. The contours of the class-conditional distributions are spheres, and the decision boundaries themselves are also spherical.</p>
 <figure>
-<video autoplay loop mutued playsinline>
+<video autoplay loop mutued playsinline controls>
   <source src="/images/spherical.webm" type="video/webm">
   <source src="/images/spherical.mp4" type="video/mp4">
   Can't play the video for some reason! Click <a href="/images/spherical.gif">here</a> to download a gif.
@@ -719,7 +719,7 @@ anim
 <h2 id="example">Example</h2>
 <p>In this example, the data was generated from a Diagonal QDA model. Show below are the LDA, Diagonal QDA, and QDA classifiers being fit to samples of increasing size.</p>
 <figure>
-<video autoplay loop mutued playsinline class="verywide">
+<video autoplay loop mutued playsinline controls class="verywide">
   <source src="/images/misspecification.webm" type="video/webm">
   <source src="/images/misspecification.mp4" type="video/mp4">
   Can't play the video for some reason! Click <a href="/images/misspecification.gif">here</a> to download a gif.
