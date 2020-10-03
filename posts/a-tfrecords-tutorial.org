@@ -1,0 +1,10 @@
+---
+title: "A TFRecords Tutorial"
+published: October 3, 2020
+tags: kaggle, tpus, tensorflow
+---
+
+Over on Kaggle, I wrote a couple of tutorials for working with TFRecords, a binary file format typically used for distributed training in TensorFlow. Of interest if you want to use TPUs for training neural networks.
+
+- [[https://www.kaggle.com/ryanholbrook/tfrecords-basics][TFRecords Basics]] and [[https://youtu.be/KgjaC9VeOi8][accompanying video]] with Jesse Mostipak
+- [[https://www.kaggle.com/ryanholbrook/walkthrough-building-a-dataset-of-tfrecords][Walkthrough: Building a Dataset of TFRecords]]
