@@ -7,20 +7,8 @@
         <description><![CDATA[A blog about data science and machine learning, with a lot of math.]]></description>
         <atom:link href="https://mathformachines.com/feeds/tpus.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Sat, 03 Oct 2020 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Fri, 10 Jul 2020 00:00:00 UT</lastBuildDate>
         <item>
-    <title>A TFRecords Tutorial</title>
-    <link>https://mathformachines.com/posts/a-tfrecords-tutorial/index.html</link>
-    <description><![CDATA[<p>Over on Kaggle, I wrote a couple of tutorials for working with TFRecords, a binary file format typically used for distributed training in TensorFlow. Of interest if you want to use TPUs for training neural networks.</p>
-<ul>
-<li><a href="https://www.kaggle.com/ryanholbrook/tfrecords-basics">TFRecords Basics</a> and <a href="https://youtu.be/KgjaC9VeOi8">accompanying video</a> with Jesse Mostipak</li>
-<li><a href="https://www.kaggle.com/ryanholbrook/walkthrough-building-a-dataset-of-tfrecords">Walkthrough: Building a Dataset of TFRecords</a></li>
-</ul>]]></description>
-    <pubDate>Sat, 03 Oct 2020 00:00:00 UT</pubDate>
-    <guid>https://mathformachines.com/posts/a-tfrecords-tutorial/index.html</guid>
-    <dc:creator>Ryan Holbrook</dc:creator>
-</item>
-<item>
     <title>Getting Started with TPUs on Kaggle</title>
     <link>https://mathformachines.com/posts/getting-started-with-tpus/index.html</link>
     <description><![CDATA[<p><a href="https://www.kaggle.com/c/tpu-getting-started/overview/faq"><strong>Petals to the Metal</strong></a> is Kaggle’s newest <a href="https://www.kaggle.com/c/tpu-getting-started/overview/faq">Getting Started</a> competition, highlighting <strong>Tensor Processing Units</strong>. A TPU is an accelerator developed by Google especially for machine learning. They can be used in TensorFlow much like GPUs, and are quite powerful. I had the pleasure of writing a tutorial to go along with the competition. Check it out!</p>
