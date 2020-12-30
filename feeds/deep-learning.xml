@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>Math for Machines</title>
+        <link>https://mathformachines.com</link>
+        <description><![CDATA[A blog about data science and machine learning, with a lot of math.]]></description>
+        <atom:link href="https://mathformachines.com/feeds/deep-learning.xml" rel="self"
+                   type="application/rss+xml" />
+        <lastBuildDate>Sat, 26 Sep 2020 00:00:00 UT</lastBuildDate>
+        <item>
+    <title>Visualizing the Loss Landscape of a Neural Network</title>
+    <link>https://mathformachines.com/posts/visualizing-the-loss-landscape/index.html</link>
+    <description><![CDATA[<p>Training a neural network is an optimization problem, the problem of minimizing its <em>loss</em>. The <strong>loss function</strong> <span class="math inline">\(Loss_X(w)\)</span> of a neural network is the error of its predictions over a fixed dataset <span class="math inline">\(X\)</span> as a function of the network’s weights or other parameters <span class="math inline">\(w\)</span>. The <strong>loss landscape</strong> is the graph of this function, a surface in some usually high-dimensional space. We can imagine the training of the network as a journey across this surface: Weight initialization drops us onto some random coordinates in the landscape, and then SGD guides us step-by-step along a path of parameter values towards a minimum. The success of our training depends on the shape of the landscape and also on our manner of stepping across it.</p>
+<p>As a neural network typically has many parameters (hundreds or millions or more), this loss surface will live in a space too large to visualize. There are, however, some tricks we can use to get a good two-dimensional of it and so gain a valuable source of intuition. I learned about these from <em>Visualizing the Loss Landscape of Neural Nets</em> by Li, et al. (<a href="https://arxiv.org/abs/1712.09913">arXiv</a>).</p>
+<figure>
+<video autoplay loop mutued playsinline controls>
+  <source src="/images/loss-landscape-path.webm" type="video/webm">
+  <source src="/images/loss-landscape-path.mp4" type="video/mp4">
+  Can't play the video for some reason! Click <a href="/images/loss-landscape-path.gif">here</a> to download a gif.
+</video>
+</figure>
+
+<h1 id="the-linear-case">The Linear Case</h1>
+<p>Let’s start with the two-dimensional case to get an idea of what we’re looking for.</p>
+<p>A single neuron with one input computes <span class="math inline">\(y = w x + b\)</span> and so has only two parameters: a weight <span class="math inline">\(w\)</span> for the input <span class="math inline">\(x\)</span> and a bias <span class="math inline">\(b\)</span>. Having only two parameters means we can view every dimension of the loss surface with a simple contour plot, the bias along one axis and the single weight along the other:</p>
+<figure>
+<video autoplay loop mutued playsinline controls>
+  <source src="/images/loss-landscape-linear.webm" type="video/webm">
+  <source src="/images/loss-landscape-linear.mp4" type="video/mp4">
+  Can't play the video for some reason! Click <a href="/images/loss-landscape-linear.gif">here</a> to download a gif.
+</video>
+<figcaption>Traversing the loss landscape of a linear model with SGD.</figcaption>
+</figure>
+
+<p>After training this simple linear model, we’ll have a pair of weights <span class="math inline">\(w^*\)</span> and <span class="math inline">\(b^*\)</span> that should be approximately where the minimal loss occurs – it’s nice to take this point as the center of the plot. By collecting the weights at every step of training, we can trace out the path taken by SGD across the loss surface towards the minimum.</p>
+<p>Our goal now is to get similar kinds of images for networks with any number of parameters.</p>
+<h1 id="making-random-slices">Making Random Slices</h1>
+<p>How can we view the loss landscape of a larger network? Though we can’t anything like a complete view of the loss surface, we can still get <em>a</em> view as long as we don’t especially care <em>what</em> view we get; that is, we’ll just take a random 2D slice out of the loss surface and look at the contours that slice, hoping that it’s more or less representative.</p>
+<p>This slice is basically a coordinate system: we need a center (the origin) and a pair of direction vectors (axes). As before, let’s take the weights <span class="math inline">\(W^*\)</span> from the trainined network to act as the center, and the direction vectors we’ll generate randomly.</p>
+<p>Now the loss at some point <span class="math inline">\((a, b)\)</span> on the graph is taken by setting the weights of the network to <span class="math inline">\(W^* + a W_0 + b W_1\)</span> and evaluating it on the given data. Plot these losses across some range of values for <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>, and we can produce our contour plot.</p>
+<figure>
+<img src="/images/random-loss-surface.png" title="random-loss-surface" alt="A random slices through a high-dimensional loss surface" /><figcaption>A random slices through a high-dimensional loss surface</figcaption>
+</figure>
+<p>We might worry that the plot would be distorted if the random vectors we chose happened to be close together, even though we’ve plotted them as if they were at a right angle. It’s a nice fact about high-dimensional vector spaces, though, that any two random vectors you choose from them will usually be close to orthogonal.</p>
+<p>Here’s how we could implement this:</p>
+<pre class="python"><code>import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import callbacks, layers
+
+class RandomCoordinates(object):
+    def __init__(self, origin):
+        self.origin_ = origin
+        self.v0_ = normalize_weights(
+            [np.random.normal(size=w.shape) for w in origin], origin
+        )
+        self.v1_ = normalize_weights(
+            [np.random.normal(size=w.shape) for w in origin], origin
+        )
+
+    def __call__(self, a, b):
+        return [
+            a * w0 + b * w1 + wc
+            for w0, w1, wc in zip(self.v0_, self.v1_, self.origin_)
+        ]
+
+
+def normalize_weights(weights, origin):
+    return [
+        w * np.linalg.norm(wc) / np.linalg.norm(w)
+        for w, wc in zip(weights, origin)
+    ]
+
+
+class LossSurface(object):
+    def __init__(self, model, inputs, outputs):
+        self.model_ = model
+        self.inputs_ = inputs
+        self.outputs_ = outputs
+
+    def compile(self, range, points, coords):
+        a_grid = tf.linspace(-1.0, 1.0, num=points) ** 3 * range
+        b_grid = tf.linspace(-1.0, 1.0, num=points) ** 3 * range
+        loss_grid = np.empty([len(a_grid), len(b_grid)])
+        for i, a in enumerate(a_grid):
+            for j, b in enumerate(b_grid):
+                self.model_.set_weights(coords(a, b))
+                loss = self.model_.test_on_batch(
+                    self.inputs_, self.outputs_, return_dict=True
+                )[&quot;loss&quot;]
+                loss_grid[j, i] = loss
+        self.model_.set_weights(coords.origin_)
+        self.a_grid_ = a_grid
+        self.b_grid_ = b_grid
+        self.loss_grid_ = loss_grid
+
+    def plot(self, range=1.0, points=24, levels=20, ax=None, **kwargs):
+        xs = self.a_grid_
+        ys = self.b_grid_
+        zs = self.loss_grid_
+        if ax is None:
+            _, ax = plt.subplots(**kwargs)
+            ax.set_title(&quot;The Loss Surface&quot;)
+            ax.set_aspect(&quot;equal&quot;)
+        # Set Levels
+        min_loss = zs.min()
+        max_loss = zs.max()
+        levels = tf.exp(
+            tf.linspace(
+                tf.math.log(min_loss), tf.math.log(max_loss), num=levels
+            )
+        )
+        # Create Contour Plot
+        CS = ax.contour(
+            xs,
+            ys,
+            zs,
+            levels=levels,
+            cmap=&quot;magma&quot;,
+            linewidths=0.75,
+            norm=mpl.colors.LogNorm(vmin=min_loss, vmax=max_loss * 2.0),
+        )
+        ax.clabel(CS, inline=True, fontsize=8, fmt=&quot;%1.2f&quot;)
+        return ax
+</code></pre>
+<p>Let’s try it out. We’ll create a simple fully-connected network to fit a curve to this parabola:</p>
+<pre class="python"><code># Create some data
+NUM_EXAMPLES = 256
+BATCH_SIZE = 64
+x = tf.random.normal(shape=(NUM_EXAMPLES, 1))
+err = tf.random.normal(shape=x.shape, stddev=0.25)
+y = x ** 2 + err
+y = tf.squeeze(y)
+ds = (tf.data.Dataset
+      .from_tensor_slices((x, y))
+      .shuffle(NUM_EXAMPLES)
+      .batch(BATCH_SIZE))
+plt.plot(x, y, &#39;o&#39;, alpha=0.5);
+</code></pre>
+<p><img src="/images/loss-surface-parabola.png" /></p>
+<pre class="python"><code># Fit a fully-connected network (ie, a multi-layer perceptron)
+model = keras.Sequential([
+  layers.Dense(64, activation=&#39;relu&#39;),
+  layers.Dense(64, activation=&#39;relu&#39;),
+  layers.Dense(64, activation=&#39;relu&#39;),
+  layers.Dense(1)
+])
+model.compile(
+  loss=&#39;mse&#39;,
+  optimizer=&#39;adam&#39;,
+)
+history = model.fit(
+  ds,
+  epochs=200,
+  verbose=0,
+)
+
+# Look at fitted curve
+grid = tf.linspace(-4, 4, 3000)
+fig, ax = plt.subplots()
+ax.plot(x, y, &#39;o&#39;, alpha=0.1)
+ax.plot(grid, model.predict(grid).reshape(-1, 1), color=&#39;k&#39;)
+</code></pre>
+<p><img src="/images/loss-surface-parabola-fit.png" /></p>
+<p>Looks like we got an okay fit, so now we’ll look at a random slice from the loss surface:</p>
+<pre class="python"><code># Create loss surface
+coords = RandomCoordinates(model.get_weights())
+loss_surface = LossSurface(model, x, y)
+loss_surface.compile(points=30, coords=coords)
+
+# Look at loss surface
+plt.figure(dpi=100)
+loss_surface.plot()
+</code></pre>
+<p><img src="/images/loss-surface-random-slice-result.png" /></p>
+<h1 id="improving-the-view">Improving the View</h1>
+<p>Getting a good plot of the path the parameters take during training requires one more trick. A path through a random slice of the landscape tends to show too little variation to get a good idea of how the training actually proceeded. A more representative view would show us the directions through which the parameters had the <em>most</em> variation. We want, in other words, the first two principal components of the collection of parameters assumed by the network during training.</p>
+<pre class="python"><code>from sklearn.decomposition import PCA
+
+# Some utility functions to reshape network weights
+def vectorize_weights_(weights):
+    vec = [w.flatten() for w in weights]
+    vec = np.hstack(vec)
+    return vec
+
+
+def vectorize_weight_list_(weight_list):
+    vec_list = []
+    for weights in weight_list:
+        vec_list.append(vectorize_weights_(weights))
+    weight_matrix = np.column_stack(vec_list)
+    return weight_matrix
+
+
+def shape_weight_matrix_like_(weight_matrix, example):
+    weight_vecs = np.hsplit(weight_matrix, weight_matrix.shape[1])
+    sizes = [v.size for v in example]
+    shapes = [v.shape for v in example]
+    weight_list = []
+    for net_weights in weight_vecs:
+        vs = np.split(net_weights, np.cumsum(sizes))[:-1]
+        vs = [v.reshape(s) for v, s in zip(vs, shapes)]
+        weight_list.append(vs)
+    return weight_list
+
+
+def get_path_components_(training_path, n_components=2):
+    # Vectorize network weights
+    weight_matrix = vectorize_weight_list_(training_path)
+    # Create components
+    pca = PCA(n_components=2, whiten=True)
+    components = pca.fit_transform(weight_matrix)
+    # Reshape to fit network
+    example = training_path[0]
+    weight_list = shape_weight_matrix_like_(components, example)
+    return pca, weight_list
+
+
+class PCACoordinates(object):
+    def __init__(self, training_path):
+        origin = training_path[-1]
+        self.pca_, self.components = get_path_components_(training_path)
+        self.set_origin(origin)
+
+    def __call__(self, a, b):
+        return [
+            a * w0 + b * w1 + wc
+            for w0, w1, wc in zip(self.v0_, self.v1_, self.origin_)
+        ]
+
+    def set_origin(self, origin, renorm=True):
+        self.origin_ = origin
+        if renorm:
+            self.v0_ = normalize_weights(self.components[0], origin)
+            self.v1_ = normalize_weights(self.components[1], origin)
+</code></pre>
+<p>Having defined these, we’ll train a model like before but this time with a simple callback that will collect the weights of the model while it trains:</p>
+<pre class="python"><code># Create data
+ds = (
+    tf.data.Dataset.from_tensor_slices((inputs, outputs))
+    .repeat()
+    .shuffle(1000, seed=SEED)
+    .batch(BATCH_SIZE)
+)
+
+
+# Define Model
+model = keras.Sequential(
+    [
+        layers.Dense(64, activation=&quot;relu&quot;, input_shape=[1]),
+        layers.Dense(64, activation=&quot;relu&quot;),
+        layers.Dense(64, activation=&quot;relu&quot;),      
+        layers.Dense(1),
+    ]
+)
+
+model.compile(
+    optimizer=&quot;adam&quot;, loss=&quot;mse&quot;,
+)
+
+training_path = [model.get_weights()]
+# Callback to collect weights as the model trains
+collect_weights = callbacks.LambdaCallback(
+    on_epoch_end=(
+        lambda batch, logs: training_path.append(model.get_weights())
+    )
+)
+
+history = model.fit(
+    ds,
+    steps_per_epoch=1,
+    epochs=40,
+    callbacks=[collect_weights],
+    verbose=0,
+)
+</code></pre>
+<p>And now we can get a view of the loss surface more representative of where the optimization actually occurs:</p>
+<pre class="python"><code># Create loss surface
+coords = PCACoordinates(training_path)
+loss_surface = LossSurface(model, x, y)
+loss_surface.compile(points=30, coords=coords, range=0.2)
+# Look at loss surface
+loss_surface.plot(dpi=150)
+</code></pre>
+<p><img src="/images/loss-surface-pca-slice-result.png" /></p>
+<h1 id="plotting-the-optimization-path">Plotting the Optimization Path</h1>
+<p>All we’re missing now is the path the neural network weights took during training in terms of the transformed coordinate system. Given the weights <span class="math inline">\(w\)</span> for a neural network, in other words, we need to find the values of <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> that correspond to the direction vectors we found via PCA and the origin weights <span class="math inline">\(w_c\)</span>.</p>
+<p><span class="math display">\[w - v_c = a v_0 + b v_1\]</span></p>
+<p>We can’t solve this using an ordinary inverse (the matrix <span class="math inline">\( \left[\begin{matrix} v_0 &amp; v_1 \end{matrix} \right] \)</span> isn’t square), so instead we’ll use the Moore-Penrose pseudoinverse, which will give us a least-squares optimal projection of <span class="math inline">\(w\)</span> onto the coordinate vectors:</p>
+<p><span class="math display">\[\left[\begin{matrix} v_0 &amp; v_1 \end{matrix}\right]^+ (w - v_c) = (a, b)\]</span></p>
+<p>This is the ordinary least squares solution to the equation above.</p>
+<pre class="python"><code>def weights_to_coordinates(coords, training_path):
+    &quot;&quot;&quot;Project the training path onto the first two principal components
+using the pseudoinverse.&quot;&quot;&quot;
+    components = [coords.v0_, coords.v1_]
+    comp_matrix = vectorize_weight_list_(components)
+    # the pseudoinverse
+    comp_matrix_i = np.linalg.pinv(comp_matrix)
+    # the origin vector
+    w_c = vectorize_weights_(training_path[-1])
+    # center the weights on the training path and project onto components
+    coord_path = np.array(
+        [
+            comp_matrix_i @ (vectorize_weights_(weights) - w_c)
+            for weights in training_path
+        ]
+    )
+    return coord_path
+
+
+def plot_training_path(coords, training_path, ax=None, end=None, **kwargs):
+    path = weights_to_coordinates(coords, training_path)
+    if ax is None:
+        fig, ax = plt.subplots(**kwargs)
+    colors = range(path.shape[0])
+    end = path.shape[0] if end is None else end
+    norm = plt.Normalize(0, end)
+    ax.scatter(
+        path[:, 0], path[:, 1], s=4, c=colors, cmap=&quot;cividis&quot;, norm=norm,
+    )
+    return ax
+</code></pre>
+<p>Applying these to the training path we saved means we can plot them along with the loss landscape in the PCA coordinates:</p>
+<pre class="python"><code>pcoords = PCACoordinates(training_path)
+loss_surface = LossSurface(model, x, y)
+loss_surface.compile(points=30, coords=pcoords, range=0.4)
+ax = loss_surface.plot(dpi=150)
+plot_training_path(pcoords, training_path, ax)
+</code></pre>
+<p><img src="/images/loss-surface-pca-path-result.png" /></p>]]></description>
+    <pubDate>Sat, 26 Sep 2020 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/visualizing-the-loss-landscape/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+
+    </channel>
+</rss>
