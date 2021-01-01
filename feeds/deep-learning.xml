@@ -40,7 +40,7 @@
 <p>This slice is basically a coordinate system: we need a center (the origin) and a pair of direction vectors (axes). As before, let’s take the weights <span class="math inline">\(W^*\)</span> from the trainined network to act as the center, and the direction vectors we’ll generate randomly.</p>
 <p>Now the loss at some point <span class="math inline">\((a, b)\)</span> on the graph is taken by setting the weights of the network to <span class="math inline">\(W^* + a W_0 + b W_1\)</span> and evaluating it on the given data. Plot these losses across some range of values for <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>, and we can produce our contour plot.</p>
 <figure>
-<img src="/images/random-loss-surface.png" title="random-loss-surface" alt="A random slices through a high-dimensional loss surface" /><figcaption>A random slices through a high-dimensional loss surface</figcaption>
+<img src="/images/random-loss-surface.png" title="random-loss-surface" alt="Random slices through a high-dimensional loss surface" /><figcaption>Random slices through a high-dimensional loss surface</figcaption>
 </figure>
 <p>We might worry that the plot would be distorted if the random vectors we chose happened to be close together, even though we’ve plotted them as if they were at a right angle. It’s a nice fact about high-dimensional vector spaces, though, that any two random vectors you choose from them will usually be close to orthogonal.</p>
 <p>Here’s how we could implement this:</p>
