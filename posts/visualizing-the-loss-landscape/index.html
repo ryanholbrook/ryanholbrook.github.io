@@ -84,6 +84,10 @@
                 <ul>
     
         <li>
+          <a href="../../posts/what-convnets-learn/">Visualizing What Convnets Learn</a>
+        </li>
+    
+        <li>
           <a href="../../posts/visualizing-the-loss-landscape/">Visualizing the Loss Landscape of a Neural Network</a>
         </li>
     
@@ -119,10 +123,6 @@
           <a href="../../posts/investmentsim/">investmentsim - an R Package for Simulating Investment Portfolios</a>
         </li>
     
-        <li>
-          <a href="../../posts/introduction-to-categories/">Talk: An Introduction to Categories with Haskell and Databases</a>
-        </li>
-    
 </ul>
 
               </div>
@@ -142,7 +142,7 @@
       <a href="../../tags/deep-learning/">deep-learning</a>, <a href="../../tags/sgd/">sgd</a>, <a href="../../tags/visualization/">visualization</a>, <a href="../../tags/python/">python</a>
     
     <div class="float-md-right" style="text-align=right">
-      Published: September 26, 2020
+      Published: December 30, 2020
       
     </div>
   </div>
@@ -184,12 +184,12 @@
 <figcaption>Traversing the loss landscape of a linear model with SGD.</figcaption>
 </figure>
 
-<p>After training this simple linear model, we’ll have a pair of weights <span class="math inline">\(w^*\)</span> and <span class="math inline">\(b^*\)</span> that should be approximately where the minimal loss occurs – it’s nice to take this point as the center of the plot. By collecting the weights at every step of training, we can trace out the path taken by SGD across the loss surface towards the minimum.</p>
+<p>After training this simple linear model, we’ll have a pair of weights <span class="math inline">\(w_c\)</span> and <span class="math inline">\(b_c\)</span> that should be approximately where the minimal loss occurs – it’s nice to take this point <span class="math inline">\((w_c, b_c)\)</span> as the center of the plot. By collecting the weights at every step of training, we can trace out the path taken by SGD across the loss surface towards the minimum.</p>
 <p>Our goal now is to get similar kinds of images for networks with any number of parameters.</p>
 <h1 id="making-random-slices">Making Random Slices</h1>
 <p>How can we view the loss landscape of a larger network? Though we can’t anything like a complete view of the loss surface, we can still get <em>a</em> view as long as we don’t especially care <em>what</em> view we get; that is, we’ll just take a random 2D slice out of the loss surface and look at the contours that slice, hoping that it’s more or less representative.</p>
-<p>This slice is basically a coordinate system: we need a center (the origin) and a pair of direction vectors (axes). As before, let’s take the weights <span class="math inline">\(W^*\)</span> from the trainined network to act as the center, and the direction vectors we’ll generate randomly.</p>
-<p>Now the loss at some point <span class="math inline">\((a, b)\)</span> on the graph is taken by setting the weights of the network to <span class="math inline">\(W^* + a W_0 + b W_1\)</span> and evaluating it on the given data. Plot these losses across some range of values for <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>, and we can produce our contour plot.</p>
+<p>This slice is basically a coordinate system: we need a center (the origin) and a pair of direction vectors (axes). As before, let’s take the weights <span class="math inline">\(W_c\)</span> from the trainined network to act as the center, and the direction vectors we’ll generate randomly.</p>
+<p>Now the loss at some point <span class="math inline">\((a, b)\)</span> on the graph is taken by setting the weights of the network to <span class="math inline">\(W_c + a W_0 + b W_1\)</span> and evaluating it on the given data. Plot these losses across some range of values for <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>, and we can produce our contour plot.</p>
 <figure>
 <img src="../../images/random-loss-surface.png" title="random-loss-surface" alt="Random slices through a high-dimensional loss surface" /><figcaption>Random slices through a high-dimensional loss surface</figcaption>
 </figure>
@@ -437,10 +437,10 @@ loss_surface.plot(dpi=150)
 </code></pre>
 <p><img src="../../images/loss-surface-pca-slice-result.png" /></p>
 <h1 id="plotting-the-optimization-path">Plotting the Optimization Path</h1>
-<p>All we’re missing now is the path the neural network weights took during training in terms of the transformed coordinate system. Given the weights <span class="math inline">\(w\)</span> for a neural network, in other words, we need to find the values of <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> that correspond to the direction vectors we found via PCA and the origin weights <span class="math inline">\(w_c\)</span>.</p>
-<p><span class="math display">\[w - v_c = a v_0 + b v_1\]</span></p>
-<p>We can’t solve this using an ordinary inverse (the matrix <span class="math inline">\( \left[\begin{matrix} v_0 &amp; v_1 \end{matrix} \right] \)</span> isn’t square), so instead we’ll use the Moore-Penrose pseudoinverse, which will give us a least-squares optimal projection of <span class="math inline">\(w\)</span> onto the coordinate vectors:</p>
-<p><span class="math display">\[\left[\begin{matrix} v_0 &amp; v_1 \end{matrix}\right]^+ (w - v_c) = (a, b)\]</span></p>
+<p>All we’re missing now is the path the neural network weights took during training in terms of the transformed coordinate system. Given the weights <span class="math inline">\(W\)</span> for a neural network, in other words, we need to find the values of <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> that correspond to the direction vectors we found via PCA and the origin weights <span class="math inline">\(W_c\)</span>.</p>
+<p><span class="math display">\[W - W_c = a W_0 + b W_1\]</span></p>
+<p>We can’t solve this using an ordinary inverse (the matrix <span class="math inline">\( \left[\begin{matrix} W_0 &amp; W_1 \end{matrix} \right] \)</span> isn’t square), so instead we’ll use the Moore-Penrose pseudoinverse, which will give us a least-squares optimal projection of <span class="math inline">\(W\)</span> onto the coordinate vectors:</p>
+<p><span class="math display">\[\left[\begin{matrix} W_0 &amp; W_1 \end{matrix}\right]^+ (W - W_c) = (a, b)\]</span></p>
 <p>This is the ordinary least squares solution to the equation above.</p>
 <pre class="python"><code>def weights_to_coordinates(coords, training_path):
     &quot;&quot;&quot;Project the training path onto the first two principal components
@@ -496,7 +496,7 @@ plot_training_path(pcoords, training_path, ax)
     
 
     
-    <span class="next_page disabled">Next ⮞</span>
+    <a class="next_page text-gray-dark" rel="next" aria-label="Next Page" href="../../posts/what-convnets-learn/">Next ⮞</a>
     
   </div>
 </nav>
@@ -521,7 +521,7 @@ plot_training_path(pcoords, training_path, ax)
             <div id="side">
               <div>
                 <h1>Tags</h1>
-                <a style="font-size: 105%" href="../../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../../tags/category-theory/">category-theory</a> <a style="font-size: 105%" href="../../tags/classification/">classification</a> <a style="font-size: 100%" href="../../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../../tags/cql/">cql</a> <a style="font-size: 115%" href="../../tags/data-science/">data-science</a> <a style="font-size: 105%" href="../../tags/decision-boundaries/">decision-boundaries</a> <a style="font-size: 100%" href="../../tags/deep-learning/">deep-learning</a> <a style="font-size: 100%" href="../../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../../tags/engrams/">engrams</a> <a style="font-size: 105%" href="../../tags/finance/">finance</a> <a style="font-size: 100%" href="../../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../../tags/generalized-inverse/">generalized-inverse</a> <a style="font-size: 100%" href="../../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../../tags/investing/">investing</a> <a style="font-size: 100%" href="../../tags/julia/">julia</a> <a style="font-size: 100%" href="../../tags/kaggle/">kaggle</a> <a style="font-size: 100%" href="../../tags/LDA/">LDA</a> <a style="font-size: 100%" href="../../tags/least-squares/">least-squares</a> <a style="font-size: 115%" href="../../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../../tags/linear-equations/">linear-equations</a> <a style="font-size: 100%" href="../../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../../tags/memory/">memory</a> <a style="font-size: 100%" href="../../tags/moore-penrose-inverse/">moore-penrose-inverse</a> <a style="font-size: 100%" href="../../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../../tags/numpy/">numpy</a> <a style="font-size: 105%" href="../../tags/python/">python</a> <a style="font-size: 100%" href="../../tags/QDA/">QDA</a> <a style="font-size: 110%" href="../../tags/R/">R</a> <a style="font-size: 100%" href="../../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../../tags/review/">review</a> <a style="font-size: 100%" href="../../tags/sage/">sage</a> <a style="font-size: 100%" href="../../tags/sgd/">sgd</a> <a style="font-size: 100%" href="../../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../../tags/talk/">talk</a> <a style="font-size: 100%" href="../../tags/tensorflow/">tensorflow</a> <a style="font-size: 100%" href="../../tags/tensors/">tensors</a> <a style="font-size: 100%" href="../../tags/tpus/">tpus</a> <a style="font-size: 110%" href="../../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../../tags/vectors/">vectors</a> <a style="font-size: 100%" href="../../tags/visualization/">visualization</a>
+                <a style="font-size: 105%" href="../../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../../tags/category-theory/">category-theory</a> <a style="font-size: 105%" href="../../tags/classification/">classification</a> <a style="font-size: 100%" href="../../tags/convnets/">convnets</a> <a style="font-size: 100%" href="../../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../../tags/cql/">cql</a> <a style="font-size: 115%" href="../../tags/data-science/">data-science</a> <a style="font-size: 105%" href="../../tags/decision-boundaries/">decision-boundaries</a> <a style="font-size: 105%" href="../../tags/deep-learning/">deep-learning</a> <a style="font-size: 100%" href="../../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../../tags/engrams/">engrams</a> <a style="font-size: 105%" href="../../tags/finance/">finance</a> <a style="font-size: 100%" href="../../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../../tags/generalized-inverse/">generalized-inverse</a> <a style="font-size: 100%" href="../../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../../tags/investing/">investing</a> <a style="font-size: 100%" href="../../tags/julia/">julia</a> <a style="font-size: 100%" href="../../tags/kaggle/">kaggle</a> <a style="font-size: 100%" href="../../tags/LDA/">LDA</a> <a style="font-size: 100%" href="../../tags/least-squares/">least-squares</a> <a style="font-size: 115%" href="../../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../../tags/linear-equations/">linear-equations</a> <a style="font-size: 100%" href="../../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../../tags/memory/">memory</a> <a style="font-size: 100%" href="../../tags/moore-penrose-inverse/">moore-penrose-inverse</a> <a style="font-size: 100%" href="../../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../../tags/numpy/">numpy</a> <a style="font-size: 110%" href="../../tags/python/">python</a> <a style="font-size: 100%" href="../../tags/QDA/">QDA</a> <a style="font-size: 110%" href="../../tags/R/">R</a> <a style="font-size: 100%" href="../../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../../tags/review/">review</a> <a style="font-size: 100%" href="../../tags/sage/">sage</a> <a style="font-size: 100%" href="../../tags/sgd/">sgd</a> <a style="font-size: 100%" href="../../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../../tags/talk/">talk</a> <a style="font-size: 100%" href="../../tags/tensorflow/">tensorflow</a> <a style="font-size: 100%" href="../../tags/tensors/">tensors</a> <a style="font-size: 100%" href="../../tags/tpus/">tpus</a> <a style="font-size: 110%" href="../../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../../tags/vectors/">vectors</a> <a style="font-size: 105%" href="../../tags/visualization/">visualization</a>
               </div>
               <div>
                 <h1>Links</h1>

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>Math for Machines</title>
+        <link>https://mathformachines.com</link>
+        <description><![CDATA[A blog about data science and machine learning, with a lot of math.]]></description>
+        <atom:link href="https://mathformachines.com/feeds/convnets.xml" rel="self"
+                   type="application/rss+xml" />
+        <lastBuildDate>Sat, 09 Jan 2021 00:00:00 UT</lastBuildDate>
+        <item>
+    <title>Visualizing What Convnets Learn</title>
+    <link>https://mathformachines.com/posts/what-convnets-learn/index.html</link>
+    <description><![CDATA[<p>Convolutional neural networks (or <em>convnets</em>) create task-relevant representations of the training images by learning <a href="https://en.wikipedia.org/wiki/Filter_(signal_processing)">filters</a>, which isolate from an image some feature of interest. Trained to classify images of cars, for example, a convnet might learn to filter for certain body or tire shapes.</p>
+<p>In this article we’ll look at a couple ways of visualizing the filters a convnet creates during training and what kinds of features these correspond to in the training data. The first method is to look at the <em>feature maps</em> or (<em>activation maps</em>) a filter produces, which show us roughly where in an image the filter detected some feature. The second way will be through <em>optimization visuzalizations</em>, where we create an image of a filter’s preferred feature type through gradient optimization.</p>
+<figure style="padding: 1em;">
+<img src="/images/optvis-mapfilter.png" width="1000" alt=" ">
+<figcaption style="textalign: center; font-style: italic">
+Feature maps (top) and feature-optimized images (below) from ResNet50V2. Layers become deeper from left to right.
+<center>
+</center>
+</figcaption>
+</figure>
+<p>Such visualizations illustrate the process of deep learning. Through deep stacks of convolutional layers, a convnet can learns to recognize a complex hierarchy of features. At each layer, features combine and recombine features from previous layers, becoming more complex and refined.</p>
+<p>We’ll outline the two techniques here, but you can find the complete Python implementation <a href="https://gist.github.com/ryanholbrook/85583a7d847bb1639c3cf8a3769db68e">on Github</a>.</p>
+<h1 id="the-activation-model">The Activation Model</h1>
+<p>Each filter in a convolutional layer generally produces an output of shape <code>[height, width]</code>. These outputs are stacked depthwise by the layer to produce <code>[height, width, channel]</code>, one channel per filter. So a <strong>feature map</strong> is just one channel of a convolutional layer’s output. To look at feature maps, we’ll create an <strong>activation model</strong>, essentially by rerouting the output produced by a filter into a new model.</p>
+<pre class="python"><code>import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.applications import VGG16
+
+
+def make_activation_model(model, layer_name, filter):
+    layer = model.get_layer(layer_name)  # Grab the layer
+    feature_map = layer.output[:, :, :, filter]  # Get output for the given filter
+    activation_model = keras.Model(
+        inputs=model.inputs,  # New inputs are original inputs (images)
+        outputs=feature_map,  # New outputs are the filter&#39;s outputs (feature maps)
+    )
+    return activation_model
+
+
+def show_feature_map(image, model, layer_name, filter, ax=None):
+    act = make_activation_model(model, layer_name, filter)
+    feature_map = tf.squeeze(act(tf.expand_dims(image, axis=0)))
+    if ax is None:
+        fig, ax = plt.subplots()
+    ax.imshow(
+        feature_map, cmap=&quot;magma&quot;, vmin=0.0, vmax=1.0,
+    )
+    return ax
+
+
+# Use like:
+# show_feature_map(image, vgg16, &quot;block4_conv1&quot;, filter=0)</code></pre>
+<p>Here is a sample of the first few feature maps from layers in VGG16:</p>
+<figure>
+<img src="/images/optvis-actmaps1.png" width="1000" alt=" ">
+<figcaption style="textalign: center; font-style: italic">
+block1_conv2
+<center>
+</center>
+</figcaption>
+</figure>
+<figure>
+<img src="/images/optvis-actmaps2.png" width="1000" alt=" ">
+<figcaption style="textalign: center; font-style: italic">
+block2_conv2
+<center>
+</center>
+</figcaption>
+</figure>
+<figure>
+<img src="/images/optvis-actmaps3.png" width="1000" alt=" ">
+<figcaption style="textalign: center; font-style: italic">
+block3_conv2
+<center>
+</center>
+</figcaption>
+</figure>
+<figure>
+<img src="/images/optvis-actmaps4.png" width="1000" alt=" ">
+<figcaption style="textalign: center; font-style: italic">
+block4_conv1
+<center>
+</center>
+</figcaption>
+</figure>
+<figure>
+<img src="/images/optvis-actmaps5.png" width="1000" alt=" ">
+<figcaption style="textalign: center; font-style: italic">
+block5_conv3
+<center>
+</center>
+</figcaption>
+</figure>
+<h1 id="optimization-visualization">Optimization Visualization</h1>
+<p>What kind of feature will activate a given filter the most? We can find out by optimizing a random image through gradient ascent. We’ll use the filter’s activation model like before and train the image pixels just like we’d train the weights of a neural network.</p>
+<figure>
+<video autoplay loop mutued playsinline controls>
+<source src="/images/optvis-snake.webm" type="video/webm">
+<source src="/images/optvis-snake.mp4" type="video/mp4">
+Can’t play the video for some reason! Click <a href="/images/optvis-snake.gif">here</a> to download a gif. </video>
+</figure>
+<p>Here’s a simple Keras-style implementation:</p>
+<pre class="python"><code>class OptVis:
+    def __init__(
+        self, model, layer, filter, size=[128, 128],
+    ):
+        # Activation model
+        activations = model.get_layer(layer).output
+        activations = activations[:, :, :, filter]
+        self.activation_model = keras.Model(
+            inputs=model.inputs, outputs=activations
+        )
+        # Random initialization image
+        self.shape = [1, *size, 3]
+        self.image = tf.random.uniform(shape=self.shape, dtype=tf.float32)
+
+    def __call__(self):
+        image = self.activation_model(self.image)
+        return image
+
+    def compile(self, optimizer):
+        self.optimizer = optimizer
+
+    @tf.function
+    def train_step(self):
+        # Compute loss
+        with tf.GradientTape() as tape:
+            image = self.image
+            # We can include here various image parameterizations to
+            # improve the optimization here. The complete code has:
+            #
+            # - Color decorrelation on Imagenet statistics
+            # - Spatial decorrelation through a Fourier-space transform
+            # - Random affine transforms: jitter, scale, rotate
+            # - Gradient clipping
+            #
+            # These greatly improve the result
+            #
+            # The &quot;loss&quot; in this case is the mean activation produced
+            # by the image
+            loss = tf.math.reduce_mean(self.activation_model(image))
+        # Apply *negative* gradient, because want *maximum* activation
+        grads = tape.gradient(loss, self.image)
+        self.optimizer.apply_gradients([(-grads, self.image)])
+        return {&quot;loss&quot;: loss}
+
+    @tf.function
+    def fit(self, epochs=1, log=False):
+        for epoch in tf.range(epochs):
+            loss = self.train_step()
+            if log:
+                print(&quot;Score: {}&quot;.format(loss[&quot;loss&quot;]))
+        image = self.image
+        return to_valid_rgb(image)
+</code></pre>
+<p>Here is a sample from ResNet50V2:</p>
+<figure>
+<img src="/images/optvis-filter-conv1_conv.png" width="1000" alt=" ">
+<figcaption style="textalign: center; font-style: italic">
+conv1_conv
+<center>
+</center>
+</figcaption>
+</figure>
+<figure>
+<img src="/images/optvis-filter-conv2_block2_out.png" width="1000" alt=" ">
+<figcaption style="textalign: center; font-style: italic">
+conv2_block2_out
+<center>
+</center>
+</figcaption>
+</figure>
+<figure>
+<img src="/images/optvis-filter-conv3_block1_out.png" width="1000" alt=" ">
+<figcaption style="textalign: center; font-style: italic">
+conv3_block1_out
+<center>
+</center>
+</figcaption>
+</figure>
+<figure>
+<img src="/images/optvis-filter-conv4_block2_out.png" width="1000" alt=" ">
+<figcaption style="textalign: center; font-style: italic">
+conv4_block2_out
+<center>
+</center>
+</figcaption>
+</figure>
+<figure>
+<img src="/images/optvis-filter-conv5_block2_out.png" width="1000" alt=" ">
+<figcaption style="textalign: center; font-style: italic">
+conv5_block2_out
+<center>
+</center>
+</figcaption>
+</figure>]]></description>
+    <pubDate>Sat, 09 Jan 2021 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/what-convnets-learn/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+
+    </channel>
+</rss>
