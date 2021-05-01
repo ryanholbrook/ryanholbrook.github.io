@@ -138,14 +138,14 @@
         <!-- Post Header  -->
 <div class="Subhead">
   <div class="Subhead-heading">
-      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/eigenvalues-and-singular-values/">Understanding Eigenvalues and Singular Values</a></h2>
+      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/decision/">Optimal Decision Boundaries</a></h2>
   </div>
   <div class="Subhead-description">
     
-      <a href="../tags/tutorial/">tutorial</a>, <a href="../tags/linear-algebra/">linear-algebra</a>, <a href="../tags/eigenvalues/">eigenvalues</a>, <a href="../tags/singular-values/">singular-values</a>
+      <a href="../tags/R/">R</a>, <a href="../tags/classification/">classification</a>, <a href="../tags/decision-boundaries/">decision-boundaries</a>, <a href="../tags/data-science/">data-science</a>
     
     <div class="float-md-right" style="text-align=right">
-      Published: November 15, 2019
+      Published: January  9, 2020
       
     </div>
   </div>
@@ -157,318 +157,614 @@
     <h1>Table of Contents</h1>
     <ul class="incremental">
 <li><a href="#introduction">Introduction</a></li>
-<li><a href="#eigenvalues-and-eigenvectors">Eigenvalues and Eigenvectors</a></li>
-<li><a href="#singular-values-and-singular-vectors">Singular Values and Singular Vectors</a></li>
-<li><a href="#matrix-approximation-with-svd">Matrix Approximation with SVD</a></li>
+<li><a href="#optimal-boundaries">Optimal Boundaries</a></li>
+<li><a href="#prepare-r">Prepare R</a></li>
+<li><a href="#decision-boundaries-for-continuous-features">Decision Boundaries for Continuous Features</a><ul class="incremental">
+<li><a href="#normally-distributed-features">Normally Distributed Features</a><ul class="incremental">
+<li><a href="#samples">Samples</a></li>
+<li><a href="#classes-on-the-feature-space">Classes on the Feature Space</a></li>
+<li><a href="#the-optimal-decision-boundary">The Optimal Decision Boundary</a></li>
+</ul></li>
+<li><a href="#mixture-of-normals">Mixture of Normals</a><ul class="incremental">
+<li><a href="#samples-1">Samples</a></li>
+<li><a href="#classes-on-the-feature-space-1">Classes on the Feature Space</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#the-optimal-decision-boundary-1">The Optimal Decision Boundary</a></li>
+<li><a href="#class-imbalance">Class Imbalance</a><ul class="incremental">
+<li><a href="#normally-distributed-features-1">Normally Distributed Features</a></li>
+<li><a href="#mixture-of-normals-1">Mixture of Normals</a></li>
+</ul></li>
+<li><a href="#conclusion">Conclusion</a></li>
 </ul>
   </div>
   
   
   <section id="content" class="pb-2 mb-4 border-bottom">
     <h1 id="introduction">Introduction</h1>
-<p>What are eigenvalues? What are singular values? They both describe the behavior of a matrix on a certain set of vectors. The difference is this: The eigenvectors of a matrix describe the directions of its <em>invariant</em> action. The singular vectors of a matrix describe the directions of its <em>maximum</em> action. And the corresponding eigen- and singular values describe the magnitude of that action.</p>
-<p>They are defined this way. A scalar <span class="math inline">\(\lambda\)</span> is an <strong><a href="https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors">eigenvalue</a></strong> of a linear transformation <span class="math inline">\(A\)</span> if there is a vector <span class="math inline">\(v\)</span> such that <span class="math inline">\(A v = \lambda v\)</span>, and <span class="math inline">\(v\)</span> is called an <strong>eigenvector</strong> of <span class="math inline">\(\lambda\)</span>. A scalar <span class="math inline">\(\sigma\)</span> is a <strong><a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value</a></strong> of <span class="math inline">\(A\)</span> if there are (unit) vectors <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> such that <span class="math inline">\(A v = \sigma u\)</span> and <span class="math inline">\(A^* u = \sigma v\)</span>, where <span class="math inline">\(A^*\)</span> is the <a href="https://en.wikipedia.org/wiki/Conjugate_transpose">conjugate transpose</a> of <span class="math inline">\(A\)</span>; the vectors <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are <strong>singular vectors</strong>. The vector <span class="math inline">\(u\)</span> is called a <strong>left</strong> singular vector and <span class="math inline">\(v\)</span> a <strong>right</strong> singular vector.</p>
-<h1 id="eigenvalues-and-eigenvectors">Eigenvalues and Eigenvectors</h1>
-<p>That eigenvectors give the directions of invariant action is obvious from the definition. The definition says that when <span class="math inline">\(A\)</span> acts on an eigenvector, it just multiplies it by a constant, the corresponding eigenvalue. In other words, when a linear transformation acts on one of its eigenvectors, it shrinks the vector or stretches it and reverses its direction if <span class="math inline">\(\lambda\)</span> is negative, but never changes the direction otherwise. The action is invariant.</p>
-<p>Take this matrix, for instance:</p>
-<p><span class="math display">\[ A = \begin{bmatrix}
-0 &amp; 2 \\
-2 &amp; 0
-\end{bmatrix} \]</span></p>
-<figure>
-<img src="../images/eigen-circle-1.png" title="eigen-circle-1" alt="Eigenvectors of A" width="400" /><figcaption>Eigenvectors of <span class="math inline">\(A\)</span></figcaption>
-</figure>
-<p>We can see how the transformation just stretches the red vector by a factor of 2, while the blue vector it stretches but also reflects over the origin.</p>
-<p>And this matrix:</p>
-<p><span class="math display">\[ A = \begin{bmatrix}
-1 &amp; \frac{1}{3} \\
-\frac{4}{3} &amp; 1
-\end{bmatrix} \]</span></p>
-<figure>
-<img src="../images/eigen-circle-2.png" title="eigen-circle-2" alt="Eigenvectors of A" width="400" /><figcaption>Eigenvectors of <span class="math inline">\(A\)</span></figcaption>
-</figure>
-<p>It stretches the red vector and shrinks the blue vector, but reverses neither.</p>
-<p>The point is that in every case, when a matrix acts on one of its eigenvectors, the action is always in a parallel direction.</p>
-<h1 id="singular-values-and-singular-vectors">Singular Values and Singular Vectors</h1>
-<p>This invariant direction does not necessarily give the transformation’s direction of <em>greatest effect</em>, however. You can see that in the previous example. But say <span class="math inline">\(\sigma_1\)</span> is the <em>largest</em> singular value of <span class="math inline">\(A\)</span> with right singular vector <span class="math inline">\(v\)</span>. Then <span class="math inline">\(v\)</span> is a solution to</p>
-<p><span class="math display">\[ \operatorname*{argmax}_{x, ||x||=1} ||A x|| \]</span></p>
-<p>In other words, <span class="math inline">\( ||A v|| = \sigma_1 \)</span> is at least as big as <span class="math inline">\( ||A x|| \)</span> for any other unit vector <span class="math inline">\(x\)</span>. It’s not necessarily the case that <span class="math inline">\(A v\)</span> is parallel to <span class="math inline">\(v\)</span>, though.</p>
-<p>Compare the eigenvectors of the matrix in the last example to its singular vectors:</p>
-<figure>
-<img src="../images/singular-circle-1.png" title="singular-circle-1" alt="Singular vectors of A" width="400" /><figcaption>Singular vectors of <span class="math inline">\(A\)</span></figcaption>
-</figure>
-<p>The directions of maximum effect will be exactly the semi-axes of the ellipse, the ellipse which is the image of the unit circle under <span class="math inline">\(A\)</span>.</p>
-<p>Let’s extend this idea to 3-dimensional space to get a better idea of what’s going on. Consider this transformation:</p>
-<p><span class="math display">\[A = \begin{bmatrix}
-\frac{3}{2} \, \sqrt{2} &amp; -\sqrt{2} &amp; 0 \\
-\frac{3}{2} \, \sqrt{2} &amp; \sqrt{2} &amp; 0 \\
-0 &amp; 0 &amp; 1
-\end{bmatrix} \]</span></p>
-<p>This will have the effect of transforming the unit sphere into an <a href="https://en.wikipedia.org/wiki/Ellipsoid">ellipsoid</a>:</p>
-<figure>
-<img src="../images/transform3d-0.png" title="transform3d-0" alt="The unit sphere transformed into an ellipsoid." width="800" /><figcaption>The unit sphere transformed into an ellipsoid.</figcaption>
-</figure>
-<p>Its singular values are 3, 2, and 1. You can see how they again form the semi-axes of the resulting figure.</p>
-<figure>
-<img src="../images/transform3d-1.png" title="transform3d-1" alt="The singular vectors as semi-axes in the ellipsoid." width="800" /><figcaption>The singular vectors as semi-axes in the ellipsoid.</figcaption>
-</figure>
-<h1 id="matrix-approximation-with-svd">Matrix Approximation with SVD</h1>
-<p>Now, the <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) will tell us what <span class="math inline">\(A\)</span>’s singular values are:</p>
-<p><span class="math display">\[ A = U \Sigma V^* = 
-\begin{bmatrix}
-\frac{\sqrt{2}}{2} &amp; -\frac{\sqrt{2}}{2} &amp; 0.0 \\
-\frac{\sqrt{2}}{2} &amp; \frac{\sqrt{2}}{2} &amp; 0.0 \\
-0 &amp; 0 &amp; 1
-\end{bmatrix} \begin{bmatrix}
-3 &amp; 0 &amp; 0 \\
-0 &amp; 2 &amp; 0 \\
-0 &amp; 0 &amp; 1
-\end{bmatrix} \begin{bmatrix}
-1 &amp; 0 &amp; 0 \\
-0 &amp; 1 &amp; 0 \\
-0 &amp; 0 &amp; 1
-\end{bmatrix} \]</span></p>
-<p>The diagonal entries of the matrix <span class="math inline">\(\Sigma\)</span> are the singular values of <span class="math inline">\(A\)</span>. We can obtain a lower-dimensional approximation to <span class="math inline">\(A\)</span> by setting one or more of its singular values to 0.</p>
-<p>For instance, say we set the largest singular value, 3, to 0. We then get this matrix:</p>
-<p><span class="math display">\[ A_1 = \begin{bmatrix}
-\frac{\sqrt{2}}{2} &amp; -\frac{\sqrt{2}}{2} &amp; 0.0 \\
-\frac{\sqrt{2}}{2} &amp; \frac{\sqrt{2}}{2} &amp; 0.0 \\
-0 &amp; 0 &amp; 1
-\end{bmatrix} \begin{bmatrix}
-0 &amp; 0 &amp; 0 \\
-0 &amp; 2 &amp; 0 \\
-0 &amp; 0 &amp; 1
-\end{bmatrix} \begin{bmatrix}
-1 &amp; 0 &amp; 0 \\
-0 &amp; 1 &amp; 0 \\
-0 &amp; 0 &amp; 1
-\end{bmatrix} = \begin{bmatrix}
-0 &amp; -\frac{\sqrt{2}}{2} &amp; 0 \\
-0 &amp; \frac{\sqrt{2}}{2} &amp; 0 \\
-0 &amp; 0 &amp; 1
-\end{bmatrix} \]</span></p>
-<p>which transforms the unit sphere like this:</p>
-<figure>
-<img src="../images/ellipse-2.png" title="ellipse-2" alt="The transformation with the largest singular value set to 0." width="400" /><figcaption>The transformation with the largest singular value set to 0.</figcaption>
-</figure>
-<p>The resulting figure now lives in a 2-dimensional space. Further, the largest singular value of <span class="math inline">\(A_1\)</span> is now 2. Set it to 0:</p>
-<p><span class="math display">\[ A_2 = \begin{bmatrix}
-\frac{\sqrt{2}}{2} &amp; -\frac{\sqrt{2}}{2} &amp; 0.0 \\
-\frac{\sqrt{2}}{2} &amp; \frac{\sqrt{2}}{2} &amp; 0.0 \\
-0 &amp; 0 &amp; 1
-\end{bmatrix} \begin{bmatrix}
-0 &amp; 0 &amp; 0 \\
-0 &amp; 0 &amp; 0 \\
-0 &amp; 0 &amp; 1
-\end{bmatrix} \begin{bmatrix}
-1 &amp; 0 &amp; 0 \\
-0 &amp; 1 &amp; 0 \\
-0 &amp; 0 &amp; 1
-\end{bmatrix} = \begin{bmatrix}
-0 &amp; 0 &amp; 0 \\
-0 &amp; 0 &amp; 0 \\
-0 &amp; 0 &amp; 1
-\end{bmatrix} \]</span></p>
-<p>And we get a 1-dimensional figure, and a final largest singular value of 1:</p>
-<figure>
-<img src="../images/ellipse-1.png" title="ellipse-1" alt="The transformation with the two largest singular values set to 0." width="400" /><figcaption>The transformation with the two largest singular values set to 0.</figcaption>
-</figure>
-<p>This is the point: Each set of singular vectors will form an <a href="https://en.wikipedia.org/wiki/Orthonormal_basis">orthonormal basis</a> for some <a href="https://en.wikipedia.org/wiki/Linear_subspace">linear subspace</a> of <span class="math inline">\(\mathbb{R}^n\)</span>. A singular value and its singular vectors give the direction of maximum action among all directions orthogonal to the singular vectors of any larger singular value.</p>
-<p>This has important applications. There are many problems in statistics and machine learning that come down to finding a <a href="https://en.wikipedia.org/wiki/Low-rank_approximation">low-rank approximation</a> to some matrix at hand. <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">Principal component analysis</a> is a problem of this kind. It says: approximate some matrix <span class="math inline">\(X\)</span> of observations with a number of its uncorrelated components of maximum variance. This problem is solved by computing its singular value decomposition and setting some of its smallest singular values to 0.</p>
-<figure>
-<img src="../images/approximations.png" title="approximations" alt="Low-rank approximations of A." width="1000" /><figcaption>Low-rank approximations of <span class="math inline">\(A\)</span>.</figcaption>
-</figure>
-  </section>
-  
-</article>
+<p>Over the next few posts, we will investigate <em>decision boundaries</em>. A decision boundary is a graphical representation of the solution to a classification problem. Decision boundaries can help us to understand what kind of solution might be appropriate for a problem. They can also help us to understand the how various machine learning classifiers arrive at a solution.</p>
+<p>In this post, we will look at a problem’s <em>optimal</em> decision boundary, which we can find when we know exactly how our data was generated. The optimal decision boundary represents the “best” solution possible for that problem. Consequently, by looking at the complexity of this boundary and at how much error it produces, we can get an idea of the inherent difficulty of the problem.</p>
+<p>Unless we have generated the data ourselves, we won’t usually be able to find the optimal boundary. Instead, we approximate it using a classifier. A good machine learning classifier tries to approximate the optimal boundary for a problem as closely as possible.</p>
+<p>In future posts, we will look at the approximating boundary created by various classification algorithms. We will investigate the strategy the classifier uses to create this boundary and how this boundary evolves as the classifier is trained on more and more data. There are many classification algorithms available to a data scientist – regression, discriminant analysis, decision trees, neural networks, to name a few – and it is important to understand which algorithm is appropritate for the problem at hand. Decision boundaries can help us to do this.</p>
+<video autoplay loop mutued playsinline controls>
+  <source src="../images/rf_mix.webm" type="video/webm">
+  <source src="../images/rf_mix.mp4" type="video/mp4">
+  Can't play the video for some reason! Click <a href="../images/rf_mix.gif">here</a> to download a gif.
+</video>
 
-
-        <!-- Post Footer -->
-        <div>
-
-        </div>
-
-    
-  </div>
-  
-  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
-
-        <!-- Post Header  -->
-<div class="Subhead">
-  <div class="Subhead-heading">
-      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/visualizing-linear-transformations/">Visualizing Linear Transformations</a></h2>
-  </div>
-  <div class="Subhead-description">
-    
-      <a href="../tags/tutorial/">tutorial</a>, <a href="../tags/linear-algebra/">linear-algebra</a>, <a href="../tags/matrix-decomposition/">matrix-decomposition</a>, <a href="../tags/geometry/">geometry</a>
-    
-    <div class="float-md-right" style="text-align=right">
-      Published: November 12, 2019
-      
-    </div>
-  </div>
-</div>
-
-<article>
-  
-  <div id="toc" class="Box mb-3">
-    <h1>Table of Contents</h1>
-    <ul class="incremental">
-<li><a href="#introduction">Introduction</a></li>
-<li><a href="#three-primitive-transformations">Three Primitive Transformations</a><ul class="incremental">
-<li><a href="#scaling">Scaling</a></li>
-<li><a href="#rotation">Rotation</a></li>
-<li><a href="#reflection">Reflection</a></li>
-</ul></li>
-<li><a href="#decomposing-matricies-into-primitives">Decomposing Matricies into Primitives</a><ul class="incremental">
-<li><a href="#example">Example</a></li>
-<li><a href="#example-1">Example</a></li>
-</ul></li>
-</ul>
-  </div>
-  
-  
-  <section id="content" class="pb-2 mb-4 border-bottom">
-    <h1 id="introduction">Introduction</h1>
-<p>Say <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span> are <a href="https://en.wikipedia.org/wiki/Vector_space">vector spaces</a> with scalars in some <a href="https://en.wikipedia.org/wiki/Field_(mathematics)">field</a> <span class="math inline">\(\mathbb{F}\)</span> (the real numbers, maybe). A <strong><a href="https://en.wikipedia.org/wiki/Linear_map">linear map</a></strong> is a function <span class="math inline">\(T : V \rightarrow W \)</span> satisfying two conditions:</p>
-<ul>
-<li><strong>additivity</strong> <span class="math inline">\(T(x + y) = T x + T y\)</span> for all <span class="math inline">\(x, y \in V\)</span></li>
-<li><strong>homogeneity</strong> <span class="math inline">\(T(c x) = c (T x)\)</span> for all <span class="math inline">\(c \in \mathbb{F} \)</span> and all <span class="math inline">\(x \in V\)</span></li>
-</ul>
+<h1 id="optimal-boundaries">Optimal Boundaries</h1>
+<p>A classification problem asks: given some observations of a thing, what is the best way to assign that thing to a class based on some of its features? For instance, we might want to predict whether a person will like a movie or not based on some data we have about them, the “features” of that person.</p>
+<p>A solution to the classification problem is a rule that partitions the features and assigns each all the features of a partition to the same class. The “boundary” of this partitioning is the <strong>decision boundary</strong> of the rule.</p>
+<p>It might be that two observations have exactly the same features, but are assigned to different classes. (Two things that look the same in the ways we’ve observed might differ in ways we haven’t observed.) In terms of probabilities this means both <span class="math display">\[P(C = 0 \mid X) \gt 0\]</span> and <span class="math display">\[P(C = 1 \mid X) \gt 0\]</span> In other words, we might not be able with full certainty to classify an observation. We could however assign the observation to its <em>most probable</em> class. This gives us the decision rule <span class="math display">\[ \hat{C} = \operatorname*{argmax}_c P(C = c \mid X) \]</span></p>
+<p>The boundary that this rule produces is the <strong>optimal decision boundary</strong>. It is the <a href="https://en.wikipedia.org/wiki/Maximum_a_posteriori_estimation">MAP estimate</a> of the class label, and it is the rule that minimizes classification error under the <a href="https://en.wikipedia.org/wiki/Loss_function#0-1_loss_function">zero-one loss function</a>. We will look at error and loss more in a future post.</p>
+<p>We will consider <em>binary</em> classification problems, meaning, there will only be two possible classes, 0 or 1. For a binary classification problem, the optimal boundary occurs at those points where each class is equally probable: <span class="math display">\[ P(C = 0 \mid X) = P(C = 1 \mid X) \]</span></p>
+<h1 id="prepare-r">Prepare R</h1>
+<p>We will use R to do our analysis. We’ll have a chance to try out <code>gganimate</code> and <code>patchwork</code>, a couple of newer packages that <a href="https://www.data-imaginist.com/">Thomas Lin Pedersen</a> has been working on; they are really nice.</p>
+<p>Here we’ll define some functions to produce plots of our examples. All of these assume a classification problem where our response is binary, <span class="math inline">\(C \in \{0, 1\}\)</span>, and is predicted by two continuous features, <span class="math inline">\((X, Y)\)</span>.</p>
+<p>Briefly, they are</p>
+<ol>
+<li><code>gg_sample</code> :: creates a layer for a sample of the features colored by class.</li>
+<li><code>gg_density</code> :: creates a layer of contour plots for feature densities within each class.</li>
+<li><code>gg_optimal</code> :: creates a layer showing an optimal decision boundary.</li>
+<li><code>gg_mix_label</code> :: creates a layer labelling components in a mixture distribution.</li>
+</ol>
 <p>
 
-<p>Defining a linear map this way just ensures that anything that acts like a vector in <span class="math inline">\(V\)</span> also acts like a vector in <span class="math inline">\(W\)</span> after you map it over. It means that the map preserves all the structure of a vector space after it’s applied.</p>
-<p>It’s a simple definition – which is good – but doesn’t speak much to the imagination. Since linear algebra is possibly the <a href="https://math.stackexchange.com/questions/256682/why-study-linear-algebra">most useful</a> and <a href="https://math.stackexchange.com/questions/256682/why-study-linear-algebra">most ubiquitous</a> of all the branches of mathematics, we’d like to have some intuition about what linear maps are so we have some idea of what we’re doing <a href="https://en.wikipedia.org/wiki/Linear_regression">when</a> <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">we</a> <a href="https://en.wikipedia.org/wiki/Backpropagation">use</a> <a href="https://en.wikipedia.org/wiki/Mapreduce">it</a>. Though not all vectors live there, the <a href="https://en.wikipedia.org/wiki/Euclidean_space">Euclidean plane</a> <span class="math inline">\(\mathbb{R}^2\)</span> is certainly the easiest to visualize, and the way we <a href="https://en.wikipedia.org/wiki/Euclidean_distance">measure distance</a> there is very similar to the way we <a href="https://en.wikipedia.org/wiki/Root-mean-square_deviation">measure error</a> in statistics, so we can feel that our intuitions will carry over.</p>
-<p>It turns out that all linear maps in <span class="math inline">\(\mathbb{R}^2\)</span> can be factored into just a few primitive geometric operations: <a href="https://en.wikipedia.org/wiki/Scaling_(geometry)">scaling</a>, <a href="https://en.wikipedia.org/wiki/Rotation_(mathematics)">rotation</a>, and <a href="https://en.wikipedia.org/wiki/Reflection_(mathematics)">reflection</a>. This isn’t the only way to factor these maps, but I think it’s the easiest to understand. (We could get by <a href="https://en.wikipedia.org/wiki/Cartan%E2%80%93Dieudonn%C3%A9_theorem">without rotations</a>, in fact.)</p>
-<figure>
-<img src="../images/primitives.png" title="primitives" alt="The unit circle, rotated, reflected, and scaled." /><figcaption>The unit circle, rotated, reflected, and scaled.</figcaption>
-</figure>
-<h1 id="three-primitive-transformations">Three Primitive Transformations</h1>
-<h2 id="scaling">Scaling</h2>
-<p>A (non-uniform) <strong>scaling transformation</strong> <span class="math inline">\(D\)</span> in <span class="math inline">\(\mathbb{R}^2\)</span> is given by a <a href="https://en.wikipedia.org/wiki/Diagonal_matrix">diagonal matrix</a>:</p>
-<p><span class="math display">\[Scl(d1, d2) = \begin{bmatrix}
-d_1 &amp; 0   \\
-0   &amp; d_2 \\
-\end{bmatrix}\]</span></p>
-<p>where <span class="math inline">\(d_1\)</span> and <span class="math inline">\(d_2\)</span> are non-negative. The transformation has the effect of stretching or shrinking a vector along each coordinate axis, and, so long as <span class="math inline">\(d_1\)</span> and <span class="math inline">\(d_2\)</span> are positive, it will also preserve the <a href="https://en.wikipedia.org/wiki/Orientation_(vector_space)">orientation</a> of vectors after mapping because in this case <span class="math inline">\(\det(D) = d_1 d_2 &gt; 0\)</span>.</p>
-<p>For instance, here is the effect on a vector of this matrix: <span class="math display">\[D = \begin{bmatrix}
-0.75 &amp; 0 \\
-0    &amp; 1.25 \\
-\end{bmatrix}\]</span></p>
-<figure>
-<img src="../images/vector-scaled.png" title="vector-scaled" alt="A vector, scaled." width="400" /><figcaption>A vector, scaled.</figcaption>
-</figure>
-<p>It will shrink a vector by a factor of 0.75 along the x-axis and stretch a vector by a factor of 1.25 along the y-axis.</p>
-<p>If we think about all the vectors of length 1 as being the points of the <a href="https://en.wikipedia.org/wiki/Unit_circle">unit circle</a>, then we can get an idea of how the transformation will affect any vector. We can see a scaling as a continous transformation beginning at the <a href="https://en.wikipedia.org/wiki/Identity_matrix">identity matrix</a>.</p>
-<video autoplay loop mutued playsinline controls>
-  <source src="../../images/scaling.webm" type="video/webm">
-  <source src="../../images/scaling.mp4" type="video/mp4">
-  <source src="../../images/scaling.ogg" type="video/ogg">
-</video>
+<pre class="r"><code>library(magrittr)
+library(tidyverse)
+library(ggplot2)
+library(gganimate)
+library(patchwork)
 
-<p>If one of the diagonal entries is 0, then it will collapse the circle on the other axis.</p>
-<p><span class="math display">\[D = \begin{bmatrix}
-0 &amp; 0 \\
-0 &amp; 1.25 \\
-\end{bmatrix}\]</span></p>
-<p>This is an example of a <a href="https://en.wikipedia.org/wiki/Rank_(linear_algebra)">rank-deficient</a> matrix. It maps every vector onto the y-axis, and so its image has a dimension less than the dimension of the full space.</p>
-<video autoplay loop mutued playsinline controls>
-  <source src="../../images/collapsed.webm" type="video/webm">
-  <source src="../../images/collapsed.mp4" type="video/mp4">
-  <source src="../../images/collapsed.ogg" type="video/ogg">
-</video>
+theme_set(theme_linedraw() +
+          theme(plot.title = element_text(size = 20),
+                legend.position = &quot;none&quot;,
+                axis.text.x = element_blank(),
+                axis.text.y = element_blank(),
+                axis.title.x = element_blank(),
+                axis.title.y = element_blank(),
+                aspect.ratio = 1))
 
-<h2 id="rotation">Rotation</h2>
-<p>A <strong>rotation transformation</strong> <span class="math inline">\(Ref\)</span> is given by a matrix: <span class="math display">\[Ref(\theta) = \begin{bmatrix}
-\cos(\theta) &amp; -\sin(\theta) \\
-\sin(\theta) &amp; \cos(\theta) \\
-\end{bmatrix}\]</span></p>
-<p>This transformation will have the effect of rotating a vector counter-clockwise by an angle <span class="math inline">\(\theta\)</span>, when <span class="math inline">\(\theta\)</span> is positive, and clockwise by <span class="math inline">\(\theta\)</span> when <span class="math inline">\(\theta\)</span> is negative.</p>
+#' Make a sample layer
+#'
+#' @param data data.frame: a sample with continuous features `x` and `y`
+#' grouped by factor `class`
+#' @param classes (optional) a vector of which levels of `class` to
+#' plot; default is to plot data from all classes
+gg_sample &lt;- function(data, classes = NULL, size = 3, alpha = 0.5, ...) {
+    if (is.null(classes)) {
+        subdata &lt;- data
+    } else {
+        subdata &lt;- filter(data, class %in% classes)
+    }
+    list(geom_point(data = subdata,
+                    aes(x, y,
+                        color = factor(class),
+                        shape = factor(class)),
+                    size = size,
+                    alpha = alpha,
+                    ...),
+         scale_colour_discrete(drop = TRUE,
+                               limits = levels(factor(data$class))))
+}
+
+#' Make a density layer
+#'
+#' @param data data.frame: a data grid of features `x` and `y` with contours `z`
+#' @param data character: the name of the contour column 
+gg_density &lt;- function(data, z, size = 1, color = &quot;black&quot;, alpha = 1, ...) {
+    z &lt;- ensym(z)
+    geom_contour(data = data,
+                 aes(x, y, z = !!z),
+                 size = size,
+                 color = color,
+                 alpha = alpha,
+                 ...)
+}
+
+#' Make an optimal boundary layer
+#'
+#' @param data data.frame: a data grid of features `x` and `y` with a column with
+#' the `optimal` boundary contours
+#' @param breaks numeric: which contour levels of `optimal` to plot
+gg_optimal &lt;- function(data, breaks = c(0), ...) {
+    gg_density(data, z = optimal, breaks = breaks, ...)
+}
+
+#' Make a layer of component labels for a mixture distribution with two classes
+#'
+#' @param mus list(data.frame): the means for components of each class; every row
+#' is a mean, each column is a coordinate
+#' @param classes (optional) a vector of which levels of class to plot
+gg_mix_label &lt;- function(mus, classes = NULL, size = 10, ...) {
+    ns &lt;- map_int(mus, nrow)
+    component &lt;- do.call(c, map(ns, seq_len))
+    class &lt;- do.call(c, map2(0:(length(ns) - 1), ns, rep.int))
+    mu_all &lt;- do.call(rbind, mus)
+    data &lt;- cbind(mu_all, component, class) %&gt;%
+        set_colnames(c(&quot;x&quot;, &quot;y&quot;, &quot;component&quot;, &quot;class&quot;)) %&gt;%
+        as_tibble()
+    if (is.null(classes)) {
+        subdata &lt;- data
+    } else {
+        subdata &lt;- filter(data, class %in% classes)
+    }    
+    list(shadowtext::geom_shadowtext(data = subdata,
+                                     mapping = aes(x, y,
+                                                   label = component,
+                                                   color = factor(class)),
+                                     size = size,
+                                     ...),
+         scale_colour_discrete(drop = TRUE,
+                               limits = levels(factor(data$class))))
+}
+
+</code></pre>
+<h1 id="decision-boundaries-for-continuous-features">Decision Boundaries for Continuous Features</h1>
+<p>Decision boundaries are most easily visualized whenever we have <em>continuous</em> features, most especially when we have <em>two</em> continuous features, because then the decision boundary will exist in a plane.</p>
+<p>With two continuous features, the feature space will form a plane, and a decision boundary in this feature space is a set of one or more curves that divide the plane into distinct regions. Inside of a region, all observations will be assigned to the same class.</p>
+<p>As mentioned above, whenever we know exactly how our data was generated, we can produce the optimal decision boundary. Though this won’t usually be possible in practice, investigating the optimal boundaries produced from simulated data can still help us to understand their properties.</p>
+<p>We will look at the optimal boundary for a binary classification problem on a with features on a couple of common distributions: a multivariate normal distribution and a mixture of normal distributions.</p>
+<h2 id="normally-distributed-features">Normally Distributed Features</h2>
+<p>In a binary classification problem, whenever the features for each class jointly have a multivariate normal distribution, the optimal decision boundary is relatively simple. We will start our investigation here.</p>
+<p>With two features, the feature space is a plane. It can be shown that the optimal decision boundary in this case will either be a line or a <a href="https://en.wikipedia.org/wiki/Conic_section">conic section</a> (that is, an ellipse, a parabola, or a hyperbola). With higher dimesional feature spaces, the decision boundary will form a <a href="https://en.wikipedia.org/wiki/Hyperplane">hyperplane</a> or a <a href="https://en.wikipedia.org/wiki/Quadric">quadric surface</a>.</p>
+<p>We will consider classification problems with two classes, <span class="math inline">\(C = {0, 1}\)</span>, and two features, <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. Each class will be Bernoulli distributed and the features for each class will be distributed normally. Specifically,</p>
+<table>
+<tbody>
+<tr class="odd">
+<td>Classes</td>
+<td><span class="math inline">\( C \sim \operatorname{Bernoulli}(p) \)</span></td>
+</tr>
+<tr class="even">
+<td>Features for Class 0</td>
+<td><span class="math inline">\( (X, Y) \mid C = 0 \sim \operatorname{Normal}(\mu_0, \Sigma_0) \)</span></td>
+</tr>
+<tr class="odd">
+<td>Features for Class 1</td>
+<td><span class="math inline">\( (X, Y) \mid C = 1 \sim \operatorname{Normal}(\mu_0, \Sigma_1) \)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Our goal is to produce two kinds of visualizations: one, of a sample from these distributions, and two, the contours of the class-conditional densities for each feature. We’ll use the <code>mvnfast</code> package to help us with computations on the joint MVN.</p>
+<h3 id="samples">Samples</h3>
+<p>Let’s choose some values for our parameters. We’ll start with the case when the classes occur equally often. For our features, we’ll choose means so that there is some significant overlap between the two classes, and covariance matrices so that the distributions have a nice elliptical shape.</p>
+<pre class="r"><code>p &lt;- 0.5
+mu_0 &lt;- c(0, 2)
+sigma_0 &lt;- matrix(c(1, 0.3, 0.3, 1), nrow = 2)
+mu_1 &lt;- c(2, 0)
+sigma_1 &lt;- matrix(c(1, -0.3, -0.3, 1), nrow = 2)
+</code></pre>
+<p>Now we’ll write a function to create a dataframe containing a sample of classified features from our distribution.</p>
+<pre class="r"><code>#' Generate normally distributed feature samples for a binary
+#' classification problem
+#'
+#' @param n integer: the size of the sample
+#' @param mean_0 vector: the mean vector of the first class
+#' @param sigma_0 matrix: the 2x2 covariance matrix of the first class
+#' @param mean_1 vector: the mean vector of the second class
+#' @param sigma_1 matrix: the 2x2 covariance matrix of the second class
+#' @param p_0 double: the prior probability of class 0
+make_mvn_sample &lt;- function(n, mu_0, sigma_0, mu_1, sigma_1, p_0) {
+    n_0 &lt;- rbinom(1, n, p_0)
+    n_1 &lt;- n - n_0
+    sample_mvn &lt;- as_tibble(
+        rbind(mvnfast::rmvn(n_0,
+                            mu = mu_0,
+                            sigma = sigma_0),
+              mvnfast::rmvn(n_1,
+                            mu = mu_1,
+                            sigma = sigma_1)))
+    sample_mvn[1:n_0, 3] &lt;- 0
+    sample_mvn[(n_0 + 1):(n_0 + n_1), 3] &lt;- 1
+    sample_mvn &lt;- sample_mvn[sample(nrow(sample_mvn)), ]
+    colnames(sample_mvn) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;class&quot;)
+    sample_mvn
+}
+
+</code></pre>
+<p>Finally, we’ll create a sample of 4000 points and plot the result.</p>
+<pre class="r"><code>n &lt;- 4000
+set.seed(31415)
+sample_mvn &lt;- make_mvn_sample(n,
+                              mu_0, sigma_0,
+                              mu_1, sigma_1,
+                              p)
+
+ggplot() +
+    gg_sample(sample_mvn) +
+    coord_fixed()
+</code></pre>
 <figure>
-<img src="../images/vector-rotated.png" title="vector-rotated" alt="A vector, rotated by 3\pi/4" width="400" /><figcaption>A vector, rotated by <span class="math inline">\(3\pi/4\)</span></figcaption>
+<img src="../images/sample_mvn.png" title="sample-mvn" alt="A sample of the feature distributions for each class." width="400" /><figcaption>A sample of the feature distributions for each class.</figcaption>
 </figure>
-<p>And the unit circle gets mapped onto itself.</p>
-<video autoplay loop mutued playsinline controls>
-  <source src="../../images/rotation.webm" type="video/webm">
-  <source src="../../images/rotation.mp4" type="video/mp4">
-  <source src="../../images/rotation.ogg" type="video/ogg">
-</video>
+<p>It should be apparent that because of the overlap in these distributions, any decision rule will necessarily misclassify some observations fairly often.</p>
+<h3 id="classes-on-the-feature-space">Classes on the Feature Space</h3>
+<p>Next, we will produce some contour plots of our feature distributions. Let’s write a function to generate class probabilities at any observation <span class="math inline">\((x, y)\)</span> in the feature space; we will model the optimal decision boundary as those points where the posterior probabilities of the two classes are equal, that is, where <span class="math display">\[ P(X, Y \mid C = 0) P(C = 0) - P(X, Y \mid C = 1) P(C = 1) = 0 \]</span></p>
+<pre class="r"><code>#' Make an optimal prediction at a point from two class distributions
+#'
+#' @param x vector: input
+#' @param p_0 double: prior probability of class 0
+#' @param dfun_0 function(x): density of features of class 0
+#' @param dfun_1 function(x): density of features of class 1
+optimal_predict &lt;- function(x, p_0, dfun_0, dfun_1) {
+    ## Prior probability of class 1
+    p_1 &lt;- 1 - p_0
+    ## Conditional probability of (x, y) given class 0
+    p_x_0 &lt;- dfun_0(x)
+    ## Conditional probability of (x, y) given class 1
+    p_x_1 &lt;- dfun_1(x)
+    ## Conditional probability of class 0 given (x, y)
+    p_0_xy &lt;- p_x_0 * p_0
+    ## Conditional probability of class 1 given (x, y)
+    p_1_xy &lt;- p_x_1 * p_1
+    optimal &lt;- p_1_xy - p_0_xy
+    class &lt;- ifelse(optimal &gt; 0, 1, 0)
+    result &lt;- c(p_0_xy, p_1_xy, optimal, class)
+    names(result) &lt;- c(&quot;p_0_xy&quot;, &quot;p_1_xy&quot;, &quot;optimal&quot;, &quot;class&quot;)
+    result
+}
 
-<p>It shouldn’t be too hard to convince ourselves that the matrix we’ve written down is the one we want. Take some unit vector and write its coordinates like <span class="math inline">\((\cos\gamma, \sin\gamma)\)</span>. Multiply it by <span class="math inline">\(Ref(\theta)\)</span> to get <span class="math inline">\((\cos\gamma \cos\theta - \sin\gamma \sin\theta, \cos\gamma \sin\theta + \sin\gamma \cos\theta)\)</span>. But by a <a href="https://en.wikipedia.org/wiki/List_of_trigonometric_identities#Angle_sum_and_difference_identities">trigonometric identity</a>, this is exactly the vector <span class="math inline">\((\cos(\gamma + \theta), \sin(\gamma + \theta))\)</span>, which is our vector rotated by <span class="math inline">\(\theta\)</span>.</p>
-<p>A rotation should preserve not only orientations, but also distances. Now, recall that the determinant for a <span class="math inline">\(2\times 2\)</span> matrix <span class="math inline">\(\begin{bmatrix} a &amp; b \\ c &amp; d \end{bmatrix}\)</span> is <span class="math inline">\(a d - b c\)</span>. So a rotation matrix will have determinant <span class="math inline">\(\cos^2(\theta) + \sin^2(\theta)\)</span>, which, by the <a href="https://en.wikipedia.org/wiki/Pythagorean_trigonometric_identity">Pythagorean identity</a>, is equal to 1. This, together with the fact that its columns are <a href="https://en.wikipedia.org/wiki/Orthonormality">orthonormal</a> means that it does preserve both. It is a kind of <a href="https://en.wikipedia.org/wiki/Orthogonal_matrix">orthogonal matrix</a>, which is a kind of <a href="https://en.wikipedia.org/wiki/Isometry">isometry</a>.</p>
-<h2 id="reflection">Reflection</h2>
-<p>A <strong>reflection</strong> in <span class="math inline">\(\mathbb{R}^2\)</span> can be described with matricies like: <span class="math display">\[Ref(\theta) = \begin{bmatrix}
-\cos(2\theta) &amp; \sin(2\theta) \\
-\sin(2\theta) &amp; -\cos(2\theta) \\
-\end{bmatrix}\]</span> where the reflection is through a line crossing the origin and forming an angle <span class="math inline">\(\theta\)</span> with the x-axis.</p>
+#' Construct a dataframe with posterior class probabilities and the
+#' optimal decision boundary over a grid on the feature space
+#' 
+#' @param mean_0 vector: the mean vector of the first class
+#' @param sigma_0 matrix: the 2x2 covariance matrix of the first class
+#' @param mean_1 vector: the mean vector of the second class
+#' @param sigma_1 matrix: the 2x2 covariance matrix of the second class
+#' @param p_0 double: the prior probability of class 0
+make_density_mvn &lt;- function(mean_0, sigma_0, mean_1, sigma_1, p_0,
+                             x_min, x_max, y_min, y_max, delta = 0.05) {
+    x &lt;- seq(x_min, x_max, delta)
+    y &lt;- seq(y_min, y_max, delta)
+    density_mvn &lt;- expand.grid(x, y)
+    names(density_mvn) &lt;- c(&quot;x&quot;, &quot;y&quot;)
+    dfun_0 &lt;- function(x) mvnfast::dmvn(x, mu_0, sigma_0)
+    dfun_1 &lt;- function(x) mvnfast::dmvn(x, mu_1, sigma_1)
+    optimal_mvn &lt;- function(x, y) optimal_predict(c(x, y), p_0, dfun_0, dfun_1)
+    density_mvn &lt;-as.tibble(
+        cbind(density_mvn,
+              t(mapply(optimal_mvn,
+                       density_mvn$x, density_mvn$y))))
+    density_mvn
+}
+
+</code></pre>
+<p>Now we can generate a grid of points and compute posterior class probabilities over that grid. By plotting these probabilities, we can get describe both the conditional feature distributions for each class as well as the joint feature distribution.</p>
+<pre class="r"><code>density_mvn &lt;- make_density_mvn(mu_0, sigma_0, mu_1, sigma_1, p,
+                                -3, 5, -3, 5)
+
+(ggplot() +
+ gg_sample(sample_mvn, alpha = 0.1) +
+ gg_density(density_mvn, z = p_0_xy) +
+ gg_density(density_mvn, z = p_1_xy) +
+ ggtitle(&quot;Conditional Distributions&quot;)) +
+(ggplot() +
+ gg_sample(sample_mvn, alpha = 0.1) +
+ geom_contour(data = density_mvn,
+              aes(x = x, y = y, z = p_0_xy + p_1_xy),
+              size = 1,
+              color = &quot;black&quot;) +
+ ggtitle(&quot;Joint Distribution&quot;))
+
+</code></pre>
 <figure>
-<img src="../images/vector-reflected.png" title="vector-reflected" alt="A vector, reflected over a line at angle \pi/4." width="400" /><figcaption>A vector, reflected over a line at angle <span class="math inline">\(\pi/4\)</span>.</figcaption>
+<img src="../images/density_mvn.png" title="density-mvn" alt="Contours of the feature distributions for each class." width="800" /><figcaption>Contours of the feature distributions for each class.</figcaption>
 </figure>
-<p>And the unit circle gets mapped onto itself.</p>
-<video autoplay loop mutued playsinline controls>
-  <source src="../../images/reflection.webm" type="video/webm">
-  <source src="../../images/reflection.mp4" type="video/mp4">
-  <source src="../../images/reflection.ogg" type="video/ogg">
-</video>
+<h3 id="the-optimal-decision-boundary">The Optimal Decision Boundary</h3>
+<p>Now let’s add a plot for the optimal decision boundary for this problem.</p>
+<pre class="r"><code>(ggplot() +
+ gg_density(density_mvn, z = p_0_xy,
+            alpha = 0.25) +
+ gg_density(density_mvn, z = p_1_xy,
+            alpha = 0.25) +
+ gg_optimal(density_mvn)) +
+(ggplot() +
+ gg_sample(sample_mvn, alpha = 0.25) +
+ gg_optimal(density_mvn)) +
+plot_annotation(&quot;The Optimal Decision Boundary&quot;)
 
-<p>Note that the determinant of this matrix is -1, which means that it <em>reverses</em> orientation. But its columns are still orthonormal, and so it too is an isometry.</p>
-<h1 id="decomposing-matricies-into-primitives">Decomposing Matricies into Primitives</h1>
-<p>The <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) will factor any matrix <span class="math inline">\(A\)</span> having like this:</p>
-<p><span class="math display">\[ A = U \Sigma V^* \]</span></p>
-<p>We are working with real matricies, so <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> will both be orthogonal matrices. This means each of these will be either a reflection or a rotation, depending on the pattern of signs in its entries. The matrix <span class="math inline">\(\Sigma\)</span> is a diagonal matrix with non-negative entries, which means that it is a scaling transform. (The <span class="math inline">\(*\)</span> on the <span class="math inline">\(V\)</span> is the <a href="https://en.wikipedia.org/wiki/Conjugate_transpose">conjugate-transpose</a> operator, which just means ordinary <a href="https://en.wikipedia.org/wiki/Transpose">transpose</a> when <span class="math inline">\(V\)</span> doesn’t contain any imaginary entries. So, for us, <span class="math inline">\(V^* = V^\top\)</span>.) Now with the SVD we can rewrite any linear transformation as:</p>
+</code></pre>
+<figure>
+<img src="../images/optimal_mvn.png" title="optimal-mvn" alt="The optimal decision boundary" width="800" /><figcaption>The optimal decision boundary</figcaption>
+</figure>
+<p>Notice how the boundary runs through the points where the contours of the two conditional distributions intersect. These points of intersection are where the classes have equal posterior probability.</p>
+<h2 id="mixture-of-normals">Mixture of Normals</h2>
+<p>The features of each class might also be modeled as a <em>mixture</em> of normal distributions. This means that each observation in a class will come from one of <em>several</em> normal distributions; in our case, the distributions from a class will be joined by a common hyperparameter, their mean.</p>
+<p>In description, at least, the problem is still relatively simple. The possible decision boundaries produced, however, can be quite complex. This is a much more difficult problem than the one we saw before.</p>
+<p>For our examples, we will generate the data as follows:</p>
+<table>
+<tbody>
+<tr class="odd">
+<td>Classes</td>
+<td><span class="math inline">\( C \sim Bernoulli(p) \)</span></td>
+</tr>
+<tr class="even">
+<td>Mean of Means for Class 0</td>
+<td><span class="math inline">\( \nu_0 \sim Normal((0, 1), I) \)</span></td>
+</tr>
+<tr class="odd">
+<td>Mean of Means for Class 1</td>
+<td><span class="math inline">\( \nu_0 \sim Normal((1, 0), I) \)</span></td>
+</tr>
+<tr class="even">
+<td>Means of Components for Class 0</td>
+<td><span class="math inline">\( \mu_{0, i=1, \ldots, n_0} \sim Normal(\nu_0, I) \)</span></td>
+</tr>
+<tr class="odd">
+<td>Means of Components for Class 1</td>
+<td><span class="math inline">\( \mu_{1, i=1, \ldots, n_1} \sim Normal(\nu_1, I) \)</span></td>
+</tr>
+<tr class="even">
+<td>Features for Class 0</td>
+<td><span class="math inline">\( (X, Y) \mid C = 0 \sim w_{0, 1} Normal(\mu_{0, 1}, \Sigma_0) + \cdots + w_{0, l_0} Normal(\mu_{0, 0}, \Sigma_0) \)</span></td>
+</tr>
+<tr class="odd">
+<td>Features for Class 1</td>
+<td><span class="math inline">\( (X, Y) \mid C = 1 \sim w_{1, 1} Normal(\mu_{1, 1}, \Sigma_1) + \cdots + w_{1, l_1} Normal(\mu_{1, l_1}, \Sigma_1) \)</span></td>
+</tr>
+</tbody>
+</table>
+<p>where <span class="math inline">\(n_0\)</span> is the number of components for class 0, <span class="math inline">\(w_{0, i}\)</span> are the weights on each component, <span class="math inline">\(\Sigma_0 = \frac{1}{2 * l_0} I\)</span>, and <span class="math inline">\(I\)</span> is the identity matrix; similarly for class 1.</p>
+<p>This is a bit awful, but we are basically doing this:</p>
+<p>For each class, define the distribution of the features <span class="math inline">\((X, Y)\)</span> by</p>
 <ol>
-<li><span class="math inline">\(V^*\)</span>: Rotate/Reflect</li>
-<li><span class="math inline">\(\Sigma\)</span>: Scale</li>
-<li><span class="math inline">\(U\)</span>: Rotate/Reflect</li>
+<li>Choosing the number of components to go in the mixture.</li>
+<li>Choosing a mean for each component by sampling from a normal distribution.</li>
 </ol>
-<h2 id="example">Example</h2>
-<p><span class="math display">\[\begin{bmatrix}
-0.5 &amp; 1.5 \\
-1.5 &amp; 0.5
-\end{bmatrix} \approx \begin{bmatrix}
--0.707 &amp; -0.707 \\
--0.707 &amp; 0.707
-\end{bmatrix} \begin{bmatrix}
-2.0 &amp; 0.0 \\
-0.0 &amp; 1.0
-\end{bmatrix} \begin{bmatrix}
--0.707 &amp; -0.707 \\
-0.707 &amp; -0.707
-\end{bmatrix} \]</span></p>
-<p>This turns out to be:</p>
+<p>Then, to get a sample: Get an observation by</p>
 <ol>
-<li><span class="math inline">\(V^*\)</span>: Rotate clockwise by <span class="math inline">\(\theta = \frac{3 \pi}{4}\)</span>.</li>
-<li><span class="math inline">\(\Sigma\)</span>: Scale x-coordinate by <span class="math inline">\(d_1 = 2\)</span> and y-coordinate by <span class="math inline">\(d_2 = 1\)</span>.</li>
-<li><span class="math inline">\(U\)</span>: Reflect over the line with angle <span class="math inline">\(-\frac{3\pi}{8}\)</span>.</li>
+<li>Choosing a class, 0 or 1.</li>
+<li>Choosing a component from that class, a normal distribution.</li>
+<li>Sample the observation from that component.</li>
 </ol>
+<h3 id="samples-1">Samples</h3>
+<p>The computations for the mixture of MVNs are fairly similar to the ones we did before. First let’s define a sampling function. This function just implements the above steps.</p>
+<pre class="r"><code>#' Generate normally distributed feature samples for a binary
+#' classification problem
+#'
+#' @param n integer: the size of the sample
+#' @param nu_0 numeric: the average mean of the components of the first feature
+#' @param sigma_0 matrix: covariance of components of the first feature
+#' @param n_0 integer: class frequency of first feature in the sample
+#' @param w_0 numeric: vector of weights for components of the first feature
+#' @param mean_1 numeric: the average mean of the components of the second feature
+#' @param sigma_1 matrix: covariance of components of the second feature
+#' @param n_1 integer: class frequency of second feature in the sample
+#' @param w_1 numeric: vector of weights for components of the second feature
+#' @param p_0 double: the prior probability of class 0
+make_mix_sample &lt;- function(n,
+                            nu_0, tau_0, n_0, sigma_0, w_0,
+                            nu_1, tau_1, n_1, sigma_1, w_1,
+                            p_0) {
+    ## Number of Components for Each Class
+    l_0 &lt;- length(w_0)
+    l_1 &lt;- length(w_1)
+    ## Sample the Component Means
+    mu_0 &lt;- mvnfast::rmvn(n = l_0,
+                          mu = nu_0, sigma = tau_0)
+    mu_1 &lt;- mvnfast::rmvn(n = l_1,
+                          mu = nu_1, sigma = tau_1)
+    ## Class Frequency in the Sample
+    n_0 &lt;- rbinom(1, n, p_0)
+    n_1 &lt;- n - n_0
+    ## Sample the Features
+    f_0 &lt;- mvnfast::rmixn(n = n_0,
+                          mu = mu_0, sigma = sigma_0, w = w_0,
+                          retInd = TRUE)
+    c_0 &lt;- attr(f_0, &quot;index&quot;)
+    f_1 &lt;- mvnfast::rmixn(n = n_1,
+                          mu = mu_1, sigma = sigma_1, w = w_1,
+                          retInd = TRUE)
+    c_1 &lt;- attr(f_1, &quot;index&quot;)
+    sample_mix &lt;- as.data.frame(rbind(f_0, f_1))
+    sample_mix[, 3] &lt;- c(c_0, c_1)
+    ## Define Classes
+    sample_mix[1:n_0, 4] &lt;- 0
+    sample_mix[(n_0 + 1):(n_0 + n_1), 4] &lt;- 1
+    sample_mix &lt;- sample_mix[sample(nrow(sample_mix)), ]
+    names(sample_mix) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;component&quot;, &quot;class&quot;)
+    ## Store Component Means
+    attr(sample_mix, &quot;mu_0&quot;) &lt;- mu_0
+    attr(sample_mix, &quot;mu_1&quot;) &lt;- mu_1
+    sample_mix
+}
+
+</code></pre>
+<p>Now we’ll define the parameters, construct a sample, and look at the result.</p>
+<pre class="r"><code>
+## Bernoulli parameter for class distribution
+p = 0.5
+## Mean of component means
+nu_0 = c(0, 1)
+nu_1 = c(1, 0)
+## Covariance for component means
+tau_0 = matrix(c(1, 0, 0, 1), nrow = 2)
+tau_1 = matrix(c(1, 0, 0, 1), nrow = 2)
+## Number of components for each class
+n_0 &lt;- 10
+n_1 &lt;- 10
+## Covariance for each class
+sigma_0 &lt;- replicate(n_0, matrix(c(1, 0, 0, 1), 2) / n_0 * 2,
+                     simplify = FALSE)
+sigma_1 &lt;- replicate(n_1, matrix(c(1, 0, 0, 1), 2) / n_1 * 2,
+                     simplify = FALSE)
+## Weights of mixture components
+w_0 &lt;- rep(1 / n_0, n_0)
+w_1 &lt;- rep(1 / n_1, n_1)
+
+## Sample size
+n &lt;- 4000
+set.seed(31)
+sample_mix &lt;- make_mix_sample(n,
+                              nu_0, tau_0, n_0, sigma_0, w_0,
+                              nu_1, tau_1, n_1, sigma_1, w_1,
+                              p)
+## Retrieve the generated component means
+mu_0 &lt;- attr(sample_mix, &quot;mu_0&quot;)
+mu_1 &lt;- attr(sample_mix, &quot;mu_1&quot;)
+
+ggplot() +
+    gg_sample(sample_mix) +
+    ggtitle(&quot;Sample of Mixture Distribution&quot;)
+
+ggplot() +
+    gg_sample(sample_mix) +
+    gg_mix_label(list(mu_0, mu_1)) +
+    facet_wrap(vars(class)) +
+    ggtitle(&quot;Feature Components&quot;)
+
+</code></pre>
+<figure>
+<img src="../images/sample_mix.png" title="sample-mix" alt="A sample from the mixture distributions." width="400" /><figcaption>A sample from the mixture distributions.</figcaption>
+</figure>
+<p>We’ve labelled the component means for each class. (There are 10 components for class 0, and 10 components for class 1.) You can see that around each of these labels is a sample from a normal distribution.</p>
+<h3 id="classes-on-the-feature-space-1">Classes on the Feature Space</h3>
+<p>Now we’ll compute class probabilities on the feature space.</p>
+<p>First define a generating function.</p>
+<pre class="r"><code>#' Construct a dataframe with posterior class probabilities and the
+#' optimal decision boundary over a grid on the feature space
+#' 
+#' @param mean_0 numeric: the average mean of the components of the first feature
+#' @param sigma_0 matrix: covariance of components of the first feature
+#' @param w_0 numeric: vector of weights for components of the first feature
+#' @param mean_1 numeric: the average mean of the components of the second feature
+#' @param sigma_1 matrix: covariance of components of the second feature
+#' @param w_1 numeric: vector of weights for components of the second feature
+#' @param p_0 double: the prior probability of class 0
+make_density_mix &lt;- function(mean_0, sigma_0, w_0,
+                             mean_1, sigma_1, w_1, p_0,
+                             x_min, x_max, y_min, y_max, delta = 0.05) {
+    x &lt;- seq(x_min, x_max, delta)
+    y &lt;- seq(y_min, y_max, delta)
+    density_mix &lt;- expand.grid(x, y)
+    names(density_mix) &lt;- c(&quot;x&quot;, &quot;y&quot;)
+    dfun_0 &lt;- function(x) mvnfast::dmixn(matrix(x, nrow = 1),
+                                         mu = mean_0,
+                                         sigma = sigma_0,
+                                         w = w_0)
+    dfun_1 &lt;- function(x) mvnfast::dmixn(matrix(x, nrow = 1),
+                                         mu = mean_1,
+                                         sigma = sigma_1,
+                                         w = w_1)
+    optimal_mix &lt;- function(x, y) optimal_predict(c(x, y), p_0, dfun_0, dfun_1)
+    density_mix &lt;-as.tibble(
+        cbind(density_mix,
+              t(mapply(optimal_mix,
+                       density_mix$x, density_mix$y))))
+    density_mix
+}
+</code></pre>
+<p>And now compute the grid and plot.</p>
+<pre class="r"><code>density_mix &lt;- make_density_mix(mu_0, sigma_0, w_0, mu_1, sigma_1, w_1, p,
+                                -3, 5, -3, 5)
+
+(ggplot() +
+ gg_sample(sample_mix, classes = 0,
+           alpha = 0.1) +
+ gg_density(density_mix, z = p_0_xy) +
+ gg_mix_label(list(mu_0, mu_1), classes = 0) +
+ ggtitle(&quot;Density of Class 0&quot;)) +
+(ggplot() +
+ gg_sample(sample_mix, classes = 1,
+           alpha = 0.1) +
+ gg_density(density_mix, z = p_1_xy) +
+ gg_mix_label(list(mu_0, mu_1), classes = 1) +
+ ggtitle(&quot;Density of Class 1&quot;)) +
+(ggplot() +
+ gg_sample(sample_mix,
+           alpha = 0.1) +
+ geom_contour(data = density_mix,
+              aes(x = x, y = y, z = p_0_xy + p_1_xy),
+              color = &quot;black&quot;,
+              size = 1) +
+ ggtitle(&quot;Joint Density&quot;))
+
+</code></pre>
+<figure>
+<img src="../images/density_mix.png" title="density-mix" alt="Contours of the feature distributions for each class." width="1000" /><figcaption>Contours of the feature distributions for each class.</figcaption>
+</figure>
+<h1 id="the-optimal-decision-boundary-1">The Optimal Decision Boundary</h1>
+<p>And here is the optimal decision boundary for this problem. Notice how again the boundary runs through points of intersection in the two conditional distributions, and how it separates the classes of observations in the sample.</p>
+<pre class="r"><code>(ggplot() +
+ gg_density(density_mix, z = p_0_xy,
+            alpha = 0.25) +
+ gg_density(density_mix, z = p_1_xy,
+            alpha = 0.25) +
+ gg_optimal(density_mix)) +
+(ggplot() +
+ gg_sample(sample_mix, alpha = 0.25) +
+ gg_optimal(density_mix))
+</code></pre>
+<figure>
+<img src="../images/optimal_mix.png" title="optimal-mix" alt="The optimal decision boundary." width="800" /><figcaption>The optimal decision boundary.</figcaption>
+</figure>
+<h1 id="class-imbalance">Class Imbalance</h1>
+<p>So far, we’ve only seen the case where the two classes occur about equally often. If one class has a lower probability of occuring (say class 1), then the optimal decision boundary must move toward the class 1 distribution in order to equalize the probabilities on either side. This should help illustrate why it’s important to consider class imbalance whenever you’re working on a classification problem. A large imbalance can change your decisions drastically.</p>
+<p>To see this change, we will use the <code>gganimate</code> package to produce an animation showing how the optimal boundary changes as the Bernoulli parameter (the frequency of class 0) changes from 0.1 to 0.9.</p>
+<h2 id="normally-distributed-features-1">Normally Distributed Features</h2>
+<pre class="r"><code>## Evaluate mu_0, sigma_0, etc. again, if needed.
+
+density_p0 &lt;-
+    map_dfr(seq(0.1, 0.9, 0.005),
+            function(p_0)
+                make_density_mvn(mu_0, sigma_0, mu_1, sigma_1,
+                                 p_0, -3, 5, -3, 5) %&gt;%
+                mutate(p_0 = p_0))
+
+anim &lt;- ggplot() +
+    geom_contour(data = density_p0,
+                 aes(x = x, y = y, z = p_0_xy + p_1_xy),
+                 color = &quot;black&quot;,
+                 size = 1,
+                 alpha = 0.25) +
+    gg_optimal(density_p0) +
+    transition_manual(p_0) +
+    ggtitle(&quot;Proportion of Class 0: {current_frame}&quot;)
+
+anim &lt;- animate(anim, renderer = gifski_renderer(),
+                width = 800, height = 800)
+
+anim
+</code></pre>
 <video autoplay loop mutued playsinline controls>
-  <source src="../../images/rot-scale-ref.webm" type="video/webm">
-  <source src="../../images/rot-scale-ref.mp4" type="video/mp4">
-  <source src="../../images/rot-scale-ref.ogg" type="video/ogg">
+  <source src="../images/imbalance_mvn.webm" type="video/webm">
+  <source src="../images/imbalance_mvn.mp4" type="video/mp4">
+  <source src="../images/imbalance_mvn.ogv" type="video/ogg">
 </video>
 
-<h2 id="example-1">Example</h2>
-<p>And here is a <a href="https://en.wikipedia.org/wiki/Shear_mapping">shear transform</a>, represented as: rotation, scale, rotation.</p>
-<span class="math display">\[\begin{bmatrix}
-1.0 &amp; 1.0 \\
-0.0 &amp; 1.0
-\end{bmatrix} \approx \begin{bmatrix}
-0.85 &amp; -0.53 \\
-0.53 &amp; 0.85
-\end{bmatrix} \begin{bmatrix}
-1.62 &amp; 0.0 \\
-0.0 &amp; 0.62
-\end{bmatrix} \begin{bmatrix}
-0.53 &amp; 0.85 \\
--0.85 &amp; 0.53
-\end{bmatrix}
-\]</span>
+<h2 id="mixture-of-normals-1">Mixture of Normals</h2>
+<pre class="r"><code>density_mix_p0 &lt;-
+    map_dfr(seq(0.1, 0.9, 0.005),
+            function(p_0)
+                make_density_mix(mu_0, sigma_0, w_0, mu_1, sigma_1, w_1,
+                                 p_0, -3, 5, -3, 5) %&gt;%
+                mutate(p_0 = p_0))
+anim &lt;- ggplot() +
+    geom_contour(data = density_mix_p0,
+                 aes(x = x, y = y, z = p_0_xy + p_1_xy),
+                 color = &quot;black&quot;,
+                 size = 1,
+                 alpha = 0.25) +
+    gg_optimal(density_mix_p0) +
+    transition_manual(p_0) +
+    ggtitle(&quot;Proportion of Class 0: {current_frame}&quot;)
+
+anim &lt;- animate(anim, renderer = gifski_renderer(),
+                width = 800, height = 800)
+
+anim
+
+</code></pre>
 <video autoplay loop mutued playsinline controls>
-  <source src="../../images/shear.webm" type="video/webm">
-  <source src="../../images/shear.mp4" type="video/mp4">
-  <source src="../../images/shear.ogg" type="video/ogg">
+  <source src="../images/imbalance_mix.webm" type="video/webm">
+  <source src="../images/imbalance_mix.mp4" type="video/mp4">
+  <source src="../images/imbalance_mix.ogg" type="video/ogg">
 </video>
 
+<h1 id="conclusion">Conclusion</h1>
+<p>In this post, we reviewed <strong>decision boundaries</strong>, a way of visualizing classification rules. In particular, we looked at <strong>optimal</strong> decision boundaries, which represent the <em>best</em> solution possible to a problem given certain costs for misclassification. The rule we used in this post was the <strong>MAP</strong> estimate, which minimizes zero-one loss, where all misclassifications are equally likely.</p>
+<p>In future posts, we’ll look other kinds of loss functions and how that can affect the decision rule, and also at the boundaries produced by a number of statistical learning models.</p>
+<p>Hope you enjoyed it!</p>
   </section>
   
 </article>
@@ -487,14 +783,14 @@ d_1 &amp; 0   \\
         <!-- Post Header  -->
 <div class="Subhead">
   <div class="Subhead-heading">
-      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/bayes-and-means/">What I'm Reading 1: Bayes and Means</a></h2>
+      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/least-squares-with-the-mp-inverse/">Least Squares with the Moore-Penrose Inverse</a></h2>
   </div>
   <div class="Subhead-description">
     
-      <a href="../tags/R/">R</a>, <a href="../tags/bayesian/">bayesian</a>, <a href="../tags/data-science/">data-science</a>, <a href="../tags/stacking/">stacking</a>, <a href="../tags/BMA/">BMA</a>, <a href="../tags/review/">review</a>
+      <a href="../tags/tutorial/">tutorial</a>, <a href="../tags/linear-algebra/">linear-algebra</a>, <a href="../tags/moore-penrose-inverse/">moore-penrose-inverse</a>, <a href="../tags/generalized-inverse/">generalized-inverse</a>, <a href="../tags/least-squares/">least-squares</a>, <a href="../tags/linear-equations/">linear-equations</a>
     
     <div class="float-md-right" style="text-align=right">
-      Published: October  4, 2019
+      Published: November 21, 2019
       
     </div>
   </div>
@@ -505,78 +801,187 @@ d_1 &amp; 0   \\
   <div id="toc" class="Box mb-3">
     <h1>Table of Contents</h1>
     <ul class="incremental">
-<li><a href="#bayesian-aggregation">Bayesian Aggregation</a></li>
-<li><a href="#bayesian-stacking">Bayesian Stacking</a></li>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#example---system-with-an-invertible-matrix">Example - System with an Invertible Matrix</a></li>
+<li><a href="#constructing-inverses-with-the-svd">Constructing Inverses with the SVD</a><ul class="incremental">
+<li><a href="#example">Example</a></li>
+</ul></li>
+<li><a href="#constructing-mp-inverses-with-the-svd">Constructing MP-Inverses with the SVD</a><ul class="incremental">
+<li><a href="#example---an-inconsistent-system">Example - An Inconsistent System</a></li>
+</ul></li>
 </ul>
   </div>
   
   
   <section id="content" class="pb-2 mb-4 border-bottom">
-    <h1 id="bayesian-aggregation">Bayesian Aggregation</h1>
-<p>Yang, Y., &amp; Dunson, D. B., <em>Minimax Optimal Bayesian Aggregation</em> 2014 (<a href="https://arxiv.org/abs/1403.1345">arXiv</a>)</p>
-<p>Say we have a number of estimators <span class="math inline">\(\hat f_1, \ldots, \hat f_K\)</span> derived from a number of models <span class="math inline">\(M_1, \ldots, M_K\)</span> for some regression problem <span class="math inline">\(Y = f(X) + \epsilon\)</span>, but, as is the nature of things when estimating with limited data, we don’t know which estimator represents the true model (assuming the true model is in our list). The Bayesian habit is to stick a prior on the uncertainty, compute posteriors probabilities, and then average across the unknown parameter using the posterior probabilities as weights. Since the posterior probabilities (call them <span class="math inline">\(\lambda_1, \ldots, \lambda_K\)</span>) have to sum to 1, we obtain a <em>convex combination</em> of our estimators <span class="math display">\[ \hat f = \sum_{1\leq i \leq K} \lambda_i \hat f_i \]</span> This is the approach of <a href="https://www.stat.colostate.edu/~jah/papers/statsci.pdf">Bayesian Model Averaging</a> (BMA). Yang <em>et al.</em> propose to find such combinations using a <a href="https://en.wikipedia.org/wiki/Dirichlet_distribution">Dirichlet prior</a> on the weights <span class="math inline">\(\lambda_i\)</span>. If we remove the restriction that the weights sum to 1 and instead only ask that they have finite sum in absolute value, then we obtain <span class="math inline">\(\hat f\)</span> as a <em>linear combination</em> of <span class="math inline">\(\hat f_i\)</span>. The authors then place a Gamma prior on <span class="math inline">\(A = \sum_i |\lambda_i|\)</span> and a Dirichlet prior on <span class="math inline">\(\mu_i = \frac{|\lambda_i|}{A}\)</span>. In both the linear and the convex cases they show that the resulting estimator is minimax optimal in the sense that it will give the best worst-case predictions for a given number of observations, including the case where a sparsity restriction is placed on the number of estimators <span class="math inline">\(\hat f_i\)</span>; in other words, <span class="math inline">\(\hat f\)</span> converges to the true estimator as the number of observations increases with minimax optimal risk. The advantage to previous non-bayesian methods of linear or convex aggregation is that the sparsity parameter can be learned from the data. The Dirichlet convex combination gives good performance against Best Model selection, Majority Voting, and <a href="https://biostats.bepress.com/ucbbiostat/paper266/">SuperLearner</a>, especially when there are both a large number of observations and a large number of estimators.</p>
-<p>I implemented the convex case in R for use with <a href="https://github.com/paul-buerkner/brms">brms</a>. The Dirichlet distribution has been <a href="https://en.wikipedia.org/wiki/Dirichlet_distribution#Gamma_distribution">reparameterized</a> as a sum of Gamma RVs to aid in sampling. The Dirichlet concentration parameter is <span class="math inline">\(\frac{\alpha}{K^\gamma}\)</span>; the authors recommend choosing <span class="math inline">\(\alpha = 1\)</span> and <span class="math inline">\(\gamma = 2\)</span>.</p>
-<pre class="r" data-org-language="R"><code>convex_regression &lt;- function(formula, data,
-                              family = &quot;gaussian&quot;,
-                              ## Yang (2014) recommends alpha = 1, gamma = 2
-                              alpha = 1, gamma = 2,
-                              verbose = 0,
-                              ...) {
-  if (gamma &lt;= 1) {
-    warning(paste(&quot;Parameter gamma should be greater than 1. Given:&quot;, gamma))
-  }
-  if (alpha &lt;= 0) {
-    warning(paste(&quot;Parameter alpha should be greater than 0. Given:&quot;, alpha))
-  }
-  ## Set up priors.
-  K &lt;- length(terms(formula))
-  alpha_K &lt;- alpha / (K^gamma)
-  stanvars &lt;-
-    stanvar(alpha_K,
-      &quot;alpha_K&quot;,
-      block = &quot;data&quot;,
-      scode = &quot;  real&lt;lower = 0&gt; alpha_K;  // dirichlet parameter&quot;
-    ) +
-    stanvar(
-      name = &quot;b_raw&quot;,
-      block = &quot;parameters&quot;,
-      scode = &quot;  vector&lt;lower = 0&gt;[K] b_raw; &quot;
-    ) +
-    stanvar(
-      name = &quot;b&quot;,
-      block = &quot;tparameters&quot;,
-      scode = &quot;  vector[K] b = b_raw / sum(b_raw);&quot;
-    )
-  prior &lt;- prior(&quot;target += gamma_lpdf(b_raw | alpha_K, 1)&quot;,
-    class = &quot;b_raw&quot;, check = FALSE
-  )
-  f &lt;- update.formula(formula, . ~ . - 1)
-  if (verbose &gt; 0) {
-    make_stancode(f,
-      prior = prior,
-      data = data,
-      stanvars = stanvars
-    ) %&gt;% message()
-  }
-  fit_dir &lt;- brm(f,
-    prior = prior,
-    family = family,
-    data = data,
-    stanvars = stanvars,
-    ...
-  )
-  fit_dir
-}
-</code></pre>
-<p>Here is a <a href="https://gist.github.com/ryanholbrook/b5c7d44c0c7642eeee1a3034b48f29d7">gist</a> that includes an interface to <a href="https://tidymodels.github.io/parsnip/">parsnip</a>.</p>
-<p>In my own experiments, I found the performance of the convex aggregator to be comparable to a <a href="https://en.wikipedia.org/wiki/Lasso_(statistics)">LASSO</a> SuperLearner at the cost of the lengthier training that goes with MCMC methods and the finicky convergence of sparse priors. So I would likely reserve this for when I had lots of features and lots of estimators to work through, where I presume it would show an advantage. But in that case it would definitely be on my list of things to try.</p>
-<h1 id="bayesian-stacking">Bayesian Stacking</h1>
-<p>Yao, Y., Vehtari, A., Simpson, D., &amp; Gelman, A., <em>Using Stacking to Average Bayesian Predictive Distributions</em> (<a href="https://projecteuclid.org/euclid.ba/1516093227">pdf</a>)</p>
-<p>Another approach to model combination is <a href="https://doi.org/10.1080/01621459.1996.10476733">stacking</a>. With stacking, model weights are chosen by cross-validation to minimize <a href="https://en.wikipedia.org/wiki/Root-mean-square_deviation">RMSE</a> predictive error. Now, BMA finds the aggregated model that best fits the data, while stacking finds the aggregated model that gives the best predictions. Stacking therefore is usually better when predictions are what you want. A drawback is that stacking produces models through <em>point</em> estimates. So, they don’t give you all the information of a full distribution like BMA would. Yao <em>et al.</em> propose a method of stacking that instead finds the optimal <a href="https://en.wikipedia.org/wiki/Posterior_predictive_distribution">predictive distribution</a> by convex combinations of distributions with weights chosen by some scoring rule: the authors use the minimization of KL-divergence. Hence, they choose weights <span class="math inline">\(w\)</span> empirically through <a href="https://en.wikipedia.org/wiki/Cross-validation_(statistics)#Leave-one-out_cross-validation">LOO</a> by <span class="math display">\[ \max_w \frac{1}{n} \sum_{1\leq i \leq n} \log \sum_{1\leq k \leq K} w_k p(y_i | y_{-i}, M_k) \]</span> where <span class="math inline">\(y_1, \ldots, y_n\)</span> are the observed data and <span class="math inline">\(y_{-i}\)</span> is the data with <span class="math inline">\(y_i\)</span> left out. The following figure shows how stacking of predictive distributions gives the “best of both worlds” for BMA and point prediction stacking.</p>
+    <h1 id="introduction">Introduction</h1>
+<p>The <strong><a href="https://en.wikipedia.org/wiki/Invertible_matrix">inverse</a></strong> of a matrix <span class="math inline">\(A\)</span> is another matrix <span class="math inline">\(A^{-1}\)</span> that has this property:</p>
+<span class="math display">\[\begin{align*}
+A A^{-1} &amp;= I \\
+A^{-1} A &amp;= I
+\end{align*}
+\]</span>
+<p>where <span class="math inline">\(I\)</span> is the <em>identity matrix</em>. This is a nice property for a matrix to have, because then we can work with it in equations just like we might with ordinary numbers. For instance, to solve some <a href="https://en.wikipedia.org/wiki/System_of_linear_equations">linear system of equations</a> <span class="math display">\[ A x = b \]</span> we can just multiply the inverse of <span class="math inline">\(A\)</span> to both sides <span class="math display">\[ x = A^{-1} b \]</span> and then we have some unique solution vector <span class="math inline">\(x\)</span>. Again, this is just like we would do if we were trying to solve a real-number equation like <span class="math inline">\(a x = b\)</span>.</p>
+<p>Now, a matrix has an inverse whenever it is square and its rows are linearly independent. But not every system of equations we might care about will give us a matrix that satisfies these properties. The coefficient matrix <span class="math inline">\(A\)</span> would fail to be invertible if the system did not have the same number of equations as unknowns (<span class="math inline">\(A\)</span> is not square), or if the system had dependent equations (<span class="math inline">\(A\)</span> has dependent rows).</p>
+<p><a href="https://en.wikipedia.org/wiki/Generalized_inverse">Generalized inverses</a> are meant to solve this problem. They are meant to solve equations like <span class="math inline">\(A x = b\)</span> in the “best way possible” when <span class="math inline">\(A^{-1}\)</span> fails to exist. There are many kinds of generalized inverses, each with its own “best way.” (They can be used to solve <a href="https://en.wikipedia.org/wiki/Tikhonov_regularization">ridge regression</a> problems, for instance.)</p>
+<p>The most common is the <strong><a href="https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse">Moore-Penrose inverse</a></strong>, or sometimes just the <strong>pseudoinverse</strong>. It solves the <a href="https://en.wikipedia.org/wiki/Ordinary_least_squares">least-squares</a> problem for linear systems, and therefore will give us a solution <span class="math inline">\(\hat{x}\)</span> so that <span class="math inline">\(A \hat{x}\)</span> is as close as possible in ordinary <a href="https://en.wikipedia.org/wiki/Euclidean_distance">Euclidean distance</a> to the vector <span class="math inline">\(b\)</span>.</p>
+<p>The notation for the Moore-Penrose inverse is <span class="math inline">\(A^+\)</span> instead of <span class="math inline">\(A^{-1}\)</span>. If <span class="math inline">\(A\)</span> is invertible, then in fact <span class="math inline">\(A^+ = A^{-1}\)</span>, and in that case the solution to the least-squares problem is the same as the ordinary solution (<span class="math inline">\(A^+ b = A^{-1} b\)</span>). So, the MP-inverse is strictly more general than the ordinary inverse: we can always use it and it will always give us the same solution as the ordinary inverse whenever the ordinary inverse exists.</p>
+<p>We will look at how we can construct the Moore-Penrose inverse using the SVD. This turns out to be an easy extension to constructing the ordinary matrix inverse with the SVD. We will then see how solving a least-squares problem is just as easy as solving an ordinary equation.</p>
+<h1 id="example---system-with-an-invertible-matrix">Example - System with an Invertible Matrix</h1>
+<p>First let’s recall how to solve a system whose coefficient matrix is invertible. In this case, we have the same number of equations as unknowns and the equations are all independent. Then <span class="math inline">\(A^{-1}\)</span> exists and we can find a unique solution for <span class="math inline">\(x\)</span> by multiplying <span class="math inline">\(A^{-1}\)</span> on both sides.</p>
+<p>For instance, say we have</p>
+<p><span class="math display">\[ \left\{\begin{align*}
+x_1 - \frac{1}{2}x_2 &amp;= 1 \\
+-\frac{1}{2} x_1 + x_2 &amp;= -1
+\end{align*}\right. \]</span></p>
+<p>Then</p>
+<p><span class="math display">\[ \begin{array}{c c}
+A = \begin{bmatrix}
+1 &amp; -1/2 \\
+-1/2 &amp; 1
+\end{bmatrix},
+&amp;A^{-1} = \begin{bmatrix}
+4/3 &amp; 2/3 \\
+2/3 &amp; 4/3
+\end{bmatrix} \end{array} \]</span></p>
+<p>and</p>
+<p><span class="math display">\[x = A^{-1}b = \begin{bmatrix}
+4/3 &amp; 2/3 \\
+2/3 &amp; 4/3
+\end{bmatrix} \begin{bmatrix}
+1 \\ 
+-1
+\end{bmatrix} = \begin{bmatrix}
+2/3 \\
+-2/3
+\end{bmatrix}
+\]</span></p>
+<p>So <span class="math inline">\(x_1 = \frac{2}{3}\)</span> and <span class="math inline">\(x_2 = -\frac{2}{3}\)</span>.</p>
+<h1 id="constructing-inverses-with-the-svd">Constructing Inverses with the SVD</h1>
+<p>The <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) gives us an intuitive way constructing an inverse matrix. We will be able to see how the geometric transforms of <span class="math inline">\(A^{-1}\)</span> undo the transforms of <span class="math inline">\(A\)</span>.</p>
+<p>The SVD says that for any matrix <span class="math inline">\(A\)</span>,</p>
+<p><span class="math display">\[ A = U \Sigma V^* \]</span></p>
+<p>where <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> are orthogonal matricies and <span class="math inline">\(\Sigma\)</span> is a diagonal matrix.</p>
+<p>Now, if <span class="math inline">\(A\)</span> is invertible, we can use its SVD to find <span class="math inline">\(A^{-1}\)</span> like so:</p>
+<p><span class="math display">\[ A^{-1} = V \Sigma^{-1} U^* \]</span></p>
+<p>If we have the SVD of <span class="math inline">\(A\)</span>, we can construct its inverse by swapping the orthogonal matrices <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> and finding the inverse of <span class="math inline">\(\Sigma\)</span>. Since <span class="math inline">\(\Sigma\)</span> is diagonal, we can do this by just taking reciprocals of its diagonal entries.</p>
+<h2 id="example">Example</h2>
+<p>Let’s look at our earlier matrix again:</p>
+<p><span class="math display">\[ A = \begin{bmatrix}
+1 &amp; -1/2 \\
+-1/2 &amp; 1
+\end{bmatrix} \]</span></p>
+<p>It has SVD</p>
+<p><span class="math display">\[ A = U \Sigma V^* = \begin{bmatrix}
+\sqrt{2}/2 &amp; -\sqrt{2}/2 \\
+\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \begin{bmatrix}
+3/2 &amp; 0 \\
+0 &amp; 1/2
+\end{bmatrix} \begin{bmatrix}
+\sqrt{2}/2 &amp; \sqrt{2}/2 \\
+-\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \]</span></p>
+<p>And so,</p>
+<p><span class="math display">\[ A^{-1} = V \Sigma^{-1} U^* = \begin{bmatrix}
+\sqrt{2}/2 &amp; -\sqrt{2}/2 \\
+\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \begin{bmatrix}
+2/3 &amp; 0 \\
+0 &amp; 2
+\end{bmatrix} \begin{bmatrix}
+\sqrt{2}/2 &amp; \sqrt{2}/2 \\
+-\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \]</span></p>
+<p>and after multiplying everything out, we get</p>
+<p><span class="math display">\[ A^{-1} = \begin{bmatrix}
+4/3 &amp; 2/3 \\
+2/3 &amp; 4/3
+\end{bmatrix} \]</span></p>
+<p>just like we had before.</p>
+<p>In an <a href="../posts/visualizing-linear-transformations/">earlier post</a>, we saw how we could use the SVD to visualize a matrix as a sequence of geometric transformations. Here is the matrix <span class="math inline">\(A\)</span> followed by <span class="math inline">\(A^{-1}\)</span>, acting on the unit circle:</p>
+<video autoplay loop mutued playsinline controls>
+  <source src="../../images/invertible-equation.webm" type="video/webm">
+  <source src="../../images/invertible-equation.mp4" type="video/mp4">
+  <source src="../../images/invertible-equation.webm" type="video/ogg">
+</video>
+
+<p>The inverse matrix <span class="math inline">\(A^{-1}\)</span> reverses exactly the action of <span class="math inline">\(A\)</span>. The matrix <span class="math inline">\(A\)</span> will map any circle to a unique ellipse, with no overlap. So, <span class="math inline">\(A^{-1}\)</span> can map ellipses back to those same circles without any ambiguity. We don’t “lose information” by applying <span class="math inline">\(A\)</span>.</p>
+<h1 id="constructing-mp-inverses-with-the-svd">Constructing MP-Inverses with the SVD</h1>
+<p>We can in fact do basically the same thing for <em>any</em> matrix, not just the invertible ones. The SVD always exists, so for some matrix <span class="math inline">\(A\)</span>, first write</p>
+<p><span class="math display">\[ A = U \Sigma V^* \]</span></p>
+<p>And then find the MP-inverse by</p>
+<p><span class="math display">\[ A^+ = V \Sigma^+ U^* \]</span></p>
+<p>Now, the matrix <span class="math inline">\(A\)</span> might not be invertible. If it is not square, then, to find <span class="math inline">\(\Sigma^+\)</span>, we need to take the transpose of <span class="math inline">\(\Sigma\)</span> to make sure all the dimensions are conformable in the multiplication. It <span class="math inline">\(A\)</span> is singular (dependent rows), then <span class="math inline">\(\Sigma\)</span> will have 0’s on its diagaonal, so we need to make sure only take reciprocals of the non-zero entries.</p>
+<p>Summarizing, to find the Moore-Penrose inverse of a matrix <span class="math inline">\(A\)</span>:</p>
+<ol>
+<li>Find the Singular Value Decomposition: <span class="math inline">\(A = U \Sigma V^*\)</span> (using <a href="https://www.rdocumentation.org/packages/base/versions/3.6.1/topics/svd">R</a> or <a href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.svd.html">Python</a>, if you like).</li>
+<li>Find <span class="math inline">\(\Sigma^+\)</span> by transposing <span class="math inline">\(\Sigma\)</span> and taking the reciprocal of all its non-zero diagonal entries.</li>
+<li>Compute <span class="math inline">\(A^+ = V \Sigma^+ U^*\)</span></li>
+</ol>
+<h2 id="example---an-inconsistent-system">Example - An Inconsistent System</h2>
+<p>Let’s find the MP-inverse of a singular matrix. Let’s take</p>
+<p><span class="math display">\[A = \begin{bmatrix}
+1 &amp; 1 \\
+1 &amp; 1
+\end{bmatrix}
+\]</span></p>
+<p>Because the rows of this matrix are linearly dependent, <span class="math inline">\(A^{-1}\)</span> does not exist. But we can still find the more general MP-inverse by following the procedure above.</p>
+<p>So, first we find the SVD of <span class="math inline">\(A\)</span>:</p>
+<p><span class="math display">\[ A = U \Sigma V^* = \begin{bmatrix}
+\sqrt{2}/2 &amp; -\sqrt{2}/2 \\
+\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \begin{bmatrix}
+2 &amp; 0 \\
+0 &amp; 0
+\end{bmatrix} \begin{bmatrix}
+\sqrt{2}/2 &amp; \sqrt{2}/2 \\
+-\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \]</span></p>
+<p>Then we apply the procedure above to find <span class="math inline">\(A^+\)</span>:</p>
+<p><span class="math display">\[ A^+ = V \Sigma^+ U^* = \begin{bmatrix}
+\sqrt{2}/2 &amp; -\sqrt{2}/2 \\
+\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \begin{bmatrix}
+1/2 &amp; 0 \\
+0 &amp; 0
+\end{bmatrix} \begin{bmatrix}
+\sqrt{2}/2 &amp; \sqrt{2}/2 \\
+-\sqrt{2}/2 &amp; \sqrt{2}/2
+\end{bmatrix} \]</span></p>
+<p>And now we multiply everything out to get:</p>
+<p><span class="math display">\[ A^+ = \begin{bmatrix}
+1/4 &amp; 1/4 \\
+1/4 &amp; 1/4 \end{bmatrix} \]</span></p>
+<p>This is the Moore-Penrose inverse of <span class="math inline">\(A\)</span>.</p>
+<p>Like we did for the invertible matrix before, let’s get an idea of what <span class="math inline">\(A\)</span> and <span class="math inline">\(A^+\)</span> are doing geometrically. Here they are acting on the unit circle:</p>
+<video autoplay loop mutued playsinline controls>
+  <source src="../../images/dependent-equation.webm" type="video/webm">
+  <source src="../../images/dependent-equation.mp4" type="video/mp4">
+  <source src="../../images/dependent-equation.ogg" type="video/ogg">
+</video>
+
+<p>Notice how <span class="math inline">\(A\)</span> now collapses the circle onto a one-dimensional space. This is a consequence of it having dependent columns. For matricies with dependent columns, its image will be of lesser dimension than the space it’s mapping into. Another way of saying this is that it has a non-trivial <a href="https://en.wikipedia.org/wiki/Kernel_(linear_algebra)">null space</a>. It “zeroes out” some of the dimensions in its domain during the transformation.</p>
+<p>What if <span class="math inline">\(A\)</span> were the coefficient matrix of a system of equations? We might have:</p>
+<p><span class="math display">\[ \left\{ \begin{align*}
+x_1 + x_2 &amp;= b_1 \\
+x_1 + x_2 &amp;= b_2
+\end{align*} \right. \]</span></p>
+<p>for some <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span>.</p>
+<p>Now, unless <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span> are equal, this system won’t have an exact solution for <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>. It will be <em>inconsistent</em>. But, with <span class="math inline">\(A^+\)</span>, we can still find values for <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> that minimize the distance between <span class="math inline">\(A x\)</span> and <span class="math inline">\(b\)</span>. More specifically, let <span class="math inline">\(\hat{x} = A^{+}b\)</span>. Then <span class="math inline">\(\hat{x}\)</span> will minimize <span class="math inline">\(|| b - A x ||^2  \)</span>, the <em>squared error</em>, and <span class="math inline">\( \hat{b} = A \hat{x} = A A^{+} x \)</span> is the closest we can come to <span class="math inline">\(b\)</span>. (The vector <span class="math inline">\(b - A \hat{x}\)</span> is sometimes called the <strong><a href="https://en.wikipedia.org/wiki/Residual_(numerical_analysis)">residual</a></strong> vector.)</p>
+<p>We have</p>
+<p><span class="math display">\[ \hat{x} = A^{+} b = \begin{bmatrix}
+1/4 (b_1 + b_2) \\
+1/4 (b_1 + b_2) \end{bmatrix} \]</span></p>
+<p>so <span class="math inline">\(x_1 = \frac{1}{4} (b_1 + b_2)\)</span> and <span class="math inline">\(x_2 = \frac{1}{4} (b_1 + b_2)\)</span>. And the closest we can get to <span class="math inline">\(b\)</span> is</p>
+<p><span class="math display">\[ \hat{b} = A \hat{x} = \begin{bmatrix}
+1/2 (b_1 + b_2) \\
+1/2 (b_1 + b_2) \end{bmatrix} \]</span></p>
+<p>In other words, if we have to make <span class="math inline">\(x_1 + x_2\)</span> as close as possible to two different values <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span>, the best we can do is to choose <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> so as to get the average of <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span>.</p>
 <figure>
-<img src="../images/stacking.png" alt="From Yao (2018)" /><figcaption>From Yao (2018)</figcaption>
+<img src="../../images/least-squares.png" title="least-squares" alt="The vector b = (1, 3) and its orthogonal projection \hat{b} = (2, 2)." width="400" /><figcaption>The vector <span class="math inline">\(b = (1, 3)\)</span> and its orthogonal projection <span class="math inline">\(\hat{b} = (2, 2)\)</span>.</figcaption>
 </figure>
-<p>They have implemented stacking for <a href="https://mc-stan.org/users/interfaces/rstan">Stan</a> models in the R package <a href="https://cran.r-project.org/web/packages/loo/vignettes/loo2-weights.html">loo</a>.</p>
+<p>Or we could think about this problem geometrically. In order for there to be a solution to <span class="math inline">\(A x = b\)</span>, the vector <span class="math inline">\(b\)</span> has to reside in the image of <span class="math inline">\(A\)</span>. The image of <span class="math inline">\(A\)</span> is the span of its columns, which is all vectors like <span class="math inline">\(c(1, 1)\)</span> for a scalar <span class="math inline">\(c\)</span>. This is just the line through the origin in the picture above. But <span class="math inline">\(b = (b_1, b_2)\)</span> is not on that line if <span class="math inline">\(b_1 \neq b_2\)</span>, and so instead we minimize the distance between the two with its orthogonal projection <span class="math inline">\(\hat b\)</span>. The error or residual is the difference <span class="math inline">\(\epsilon = b - \hat{b}\)</span>.</p>
   </section>
   
 </article>
