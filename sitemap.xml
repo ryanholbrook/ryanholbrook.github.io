@@ -8,15 +8,6 @@
 
 
   <url>
-    <loc>https://mathformachines.com/posts/breaking-into-tech/</loc>
-    
-    <lastmod>2022-02-12</lastmod>
-    
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
     <loc>https://mathformachines.com/posts/what-convnets-learn/</loc>
     
     <lastmod>2021-01-09</lastmod>

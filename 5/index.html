@@ -34,8 +34,11 @@
       <a class="UnderlineNav-item" href="../about/">
         <span style="font-size:1.25em;font-weight:bold">About</span>
       </a>
-      <a class="UnderlineNav-item" href="../kaggle/">
+      <a class="UnderlineNav-item" href="../courses/">
         <span style="font-size:1.25em;font-weight:bold">Kaggle Courses</span>
+      </a>
+      <a class="UnderlineNav-item" href="../competitions/">
+        <span style="font-size:1.25em;font-weight:bold">Kaggle Competitions</span>
       </a>
     </div>
     <div class="UnderlineNav-actions">
@@ -89,10 +92,6 @@
                 <ul>
     
         <li>
-          <a href="../posts/breaking-into-tech/">How to Get a Job in Tech</a>
-        </li>
-    
-        <li>
           <a href="../posts/what-convnets-learn/">Visualizing What Convnets Learn</a>
         </li>
     
@@ -128,6 +127,10 @@
           <a href="../posts/bayes-and-means/">What I'm Reading 1: Bayes and Means</a>
         </li>
     
+        <li>
+          <a href="../posts/investmentsim/">investmentsim - an R Package for Simulating Investment Portfolios</a>
+        </li>
+    
 </ul>
 
               </div>
@@ -137,197 +140,6 @@
           <div class="my-2">
           <div role="main" id="main">
   
-  
-  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
-
-        <!-- Post Header  -->
-<div class="Subhead">
-  <div class="Subhead-heading">
-      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/visualizing-linear-transformations/">Visualizing Linear Transformations</a></h2>
-  </div>
-  <div class="Subhead-description">
-    
-      <a href="../tags/tutorial/">tutorial</a>, <a href="../tags/linear-algebra/">linear-algebra</a>, <a href="../tags/matrix-decomposition/">matrix-decomposition</a>, <a href="../tags/geometry/">geometry</a>
-    
-    <div class="float-md-right" style="text-align=right">
-      Published: November 12, 2019
-      
-    </div>
-  </div>
-</div>
-
-<article>
-  
-  <div id="toc" class="Box mb-3">
-    <h1>Table of Contents</h1>
-    <ul class="incremental">
-<li><a href="#introduction">Introduction</a></li>
-<li><a href="#three-primitive-transformations">Three Primitive Transformations</a><ul class="incremental">
-<li><a href="#scaling">Scaling</a></li>
-<li><a href="#rotation">Rotation</a></li>
-<li><a href="#reflection">Reflection</a></li>
-</ul></li>
-<li><a href="#decomposing-matricies-into-primitives">Decomposing Matricies into Primitives</a><ul class="incremental">
-<li><a href="#example">Example</a></li>
-<li><a href="#example-1">Example</a></li>
-</ul></li>
-</ul>
-  </div>
-  
-  
-  <section id="content" class="pb-2 mb-4 border-bottom">
-    <h1 id="introduction">Introduction</h1>
-<p>Say <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span> are <a href="https://en.wikipedia.org/wiki/Vector_space">vector spaces</a> with scalars in some <a href="https://en.wikipedia.org/wiki/Field_(mathematics)">field</a> <span class="math inline">\(\mathbb{F}\)</span> (the real numbers, maybe). A <strong><a href="https://en.wikipedia.org/wiki/Linear_map">linear map</a></strong> is a function <span class="math inline">\(T : V \rightarrow W \)</span> satisfying two conditions:</p>
-<ul>
-<li><strong>additivity</strong> <span class="math inline">\(T(x + y) = T x + T y\)</span> for all <span class="math inline">\(x, y \in V\)</span></li>
-<li><strong>homogeneity</strong> <span class="math inline">\(T(c x) = c (T x)\)</span> for all <span class="math inline">\(c \in \mathbb{F} \)</span> and all <span class="math inline">\(x \in V\)</span></li>
-</ul>
-<p>
-
-<p>Defining a linear map this way just ensures that anything that acts like a vector in <span class="math inline">\(V\)</span> also acts like a vector in <span class="math inline">\(W\)</span> after you map it over. It means that the map preserves all the structure of a vector space after it’s applied.</p>
-<p>It’s a simple definition – which is good – but doesn’t speak much to the imagination. Since linear algebra is possibly the <a href="https://math.stackexchange.com/questions/256682/why-study-linear-algebra">most useful</a> and <a href="https://math.stackexchange.com/questions/256682/why-study-linear-algebra">most ubiquitous</a> of all the branches of mathematics, we’d like to have some intuition about what linear maps are so we have some idea of what we’re doing <a href="https://en.wikipedia.org/wiki/Linear_regression">when</a> <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">we</a> <a href="https://en.wikipedia.org/wiki/Backpropagation">use</a> <a href="https://en.wikipedia.org/wiki/Mapreduce">it</a>. Though not all vectors live there, the <a href="https://en.wikipedia.org/wiki/Euclidean_space">Euclidean plane</a> <span class="math inline">\(\mathbb{R}^2\)</span> is certainly the easiest to visualize, and the way we <a href="https://en.wikipedia.org/wiki/Euclidean_distance">measure distance</a> there is very similar to the way we <a href="https://en.wikipedia.org/wiki/Root-mean-square_deviation">measure error</a> in statistics, so we can feel that our intuitions will carry over.</p>
-<p>It turns out that all linear maps in <span class="math inline">\(\mathbb{R}^2\)</span> can be factored into just a few primitive geometric operations: <a href="https://en.wikipedia.org/wiki/Scaling_(geometry)">scaling</a>, <a href="https://en.wikipedia.org/wiki/Rotation_(mathematics)">rotation</a>, and <a href="https://en.wikipedia.org/wiki/Reflection_(mathematics)">reflection</a>. This isn’t the only way to factor these maps, but I think it’s the easiest to understand. (We could get by <a href="https://en.wikipedia.org/wiki/Cartan%E2%80%93Dieudonn%C3%A9_theorem">without rotations</a>, in fact.)</p>
-<figure>
-<img src="../images/primitives.png" title="primitives" alt="The unit circle, rotated, reflected, and scaled." /><figcaption>The unit circle, rotated, reflected, and scaled.</figcaption>
-</figure>
-<h1 id="three-primitive-transformations">Three Primitive Transformations</h1>
-<h2 id="scaling">Scaling</h2>
-<p>A (non-uniform) <strong>scaling transformation</strong> <span class="math inline">\(D\)</span> in <span class="math inline">\(\mathbb{R}^2\)</span> is given by a <a href="https://en.wikipedia.org/wiki/Diagonal_matrix">diagonal matrix</a>:</p>
-<p><span class="math display">\[Scl(d1, d2) = \begin{bmatrix}
-d_1 &amp; 0   \\
-0   &amp; d_2 \\
-\end{bmatrix}\]</span></p>
-<p>where <span class="math inline">\(d_1\)</span> and <span class="math inline">\(d_2\)</span> are non-negative. The transformation has the effect of stretching or shrinking a vector along each coordinate axis, and, so long as <span class="math inline">\(d_1\)</span> and <span class="math inline">\(d_2\)</span> are positive, it will also preserve the <a href="https://en.wikipedia.org/wiki/Orientation_(vector_space)">orientation</a> of vectors after mapping because in this case <span class="math inline">\(\det(D) = d_1 d_2 &gt; 0\)</span>.</p>
-<p>For instance, here is the effect on a vector of this matrix: <span class="math display">\[D = \begin{bmatrix}
-0.75 &amp; 0 \\
-0    &amp; 1.25 \\
-\end{bmatrix}\]</span></p>
-<figure>
-<img src="../images/vector-scaled.png" title="vector-scaled" alt="A vector, scaled." width="400" /><figcaption>A vector, scaled.</figcaption>
-</figure>
-<p>It will shrink a vector by a factor of 0.75 along the x-axis and stretch a vector by a factor of 1.25 along the y-axis.</p>
-<p>If we think about all the vectors of length 1 as being the points of the <a href="https://en.wikipedia.org/wiki/Unit_circle">unit circle</a>, then we can get an idea of how the transformation will affect any vector. We can see a scaling as a continous transformation beginning at the <a href="https://en.wikipedia.org/wiki/Identity_matrix">identity matrix</a>.</p>
-<video autoplay loop mutued playsinline controls>
-  <source src="../../images/scaling.webm" type="video/webm">
-  <source src="../../images/scaling.mp4" type="video/mp4">
-  <source src="../../images/scaling.ogg" type="video/ogg">
-</video>
-
-<p>If one of the diagonal entries is 0, then it will collapse the circle on the other axis.</p>
-<p><span class="math display">\[D = \begin{bmatrix}
-0 &amp; 0 \\
-0 &amp; 1.25 \\
-\end{bmatrix}\]</span></p>
-<p>This is an example of a <a href="https://en.wikipedia.org/wiki/Rank_(linear_algebra)">rank-deficient</a> matrix. It maps every vector onto the y-axis, and so its image has a dimension less than the dimension of the full space.</p>
-<video autoplay loop mutued playsinline controls>
-  <source src="../../images/collapsed.webm" type="video/webm">
-  <source src="../../images/collapsed.mp4" type="video/mp4">
-  <source src="../../images/collapsed.ogg" type="video/ogg">
-</video>
-
-<h2 id="rotation">Rotation</h2>
-<p>A <strong>rotation transformation</strong> <span class="math inline">\(Ref\)</span> is given by a matrix: <span class="math display">\[Ref(\theta) = \begin{bmatrix}
-\cos(\theta) &amp; -\sin(\theta) \\
-\sin(\theta) &amp; \cos(\theta) \\
-\end{bmatrix}\]</span></p>
-<p>This transformation will have the effect of rotating a vector counter-clockwise by an angle <span class="math inline">\(\theta\)</span>, when <span class="math inline">\(\theta\)</span> is positive, and clockwise by <span class="math inline">\(\theta\)</span> when <span class="math inline">\(\theta\)</span> is negative.</p>
-<figure>
-<img src="../images/vector-rotated.png" title="vector-rotated" alt="A vector, rotated by 3\pi/4" width="400" /><figcaption>A vector, rotated by <span class="math inline">\(3\pi/4\)</span></figcaption>
-</figure>
-<p>And the unit circle gets mapped onto itself.</p>
-<video autoplay loop mutued playsinline controls>
-  <source src="../../images/rotation.webm" type="video/webm">
-  <source src="../../images/rotation.mp4" type="video/mp4">
-  <source src="../../images/rotation.ogg" type="video/ogg">
-</video>
-
-<p>It shouldn’t be too hard to convince ourselves that the matrix we’ve written down is the one we want. Take some unit vector and write its coordinates like <span class="math inline">\((\cos\gamma, \sin\gamma)\)</span>. Multiply it by <span class="math inline">\(Ref(\theta)\)</span> to get <span class="math inline">\((\cos\gamma \cos\theta - \sin\gamma \sin\theta, \cos\gamma \sin\theta + \sin\gamma \cos\theta)\)</span>. But by a <a href="https://en.wikipedia.org/wiki/List_of_trigonometric_identities#Angle_sum_and_difference_identities">trigonometric identity</a>, this is exactly the vector <span class="math inline">\((\cos(\gamma + \theta), \sin(\gamma + \theta))\)</span>, which is our vector rotated by <span class="math inline">\(\theta\)</span>.</p>
-<p>A rotation should preserve not only orientations, but also distances. Now, recall that the determinant for a <span class="math inline">\(2\times 2\)</span> matrix <span class="math inline">\(\begin{bmatrix} a &amp; b \\ c &amp; d \end{bmatrix}\)</span> is <span class="math inline">\(a d - b c\)</span>. So a rotation matrix will have determinant <span class="math inline">\(\cos^2(\theta) + \sin^2(\theta)\)</span>, which, by the <a href="https://en.wikipedia.org/wiki/Pythagorean_trigonometric_identity">Pythagorean identity</a>, is equal to 1. This, together with the fact that its columns are <a href="https://en.wikipedia.org/wiki/Orthonormality">orthonormal</a> means that it does preserve both. It is a kind of <a href="https://en.wikipedia.org/wiki/Orthogonal_matrix">orthogonal matrix</a>, which is a kind of <a href="https://en.wikipedia.org/wiki/Isometry">isometry</a>.</p>
-<h2 id="reflection">Reflection</h2>
-<p>A <strong>reflection</strong> in <span class="math inline">\(\mathbb{R}^2\)</span> can be described with matricies like: <span class="math display">\[Ref(\theta) = \begin{bmatrix}
-\cos(2\theta) &amp; \sin(2\theta) \\
-\sin(2\theta) &amp; -\cos(2\theta) \\
-\end{bmatrix}\]</span> where the reflection is through a line crossing the origin and forming an angle <span class="math inline">\(\theta\)</span> with the x-axis.</p>
-<figure>
-<img src="../images/vector-reflected.png" title="vector-reflected" alt="A vector, reflected over a line at angle \pi/4." width="400" /><figcaption>A vector, reflected over a line at angle <span class="math inline">\(\pi/4\)</span>.</figcaption>
-</figure>
-<p>And the unit circle gets mapped onto itself.</p>
-<video autoplay loop mutued playsinline controls>
-  <source src="../../images/reflection.webm" type="video/webm">
-  <source src="../../images/reflection.mp4" type="video/mp4">
-  <source src="../../images/reflection.ogg" type="video/ogg">
-</video>
-
-<p>Note that the determinant of this matrix is -1, which means that it <em>reverses</em> orientation. But its columns are still orthonormal, and so it too is an isometry.</p>
-<h1 id="decomposing-matricies-into-primitives">Decomposing Matricies into Primitives</h1>
-<p>The <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> (SVD) will factor any matrix <span class="math inline">\(A\)</span> having like this:</p>
-<p><span class="math display">\[ A = U \Sigma V^* \]</span></p>
-<p>We are working with real matricies, so <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> will both be orthogonal matrices. This means each of these will be either a reflection or a rotation, depending on the pattern of signs in its entries. The matrix <span class="math inline">\(\Sigma\)</span> is a diagonal matrix with non-negative entries, which means that it is a scaling transform. (The <span class="math inline">\(*\)</span> on the <span class="math inline">\(V\)</span> is the <a href="https://en.wikipedia.org/wiki/Conjugate_transpose">conjugate-transpose</a> operator, which just means ordinary <a href="https://en.wikipedia.org/wiki/Transpose">transpose</a> when <span class="math inline">\(V\)</span> doesn’t contain any imaginary entries. So, for us, <span class="math inline">\(V^* = V^\top\)</span>.) Now with the SVD we can rewrite any linear transformation as:</p>
-<ol>
-<li><span class="math inline">\(V^*\)</span>: Rotate/Reflect</li>
-<li><span class="math inline">\(\Sigma\)</span>: Scale</li>
-<li><span class="math inline">\(U\)</span>: Rotate/Reflect</li>
-</ol>
-<h2 id="example">Example</h2>
-<p><span class="math display">\[\begin{bmatrix}
-0.5 &amp; 1.5 \\
-1.5 &amp; 0.5
-\end{bmatrix} \approx \begin{bmatrix}
--0.707 &amp; -0.707 \\
--0.707 &amp; 0.707
-\end{bmatrix} \begin{bmatrix}
-2.0 &amp; 0.0 \\
-0.0 &amp; 1.0
-\end{bmatrix} \begin{bmatrix}
--0.707 &amp; -0.707 \\
-0.707 &amp; -0.707
-\end{bmatrix} \]</span></p>
-<p>This turns out to be:</p>
-<ol>
-<li><span class="math inline">\(V^*\)</span>: Rotate clockwise by <span class="math inline">\(\theta = \frac{3 \pi}{4}\)</span>.</li>
-<li><span class="math inline">\(\Sigma\)</span>: Scale x-coordinate by <span class="math inline">\(d_1 = 2\)</span> and y-coordinate by <span class="math inline">\(d_2 = 1\)</span>.</li>
-<li><span class="math inline">\(U\)</span>: Reflect over the line with angle <span class="math inline">\(-\frac{3\pi}{8}\)</span>.</li>
-</ol>
-<video autoplay loop mutued playsinline controls>
-  <source src="../../images/rot-scale-ref.webm" type="video/webm">
-  <source src="../../images/rot-scale-ref.mp4" type="video/mp4">
-  <source src="../../images/rot-scale-ref.ogg" type="video/ogg">
-</video>
-
-<h2 id="example-1">Example</h2>
-<p>And here is a <a href="https://en.wikipedia.org/wiki/Shear_mapping">shear transform</a>, represented as: rotation, scale, rotation.</p>
-<span class="math display">\[\begin{bmatrix}
-1.0 &amp; 1.0 \\
-0.0 &amp; 1.0
-\end{bmatrix} \approx \begin{bmatrix}
-0.85 &amp; -0.53 \\
-0.53 &amp; 0.85
-\end{bmatrix} \begin{bmatrix}
-1.62 &amp; 0.0 \\
-0.0 &amp; 0.62
-\end{bmatrix} \begin{bmatrix}
-0.53 &amp; 0.85 \\
--0.85 &amp; 0.53
-\end{bmatrix}
-\]</span>
-<video autoplay loop mutued playsinline controls>
-  <source src="../../images/shear.webm" type="video/webm">
-  <source src="../../images/shear.mp4" type="video/mp4">
-  <source src="../../images/shear.ogg" type="video/ogg">
-</video>
-
-  </section>
-  
-</article>
-
-
-        <!-- Post Footer -->
-        <div>
-
-        </div>
-
-    
-  </div>
   
   <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
 
@@ -437,6 +249,124 @@ d_1 &amp; 0   \\
     
   </div>
   
+  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
+
+        <!-- Post Header  -->
+<div class="Subhead">
+  <div class="Subhead-heading">
+      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/investmentsim/">investmentsim - an R Package for Simulating Investment Portfolios</a></h2>
+  </div>
+  <div class="Subhead-description">
+    
+      <a href="../tags/finance/">finance</a>, <a href="../tags/investing/">investing</a>, <a href="../tags/R/">R</a>, <a href="../tags/simulation/">simulation</a>
+    
+    <div class="float-md-right" style="text-align=right">
+      Published: September 11, 2019
+      
+    </div>
+  </div>
+</div>
+
+<article>
+  
+  
+  <section id="content" class="pb-2 mb-4 border-bottom">
+    <p>I wrote a little package recently for a project I’ve been working on. I’ve mostly been using it to help out with Monte Carlo simulations for personal finance planning. It’s a little rough at the moment, but for the adventurous it’s on Github here: <a href="https://github.com/ryanholbrook/investmentsim">investmentsim</a>. And here’s a quick tutorial on how to use it.</p>
+<p>The <code>investmentsim</code> package implements a function <code>make_path</code> to simulate an investment portfolio. It supports time-varying allocation of assets, automatic rebalancing, and planned transactions. The purpose of the package is to backtest investment plans as one might do for retirement accounts. (It does not have support for taxes or fees.)</p>
+<p>This example will demonstrate how to create an investment portfolio with defined allocations and transactions, and then simulate the balance of the portfolio over a period of time.</p>
+<pre class="r"><code>library(tidyverse)
+library(xts)
+library(lubridate)
+library(investmentsim)</code></pre>
+<p>First let’s create a portfolio. The <code>simreturns</code> data contains an <code>xts</code> time-series with fictional yearly returns for a stock fund and a bond fund over the years 1928 to 2018.</p>
+<pre class="r"><code>data(simreturns)
+head(simreturns)
+#&gt;            Stock.Returns Bond.Returns
+#&gt; 1928-01-01    0.11867241   0.01866146
+#&gt; 1929-01-01    0.04008497   0.02362385
+#&gt; 1930-01-01    0.16592113   0.04912787
+#&gt; 1931-01-01    0.18508859  -0.03370055
+#&gt; 1932-01-01    0.05509245   0.06772749
+#&gt; 1933-01-01    0.07558251   0.04195868</code></pre>
+<p>An <code>asset</code> in the <code>investmentsim</code> package is a function with parameters <code>start</code> and <code>end</code> that returns the percent change in the asset over the dates from <code>start</code> to <code>end</code>. The <code>make_historical</code> function will construct an asset given a time-series of returns. This function is supposed to be used when you want to use predetermined data as opposed to something generated at runtime.</p>
+<pre class="r"><code>simstock_asset &lt;- make_historical(simreturns$Stock.Returns)
+simbond_asset &lt;- make_historical(simreturns$Bond.Returns)</code></pre>
+<p>Next we define a portfolio with the <code>make_portfolio</code> function. It takes a list of names for the assets together with the functions defining them and a list for their initial balances. Also, let’s define a sequences of dates over which we’ll run the simulation.</p>
+<pre class="r"><code>asset_names &lt;- c(&quot;Stocks&quot;, &quot;Bonds&quot;)
+port &lt;- make_portfolio(asset_names,
+                       c(simstock_asset,
+                         simbond_asset),
+                       c(2500, 2500))
+dates &lt;- seq(ymd(&quot;1940-01-01&quot;), ymd(&quot;2010-01-01&quot;), by=&quot;years&quot;)</code></pre>
+<p>Then we can define our desired allocations with <code>make_linear_allocation</code>. It needs a list of dates and also a list of percentages for each asset.</p>
+<pre class="r"><code>alloc &lt;- make_linear_allocation_path(asset_names,
+                                     c(ymd(&quot;1970-01-01&quot;),
+                                       ymd(&quot;2000-01-01&quot;)),
+                                     list(c(0.9, 0.1),
+                                          c(0.4, 0.6)))</code></pre>
+<p>It’s easiest to see how it works by looking at a graph.</p>
+<pre class="r"><code>as &lt;- map(dates,
+          alloc) %&gt;%
+    do.call(rbind, .) %&gt;%
+    xts(order.by = dates)
+
+plot(as, ylim = c(0, 1),
+     col = c(&quot;red&quot;, &quot;blue&quot;),
+     main = &quot;Asset Allocation&quot;)
+addLegend(&quot;topright&quot;,
+          asset_names,
+          col = c(&quot;red&quot;, &quot;blue&quot;),
+          lty = 1, cex = 1,
+          bty = &quot;o&quot;)</code></pre>
+<figure>
+<img src="../images/allocation.png" alt="The allocation path for the portfolio." /><figcaption>The allocation path for the portfolio.</figcaption>
+</figure>
+<p>You can see that it is constant before the first date given and constant after the last date, and that it linearly interpolates the allocation when moving from one date to the next.</p>
+<p>Finally, we can define our desired transactions and collect everything together in a model. The <code>make_transactions_on_dates</code> function does what it sounds like it does: defines for the model a specified deposit (a positive value) or a specified withdrawal (a negative value). Within the simulation, transactions are applied at the end of the years given. So this transaction path just makes a $1000 deposit at the end of each year.</p>
+<pre class="r"><code>trans &lt;- make_transactions_on_dates(rep(1000, length(dates)),
+                                    dates)
+model &lt;- make_model(port, alloc, trans, dates)</code></pre>
+<p>Lastly, we evaluate <code>make_path</code> on the model to run the simulation.</p>
+<pre class="r"><code>path &lt;- make_path(model)
+c(head(path), tail(path))
+#&gt;                  Stocks        Bonds        Total Transaction
+#&gt; 1940-01-01     2500.000 2.500000e+03     5000.000           0
+#&gt; 1941-01-01     6090.672 6.767413e+02     6767.413        1000
+#&gt; 1942-01-01     7606.609 8.451788e+02     8451.788        1000
+#&gt; 1943-01-01     7997.775 8.886416e+02     8886.416        1000
+#&gt; 1944-01-01    11848.487 1.316499e+03    13164.986        1000
+#&gt; 1945-01-01    13939.015 1.548779e+03    15487.794        1000
+#&gt; 2005-01-01 11137858.729 1.670679e+07 27844646.822        1000
+#&gt; 2006-01-01 12831289.074 1.924693e+07 32078222.685        1000
+#&gt; 2007-01-01 14673102.513 2.200965e+07 36682756.282        1000
+#&gt; 2008-01-01 16844539.341 2.526681e+07 42111348.352        1000
+#&gt; 2009-01-01 16949487.079 2.542423e+07 42373717.697        1000
+#&gt; 2010-01-01 20340375.373 3.051056e+07 50850938.433        1000</code></pre>
+<pre class="r"><code>plot(path[,1:3],
+     col = c(&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;),
+     main = &quot;Investment Path&quot;)
+addLegend(&quot;topleft&quot;,
+          c(asset_names, &quot;Total&quot;),
+          col = c(&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;),
+          lty = 1, cex = 1,
+          bty = &quot;o&quot;)</code></pre>
+<figure>
+<img src="../images/path.png" alt="The value of the portfolio over time." /><figcaption>The value of the portfolio over time.</figcaption>
+</figure>
+<p>We’re rich!</p>
+  </section>
+  
+</article>
+
+
+        <!-- Post Footer -->
+        <div>
+
+        </div>
+
+    
+  </div>
+  
 
 <!-- Pagination -->
 <nav class="paginate-container" aria-label="Pagination">
@@ -461,7 +391,7 @@ d_1 &amp; 0   \\
             <div id="side">
               <div>
                 <h1>Tags</h1>
-                <a style="font-size: 100%" href="../tags/advice/">advice</a> <a style="font-size: 105%" href="../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../tags/career/">career</a> <a style="font-size: 100%" href="../tags/category-theory/">category-theory</a> <a style="font-size: 105%" href="../tags/classification/">classification</a> <a style="font-size: 100%" href="../tags/convnets/">convnets</a> <a style="font-size: 100%" href="../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../tags/cql/">cql</a> <a style="font-size: 115%" href="../tags/data-science/">data-science</a> <a style="font-size: 105%" href="../tags/decision-boundaries/">decision-boundaries</a> <a style="font-size: 105%" href="../tags/deep-learning/">deep-learning</a> <a style="font-size: 100%" href="../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../tags/engrams/">engrams</a> <a style="font-size: 105%" href="../tags/finance/">finance</a> <a style="font-size: 100%" href="../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../tags/generalized-inverse/">generalized-inverse</a> <a style="font-size: 100%" href="../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../tags/investing/">investing</a> <a style="font-size: 100%" href="../tags/julia/">julia</a> <a style="font-size: 100%" href="../tags/kaggle/">kaggle</a> <a style="font-size: 100%" href="../tags/LDA/">LDA</a> <a style="font-size: 100%" href="../tags/least-squares/">least-squares</a> <a style="font-size: 115%" href="../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../tags/linear-equations/">linear-equations</a> <a style="font-size: 100%" href="../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../tags/memory/">memory</a> <a style="font-size: 100%" href="../tags/moore-penrose-inverse/">moore-penrose-inverse</a> <a style="font-size: 100%" href="../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../tags/numpy/">numpy</a> <a style="font-size: 110%" href="../tags/python/">python</a> <a style="font-size: 100%" href="../tags/QDA/">QDA</a> <a style="font-size: 110%" href="../tags/R/">R</a> <a style="font-size: 100%" href="../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../tags/review/">review</a> <a style="font-size: 100%" href="../tags/sage/">sage</a> <a style="font-size: 100%" href="../tags/sgd/">sgd</a> <a style="font-size: 100%" href="../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../tags/talk/">talk</a> <a style="font-size: 100%" href="../tags/tensorflow/">tensorflow</a> <a style="font-size: 100%" href="../tags/tensors/">tensors</a> <a style="font-size: 100%" href="../tags/tpus/">tpus</a> <a style="font-size: 110%" href="../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../tags/vectors/">vectors</a> <a style="font-size: 105%" href="../tags/visualization/">visualization</a>
+                <a style="font-size: 105%" href="../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../tags/category-theory/">category-theory</a> <a style="font-size: 105%" href="../tags/classification/">classification</a> <a style="font-size: 100%" href="../tags/convnets/">convnets</a> <a style="font-size: 100%" href="../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../tags/cql/">cql</a> <a style="font-size: 115%" href="../tags/data-science/">data-science</a> <a style="font-size: 105%" href="../tags/decision-boundaries/">decision-boundaries</a> <a style="font-size: 105%" href="../tags/deep-learning/">deep-learning</a> <a style="font-size: 100%" href="../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../tags/engrams/">engrams</a> <a style="font-size: 105%" href="../tags/finance/">finance</a> <a style="font-size: 100%" href="../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../tags/generalized-inverse/">generalized-inverse</a> <a style="font-size: 100%" href="../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../tags/investing/">investing</a> <a style="font-size: 100%" href="../tags/julia/">julia</a> <a style="font-size: 100%" href="../tags/kaggle/">kaggle</a> <a style="font-size: 100%" href="../tags/LDA/">LDA</a> <a style="font-size: 100%" href="../tags/least-squares/">least-squares</a> <a style="font-size: 115%" href="../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../tags/linear-equations/">linear-equations</a> <a style="font-size: 100%" href="../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../tags/memory/">memory</a> <a style="font-size: 100%" href="../tags/moore-penrose-inverse/">moore-penrose-inverse</a> <a style="font-size: 100%" href="../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../tags/numpy/">numpy</a> <a style="font-size: 110%" href="../tags/python/">python</a> <a style="font-size: 100%" href="../tags/QDA/">QDA</a> <a style="font-size: 110%" href="../tags/R/">R</a> <a style="font-size: 100%" href="../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../tags/review/">review</a> <a style="font-size: 100%" href="../tags/sage/">sage</a> <a style="font-size: 100%" href="../tags/sgd/">sgd</a> <a style="font-size: 100%" href="../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../tags/talk/">talk</a> <a style="font-size: 100%" href="../tags/tensorflow/">tensorflow</a> <a style="font-size: 100%" href="../tags/tensors/">tensors</a> <a style="font-size: 100%" href="../tags/tpus/">tpus</a> <a style="font-size: 110%" href="../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../tags/vectors/">vectors</a> <a style="font-size: 105%" href="../tags/visualization/">visualization</a>
               </div>
               <div>
                 <h1>Links</h1>
