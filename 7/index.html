@@ -92,6 +92,10 @@
                 <ul>
     
         <li>
+          <a href="../posts/breaking-into-tech/">How to Get a Job in Tech</a>
+        </li>
+    
+        <li>
           <a href="../posts/what-convnets-learn/">Visualizing What Convnets Learn</a>
         </li>
     
@@ -127,10 +131,6 @@
           <a href="../posts/bayes-and-means/">What I'm Reading 1: Bayes and Means</a>
         </li>
     
-        <li>
-          <a href="../posts/investmentsim/">investmentsim - an R Package for Simulating Investment Portfolios</a>
-        </li>
-    
 </ul>
 
               </div>
@@ -140,6 +140,165 @@
           <div class="my-2">
           <div role="main" id="main">
   
+  
+  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
+
+        <!-- Post Header  -->
+<div class="Subhead">
+  <div class="Subhead-heading">
+      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/retirement-formula/">A Somewhat Better Retirement Formula</a></h2>
+  </div>
+  <div class="Subhead-description">
+    
+      <a href="../tags/finance/">finance</a>, <a href="../tags/retirement/">retirement</a>, <a href="../tags/calculator/">calculator</a>
+    
+    <div class="float-md-right" style="text-align=right">
+      Published: May 15, 2019
+      
+    </div>
+  </div>
+</div>
+
+<article>
+  
+  <div id="toc" class="Box mb-3">
+    <h1>Table of Contents</h1>
+    <ul class="incremental">
+<li><a href="#the-formula">The Formula</a><ul class="incremental">
+<li><a href="#example">Example</a></li>
+</ul></li>
+<li><a href="#the-importance-of-starting-early">The Importance of Starting Early</a></li>
+<li><a href="#assumptions">Assumptions</a><ul class="incremental">
+<li><a href="#retire-at-67">Retire at 67</a></li>
+<li><a href="#years-of-savings">12 years of savings</a></li>
+<li><a href="#of-working-income">80% of working income</a></li>
+<li><a href="#annual-return">3% annual return</a></li>
+</ul></li>
+<li><a href="#appendix---calculator">Appendix - Calculator</a></li>
+</ul>
+  </div>
+  
+  
+  <section id="content" class="pb-2 mb-4 border-bottom">
+    <p><em>This is based off a lesson I put together for a class I teach about general mathematics. I wanted a retirement savings formula that was simple enough for an ordinary person to use on their own, but also flexible enough to account for varied goals or circumstances.</em></p>
+<p><em>My formula <a href="https://www.investopedia.com/articles/personal-finance/092414/retirement-what-percentage-salary-save.asp">agrees pretty well</a> with what appear to be experts recommend, and it seems to be fairly robust in simulation. <a href="https://www.portfoliovisualizer.com/financial-goals?s=y&amp;stages=2&amp;careerYears=41&amp;mode=1&amp;initialAmount=12000&amp;years=70&amp;simulationModel=1&amp;historicalVolatility=true&amp;fullHistory=true&amp;startYear=1972&amp;endYear=2018&amp;bootstrapModel=1&amp;bootstrapMinYears=1&amp;bootstrapMaxYears=20&amp;circularBootstrap=true&amp;distribution=1&amp;dof=30&amp;meanReturn=7.0&amp;volatility=12.0&amp;sequenceStressTest=0&amp;stressTestRetirement=true&amp;inflationModel=1&amp;inflationMean=4.26&amp;inflationVolatility=3.13&amp;customIntervals=false&amp;percentileList=10%2C+25%2C+50%2C+75%2C+90&amp;returnList=0%2C+2.5%2C+5%2C+7.5%2C+10%2C+12.5&amp;asset1=TotalStockMarket&amp;allocation1_1=90&amp;asset2=TotalBond&amp;allocation2_1=10&amp;total1=100&amp;endasset1=TotalStockMarket&amp;endallocation1_1=30&amp;endasset2=TotalBond&amp;endallocation2_1=50&amp;endasset3=ShortTreasury&amp;endallocation3_1=20&amp;endtotal1=100&amp;cfname1=Saving&amp;cftype1=1&amp;cfamount1=12000&amp;cfinfadj1=true&amp;__checkbox_cfinfadj1=true&amp;cfstart1=1&amp;cffrequency1=4&amp;cfoccurs1=1&amp;cfname2=Retirement&amp;cftype2=2&amp;cfamount2=48000&amp;cfinfadj2=true&amp;__checkbox_cfinfadj2=true&amp;cfstart2=2&amp;cffrequency2=4&amp;cfoccurs2=2&amp;cftype3=2&amp;__checkbox_cfinfadj3=true&amp;cfstart3=3&amp;cffrequency3=4&amp;cfoccurs3=3">This simulation</a> <a href="../files/WithSS.pdf">(pdf)</a> based on historical data, says that a plan like this would have succeeded about 97% of the time with typical investments, and <a href="https://www.portfoliovisualizer.com/financial-goals?s=y&amp;stages=2&amp;careerYears=41&amp;mode=1&amp;initialAmount=12000&amp;years=70&amp;simulationModel=1&amp;historicalVolatility=true&amp;fullHistory=true&amp;startYear=1972&amp;endYear=2018&amp;bootstrapModel=1&amp;bootstrapMinYears=1&amp;bootstrapMaxYears=20&amp;circularBootstrap=true&amp;distribution=1&amp;dof=30&amp;meanReturn=7.0&amp;volatility=12.0&amp;sequenceStressTest=0&amp;stressTestRetirement=true&amp;inflationModel=1&amp;inflationMean=4.26&amp;inflationVolatility=3.13&amp;customIntervals=false&amp;percentileList=10%2C+25%2C+50%2C+75%2C+90&amp;returnList=0%2C+2.5%2C+5%2C+7.5%2C+10%2C+12.5&amp;asset1=TotalStockMarket&amp;allocation1_1=90&amp;asset2=TotalBond&amp;allocation2_1=10&amp;total1=100&amp;endasset1=TotalStockMarket&amp;endallocation1_1=30&amp;endasset2=TotalBond&amp;endallocation2_1=50&amp;endasset3=ShortTreasury&amp;endallocation3_1=20&amp;endtotal1=100&amp;cfname1=Saving&amp;cftype1=1&amp;cfamount1=12000&amp;cfinfadj1=true&amp;__checkbox_cfinfadj1=true&amp;cfstart1=1&amp;cffrequency1=4&amp;cfoccurs1=1&amp;cfname2=Retirement&amp;cftype2=2&amp;cfamount2=80000&amp;cfinfadj2=true&amp;__checkbox_cfinfadj2=true&amp;cfstart2=2&amp;cffrequency2=4&amp;cfoccurs2=2&amp;cftype3=2&amp;__checkbox_cfinfadj3=true&amp;cfstart3=3&amp;cffrequency3=4&amp;cfoccurs3=3">even lacking social security</a> <a href="../files/WithoutSS.pdf">(pdf)</a> would have succeeded about 76% of the time. A warning: I however am not a financial expert, so caveat emptor.</em></p>
+<p>The biggest financial problem in anyone’s life is how to provide for oneself in retirement. If you retire in your 60’s, you have a good chance of living for another several decades. Even someone used to living on a modest income of $40,000 a year, could need over half a million dollars saved up to keep from running out of money. “Half a million dollars‽” you cry. “I can barely afford my student loans!” Fortunately, by taking advantage of the <a href="https://www.snopes.com/fact-check/compound-interest/">most powerful force in the universe</a> it’s easier than you think, especially if you get started early.</p>
+<h1 id="the-formula">The Formula</h1>
+<p>After thinking about it really hard for a while, you come up with the following goal: “I want to retire at 67 with enough savings to live for 20 years at 80% of my usual income.” What can you do to have a fair chance of meeting this goal? How much you need to save depends most of all on what age you start saving at. Under some reasonable assumptions, the percent <span class="math inline">\(p\)</span> of your income you would need to save if you started saving at age <span class="math inline">\(A\)</span> would be: <span class="math display">\[\formbox{p = 12\times0.8\left(\frac{0.03}{1.03^N - 1}\right)}\]</span> where <span class="math inline">\(N=67-A\)</span>. If you wanted to type it in to a <a href="https://en.wikipedia.org/wiki/TI-30">calculator</a>, the keypresses would likely be something like this:</p>
+<pre><code>12 * 0.8 * 0.03 ÷ ( 1.03 ^ N - 1 )
+</code></pre>
+<p>Or you could use the fancy Javascript calculator <em>below</em>.</p>
+<h2 id="example">Example</h2>
+<p>For instance, say you start saving at 25. Then, assuming no prolonged periods of unemployment, you would be saving for <span class="math inline">\(N=67-25=42\)</span> years. Plugging this in to the formula, we get</p>
+<p><span class="math display">\[
+p = 12 \times 0.8 \left(\frac{0.03}{1.03^{42} - 1}\right) = 0.117
+\]</span></p>
+<p>So you would need to put about 12% of your paycheck into some kind of <a href="https://investor.vanguard.com/mutual-funds/target-retirement/">retirement fund</a> in order to meet your goal. If you make $50,000 a year, 12% of your income comes to $6000 a year, or $500 a month. Many employers, however, will offer to <a href="https://www.investopedia.com/articles/personal-finance/120315/what-good-401k-match.asp">match</a> a portion of your contributions. If your employer matches[<sup>1</sup>] 3%, then you would only need to contribute the other 9%. At $50,000 a year, this is a contribution of $375 a month.</p>
+<p>[<sup>1</sup>]: Unless it is a matter of putting a roof over your head or food on the table, you should always contribute at least up to your employer match. This is an investment with a guaranteed 100% return. You’ll never do better.</p>
+<h1 id="the-importance-of-starting-early">The Importance of Starting Early</h1>
+<p>Consider this table:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Age</th>
+<th>% Needed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>25</td>
+<td>12%</td>
+</tr>
+<tr class="even">
+<td>30</td>
+<td>15%</td>
+</tr>
+<tr class="odd">
+<td>35</td>
+<td>18%</td>
+</tr>
+<tr class="even">
+<td>40</td>
+<td>24%</td>
+</tr>
+<tr class="odd">
+<td>45</td>
+<td>31%</td>
+</tr>
+<tr class="even">
+<td>50</td>
+<td>44%</td>
+</tr>
+<tr class="odd">
+<td>55</td>
+<td>68%</td>
+</tr>
+</tbody>
+</table>
+<p>If you put your contributions off until you’re 45, you would have to put back over a third of your income to maintain the lifestyle that you’re used to. Realistically, you’re going to have to make some adjustments. If you wait until you’re 55, things are going to be painful.</p>
+<h1 id="assumptions">Assumptions</h1>
+<p>Let’s take a look at what assumptions went into our formula and the reasons for them. Feel free to play around with the numbers, but let me try to explain why I think these are good defaults.</p>
+<p>We’re assuming that you will retire at age 67, that you will need 12 years of savings in retirement, that you will be living on 80% of your working income, and that while you are working your investments will earn a 3% annual return (adjusted for inflation).</p>
+<p>The goal in saving for retirement is to not have to worry about money after you’re not able to earn it any more. The penalty for failing to meet this goal is much greater than the sacrifice needed to achieve it. It is much worse to have $2500 less a month in retirement than it is to have $500 less a month while working. Failure means having to make decisions like whether you’ll pay for your medicine, buy groceries, or keep the lights on once your Social Security check comes in. We want a low chance of failure. These assumptions reflect that goal.</p>
+<h2 id="retire-at-67">Retire at 67</h2>
+<p>In the United States, 67 is the age when a person is <a href="https://www.ssa.gov/planners/retire/agereduction.html">eligible</a> for full Social Security benefits. <a href="https://dqydj.com/average-retirement-age-in-the-united-states/">These data</a> show that healthy people usually decide to work until 70, when you get enhanced benefits, while unhealthy people retire as soon as they can, at 62, if they can hold out for even that long. Plan for a healthy old age, but consider <a href="https://www.investopedia.com/terms/d/disability-insurance.asp">disability insurance</a>.</p>
+<h2 id="years-of-savings">12 years of savings</h2>
+<p>The current <a href="https://www.ssa.gov/oact/STATS/table4c6.html">life expectancy</a> for someone who makes it to age 67 is about 20 years more. Social Security, in its current state, will pay for about 8 years worth of that,[<sup>2</sup>] so you, the retiree, will have to come up with the other 12. If you want to plan for a retirement with <a href="https://www.ssa.gov/policy/docs/ssb/v70n3/v70n3p111.html">reduced benefits</a>, or if you are very averse to the risk of living to an advanced age while being very poor, or if you want to retire early, add on a few years. If you plan on dying before you reach 67, congratulations! You’re off the hook.</p>
+<p>[<sup>2</sup>]: I don’t mean to say that Social Security pays out for eight years and then stops. I mean that it will pay for around 8/20 = 40% of your expenses during those 20 years.</p>
+<h2 id="of-working-income">80% of working income</h2>
+<p>The percentage of your income that you will need to maintain your lifestyle in retirement is called your <em>replacement ratio</em>. Generally, it will be less than your working income. Why? Though some costs will have increased (medical, perpetually), typically your financial obligations will be fewer: you don’t have to save money anymore (can’t take it with you), the kids have moved out (let us pray), the mortgage is paid off (at long last)… <a href="https://personal.vanguard.com/pdf/ISGRR.pdf">This study</a> claims your replacement ratio will usually be between 70% to 85%, depending on circumstances. If you plan on being rich and in good health, you may wish to choose the lower number; if you plan on being poor and in bad health, you may wish to choose the higher. In either case, 80% seems a cautious default.</p>
+<h2 id="annual-return">3% annual return</h2>
+<p><em>Question:</em> The stock market has historically had about a 7% inflation adjusted return. Even if you put half your money in bonds, you could still get well above 3% annually. So isn’t 3% way too conservative?</p>
+<p><em>Answer:</em> No. Because you, as an individual, don’t get an average return; you get whatever the market gives you. If your retirement years begin with a financial crisis followed by a prolonged recession, it doesn’t matter if the market recovers ten years later, you’ve already spent all your money and you’re not dead yet; as a variation on <a href="https://en.wikiquote.org/wiki/John_Maynard_Keynes">Keynes</a>: markets can remain depressed longer than you can remain solvent. Assuming a 3% average return will give you a much better chance of avoiding the worst scenarios, and if you start saving early, isn’t much of an additional burden.</p>
+<h1 id="appendix---calculator">Appendix - Calculator</h1>
+<form onsubmit="return false">
+  <ul class="form-group">
+    <li class="d-inline-block col-5"><label>Starting Age</label></li>
+    <li class="d-inline-block col-5"><input size="3" type="text" id="startage" aria-label="startage" value="25" onchange="computePercent()" /> years</li>
+  </ul>
+
+<ul class="form-group">
+  <li class="d-inline-block col-5"><label>Retirement Age</label></li>
+  <li class="d-inline-block col-5"><input size="3" type="text" id="retirementage" aria-label="retirementage" value="67" onchange="computePercent()" /> years</li>
+</ul>
+
+<ul class="form-group">
+  <li class="d-inline-block col-5"><label>Years of Savings Needed</label></li>
+  <li class="d-inline-block col-5"><input size="3" type="text" id="yearsofsavings" aria-label="yearsofsavings" value="12" onchange="computePercent()" /> years</li>
+</ul>
+
+<ul class="form-group">
+  <li class="d-inline-block col-5"><label>Percent of Working Income Needed</label></li>
+  <li class="d-inline-block col-5"><input size="3" type="text" id="percentofincome" aria-label="percentofincome" value="80" onchange="computePercent()" /> %</li>
+</ul>
+
+<ul class="form-group">    
+  <li class="d-inline-block col-5"><label>Rate of Return</label></li>
+  <li class="d-inline-block col-5"><input size="3" type="text" id="rateofreturn" aria-label="rateofreturn" value="3" onchange="computePercent()" /> % per year</li>
+</ul>
+
+    <ul>
+      <div class="text-red">
+      <li class="d-inline-block col-5"><label>You Need to Save:
+      <li class="d-inline-block col-5" id="percenttosave"></li>
+      </div> 
+    </ul>
+</form>
+
+<script src="../scripts/retirement.js"></script>
+
+  </section>
+  
+</article>
+
+
+        <!-- Post Footer -->
+        <div>
+
+        </div>
+
+    
+  </div>
   
   <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
 
@@ -377,219 +536,6 @@ end
     
   </div>
   
-  <div class="rounded-2 box-shadow-medium px-4 pb-4 mb-4 bg-white">
-
-        <!-- Post Header  -->
-<div class="Subhead">
-  <div class="Subhead-heading">
-      <h2 class="mt-3 mb-1"><a id="post-title" href="../posts/change-of-basis-for-vectors-and-covectors/">Change of Basis for Vectors and Covectors</a></h2>
-  </div>
-  <div class="Subhead-description">
-    
-      <a href="../tags/coordinates/">coordinates</a>, <a href="../tags/covectors/">covectors</a>, <a href="../tags/vectors/">vectors</a>, <a href="../tags/linear-algebra/">linear-algebra</a>
-    
-    <div class="float-md-right" style="text-align=right">
-      Published: March 18, 2019
-      
-    </div>
-  </div>
-</div>
-
-<article>
-  
-  <div id="toc" class="Box mb-3">
-    <h1>Table of Contents</h1>
-    <ul class="incremental">
-<li><a href="#vectors">Vectors</a><ul class="incremental">
-<li><a href="#example---part-1">Example - Part 1</a></li>
-<li><a href="#formulas">Formulas</a></li>
-<li><a href="#example---part-2">Example - Part 2</a></li>
-</ul></li>
-<li><a href="#covectors">Covectors</a><ul class="incremental">
-<li><a href="#example---part-3">Example - Part 3</a></li>
-<li><a href="#the-dual-basis">The Dual Basis</a></li>
-<li><a href="#formulas-1">Formulas</a></li>
-<li><a href="#example---part-4">Example - Part 4</a></li>
-</ul></li>
-<li><a href="#summary-of-formulas">Summary of Formulas</a></li>
-</ul>
-  </div>
-  
-  
-  <section id="content" class="pb-2 mb-4 border-bottom">
-    <blockquote>
-<p>We share a philosophy about linear algebra: we think basis-free, we write basis-free, but when the chips are down we close the office door and compute with matrices like fury.</p>
-</blockquote>
-<p><a href="https://mathoverflow.net/questions/11669/what-is-the-difference-between-matrix-theory-and-linear-algebra/19923">Irving Kaplansky</a></p>
-<p>Often, the first step in analyzing a problem is to <em>transform</em> it into something more amenable to our analysis. We would like the <em>representation</em> of our problem to reflect as naturally as possible whatever features of it we are most interested in. We might normalize data through a scaling transform, for instance, to eliminate spurious differences among like quantities. Or we might rotate data to align some of its salient dimensions with the coordinate axes, simplifying computations. Many matrix decompositions take the form <span class="math inline">\(M = BNA\)</span>. When <span class="math inline">\(B\)</span> and <span class="math inline">\(A\)</span> are non-singular, we can think of <span class="math inline">\(N\)</span> as being a simpler representation of <span class="math inline">\(M\)</span> under coordinate transforms <span class="math inline">\(B\)</span> and <span class="math inline">\(A\)</span>. The <a href="https://en.wikipedia.org/wiki/Eigendecomposition_of_a_matrix">spectral decomposition</a> and the <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> are of this form.</p>
-<p>All of these kinds of coordinate transformations are <em>linear</em> transformations. Linear coordinate transformations come about from operations on basis vectors that leave any vectors represented by them <a href="https://en.wikipedia.org/wiki/Active_and_passive_transformation">unchanged</a>. They are, in other words, a change of basis.</p>
-<p>This post came about from my frustration at not finding simple formulas for these transformations with simple explanations to go along with them. So here, I tried to give a simple exposition of coordinate transformations for vectors in vector spaces along with transformations of their cousins, the covectors in the dual space. I’ll get into matrices and some applications in a future post.</p>
-<h1 id="vectors">Vectors</h1>
-<h2 id="example---part-1">Example - Part 1</h2>
-<p>Let’s go through an example to see how it works. (I’ll assume the field is <span class="math inline">\(\mathbb{R}\)</span> throughout.)</p>
-<p>Let <span class="math inline">\(e\)</span> be the standard basis in <span class="math inline">\(\mathbb{R}^2\)</span> and let <span class="math inline">\(e'\)</span> be another basis where <span class="math display">\[
-\begin{array}{cc}
-e'_1 = \frac12 e_1, &amp; e'_2 = -e_1 + 2 e_2
-\end{array}
-\]</span> So we have written the basis <span class="math inline">\(e'\)</span> in terms of the standard basis <span class="math inline">\(e\)</span>. As vectors they look like this:</p>
-<figure><img src="../images/bases.jpg" alt="Drawing of the basis vectors e_1, e_2, and e'_1, e'_2" /></figure>
-
-<p>And each will induce its own coordinate system, indicating the angle and orientation of each axis, and each axis’ unit of measure.</p>
-<figure><img src="../images/coordinates.jpg" alt="Drawing of basis vectors and the coordinates they induce."></figure>
-
-<p>We can write any vector in <span class="math inline">\(\mathbb{R}^2\)</span> as a linear combination of these basis elements.</p>
-<p><span class="math display">\[\begin{array}{cc}
-v = e_1 + 2 e_2, &amp; w' = 5 e'_1 + \frac12 e'_2
-\end{array}\]</span></p>
-<figure><img src="../images/vectors.jpg" alt="Drawing of vectors in two coordinate systems."></figure>
-
-<p>We call the coefficients on the basis elements the <strong>coordinates</strong> of the vector in that basis. So, in basis <span class="math inline">\(e\)</span> the vector <span class="math inline">\(v\)</span> has coordinates <span class="math inline">\((1, 2)\)</span>, and in basis <span class="math inline">\(e'\)</span> the vector <span class="math inline">\(w'\)</span> has coordinates <span class="math inline">\((5, \frac12)\)</span>.</p>
-<h2 id="formulas">Formulas</h2>
-<p>The choice of basis is just a choice of representation. The vector itself should stay the same. So the question is – how can we rewrite a vector in a <em>different</em> basis without changing the vector itself?</p>
-<p>Let’s establish some notation. First, whenever we are talking about a vector in the abstract, let’s write <span class="math inline">\(\mathbf{v}\)</span>, and whenever we are talking about a vector represented in some basis let’s write <span class="math inline">\(v\)</span>. So the same vector <span class="math inline">\(\mathbf{v}\)</span> might have two different basis representations <span class="math inline">\(v\)</span> and <span class="math inline">\(v'\)</span>, which nevertheless all stand for the same vector: <span class="math inline">\(\mathbf{v} = v = v'\)</span>. However, when we write <span class="math inline">\(e\)</span> for a basis, we mean a list of vectors <span class="math inline">\(e_i\)</span> that form a basis in some vector space <span class="math inline">\(V\)</span>. So, <span class="math inline">\(v = v'\)</span> always, but in general <span class="math inline">\(e \neq e'\)</span>.</p>
-<p>Our basis elements let’s index with subscripts (like <span class="math inline">\(e_1\)</span>), and coordinates let’s index with superscripts (like <span class="math inline">\(v^1\)</span>). This will help us keep track of which one we’re working with. Also, let’s write basis elements as row vectors, and coordinates as column vectors. This way we can write a vector as a matrix product of the basis elements and the coordinates:</p>
-<p><span class="math display">\[v = \begin{bmatrix} e_1 &amp; e_2 \end{bmatrix}\begin{bmatrix}v^1 \\
-v^2\end{bmatrix} = v^1 e_1 + v^2 e_2
-\]</span></p>
-<p>Now we can also write the transformation given above of <span class="math inline">\(e\)</span> into <span class="math inline">\(e'\)</span> using matrix multiplication:</p>
-<p><span class="math display">\[e' = \begin{bmatrix}e'_1&amp; e'_2\end{bmatrix} = \begin{bmatrix}e_1&amp;  e_2\end{bmatrix}\begin{bmatrix}
-\frac12 &amp; -1 \\
-0 &amp; 2 
-\end{bmatrix} = \begin{bmatrix}\frac12 e_1 &amp; -e_1 + 2 e_2\end{bmatrix}\]</span></p>
-<p>The <span class="math inline">\(2 \times 2\)</span> matrix used in that transformation is called the <strong>transformation matrix</strong> from the basis <span class="math inline">\(e\)</span> to the basis <span class="math inline">\(e'\)</span>.</p>
-<p>The general formula is</p>
-<p><span class="math display">\[\formbox{e' = e A}\]</span></p>
-<p>where <span class="math inline">\(A\)</span> is the transformation matrix. We can use this <em>same</em> matrix to transform coordinate vectors, but we shouldn’t necessarily expect that we can use the same formula. The bases and the coordinates are playing different roles here: the basis elements are vectors that describe the coordinate system, while the coordinates are scalars that describe a vector’s position in that system.</p>
-<p>Let’s think about how this should work. Generally we write <span class="math inline">\(v = v^1 e_1 + v^2 e_2 \cdots + v^n e_n\)</span>. If we make some new basis <span class="math inline">\(e'\)</span> by multiplying all the <span class="math inline">\(e_i\)</span>’s by 2, say, and <em>also</em> multiplied all the <span class="math inline">\(v_j\)</span>’s by 2, then we would end up with a vector <em>four times</em> the size of the original. Instead, we should have multiplied all the <span class="math inline">\(v_j\)</span>’s by <span class="math inline">\(\frac12\)</span>, the inverse of 2, and then we would have <span class="math inline">\(v' = v\)</span>, as needed. The vector must be the same in either basis.</p>
-<p>So, if we change the <span class="math inline">\(e\)</span>’s by some factor then, the <span class="math inline">\(v\)</span>’s need to change in the <em>inverse</em> manner to maintain equality. This suggests that to change <span class="math inline">\(v\)</span> into a representation <span class="math inline">\(v'\)</span> in basis <span class="math inline">\(e'\)</span> we should use instead</p>
-<p><span class="math display">\[\formbox{v' = A^{-1} v}\]</span></p>
-<p>(We’ll prove it a little bit later.)</p>
-<p>The fact that basis elements change in one way (<span class="math inline">\(e' = e A\)</span>) while coordinates change in the inverse way (<span class="math inline">\(v' = A^{-1} v\)</span>), is why we sometimes call the basis elements <strong>covariant</strong> and the vector coordinates <strong>contravariant</strong>, and distinguish them with the position of their indices.</p>
-<h2 id="example---part-2">Example - Part 2</h2>
-<p>Let’s go back to our example. Using our formula, we get</p>
-<p><span class="math display">\[
-v' = \begin{bmatrix}2 &amp; 1 \\
-0 &amp; \frac12 \end{bmatrix} \begin{bmatrix}1 \\
-2\end{bmatrix} = \begin{bmatrix}4 \\
-1\end{bmatrix}
-\]</span></p>
-<p>But what about <span class="math inline">\(w'\)</span>? Well, since its representation is in <span class="math inline">\(e'\)</span>, to convert in the opposite direction, to <span class="math inline">\(e\)</span>, we need to use the transformation that’s the inverse of <span class="math inline">\(A^{-1}\)</span>, namely, <span class="math inline">\(A\)</span>.</p>
-<p><span class="math display">\[
-w = \begin{bmatrix}\frac12 &amp; -1 \\
-0 &amp; 1 \end{bmatrix} \begin{bmatrix}5 \\
-\frac12\end{bmatrix} = \begin{bmatrix}2 \\
-1\end{bmatrix}
-\]</span></p>
-<p>And now we have:</p>
-<figure><img src="../images/transformed.jpg" alt="Drawing of vectors v, v', w, and w'." /></figure>
-
-<p>Each vector is unchanged after a change of basis.</p>
-<h1 id="covectors">Covectors</h1>
-<p>Recall the <a href="https://en.wikipedia.org/wiki/Inner_product_space">inner product</a> on a vector space.</p>
-<p>We might ask, given some vector <span class="math inline">\(v\)</span> how does an inner product vary as we range over vectors <span class="math inline">\(w\)</span>? In this case, we could think of <span class="math inline">\(\langle v, \cdot\rangle\)</span> as a function of vectors in <span class="math inline">\(V\)</span> whose outputs are scalars. In fact, these sorts of functions themselves form a vector space, called the <strong>dual space</strong> of <span class="math inline">\(V\)</span>, which we write <span class="math inline">\(V^*\)</span>. The members of <span class="math inline">\(V^*\)</span> are called <strong>linear functionals</strong> or <strong>covectors</strong>. The covector given by <span class="math inline">\(\langle v, \cdot\rangle\)</span> we denote <span class="math inline">\(v^*\)</span>.</p>
-<p>We’ve been working with vectors in <span class="math inline">\(\mathbb{R}^n\)</span>, and in <span class="math inline">\(\mathbb{R}^n\)</span> the (canonical) inner product is the <a href="https://en.wikipedia.org/wiki/Dot_product">dot product</a>. This means that if we denote the covectors in <span class="math inline">\(V^*\)</span> as <em>rows</em> and the vectors in <span class="math inline">\(V\)</span> as <em>columns</em> (as usual), then we can write</p>
-<p><span class="math display">\[
-v^*(w) = \begin{bmatrix} v_1 &amp; \cdots &amp; v_n\end{bmatrix}\begin{bmatrix}w^1 \\
-\vdots\\
-w^n\end{bmatrix} = v_1 w^1 + \cdots + v_n w^n
-\]</span></p>
-<p>So, the covectors are functions <span class="math inline">\(\mathbb{R}^n \to \mathbb{R}\)</span>, but we can do computations with them just like we do with vectors, using matrix multiplication. We still write the indices of the row vectors as subscripts and the indices of the column vectors as superscripts.</p>
-<p>If we can think about vectors in <span class="math inline">\(\mathbb{R}^n\)</span> as arrows, how should we think about covectors? To simplify things, let’s restrict our attention to the two-dimensional case. Now, consider the action of a covector <span class="math inline">\(v^*\)</span> on some unknown vector <span class="math inline">\(w = \begin{bmatrix}x&amp; y\end{bmatrix}^\top\)</span> in <span class="math inline">\(\mathbb{R}^2\)</span>:</p>
-<p><span class="math display">\[
-v^*(w) = v_1 x + v_2 y
-\]</span></p>
-<p>Now if we look at the level sets of this function, <span class="math inline">\(v_1 x + v_2 y = k\)</span>, it should start to look familiar…</p>
-<p>It’s a family of <a href="https://en.wikipedia.org/wiki/Linear_equation#Two-point_form">lines</a>!</p>
-<p>And to find out the value of <span class="math inline">\(v^*(w)\)</span> we just count how many lines of <span class="math inline">\(v^*\)</span> the vector <span class="math inline">\(w\)</span> passes through (including maybe “fractional” valued lines – <span class="math inline">\(k\)</span> doesn’t have to just be an integer). More generally, the covectors of <span class="math inline">\(\mathbb{R}^n\)</span> can be thought of as <a href="https://en.wikipedia.org/wiki/Hyperplane">hyperplanes</a>, and the value of <span class="math inline">\(v^*(w)\)</span> can be determined by how many hyperplanes of <span class="math inline">\(v^*\)</span> the vector <span class="math inline">\(w\)</span> passes through. And furthermore, the vector <span class="math inline">\(v\)</span> will be the <a href="https://en.wikipedia.org/wiki/Normal_(geometry)">normal</a> vector to the hyperplanes given by <span class="math inline">\(v^*\)</span>, that is, they are perpendicular.</p>
-<h2 id="example---part-3">Example - Part 3</h2>
-<p>In the standard basis, let <span class="math inline">\(v^*\)</span> be given by <span class="math inline">\(\begin{bmatrix}1 &amp; 2\end{bmatrix}\)</span>. Its family of lines will then be <span class="math inline">\(x + 2 y = k\)</span>. Now let <span class="math inline">\(w\)</span> be given by <span class="math inline">\(\begin{bmatrix}2 &amp; 1\end{bmatrix}\)</span>, and count how many lines <span class="math inline">\(w\)</span> crosses through:</p>
-<figure><img src="../images/covectors.jpg" alt="Left: Drawing of v and v^*. Right: Drawing of v^* and w." /></figure>
-
-<p>It’s exactly the same as <span class="math inline">\(v^*(w) = 2 + 2(1) = 4\)</span>! I think that’s pretty cool.</p>
-<h2 id="the-dual-basis">The Dual Basis</h2>
-<p>Okay, so what about bases in <span class="math inline">\(V^*\)</span>? We’d like to have a basis for <span class="math inline">\(V^*\)</span> that is the “best fit” for whatever basis we have in <span class="math inline">\(V\)</span>. This turns out to be the basis given by: <span class="math display">\[
-e^i(e_j) =
-\begin{cases}
-  1 &amp; \text{if } i = j\\
-  0 &amp; \text{if } i \ne j
-\end{cases}\]</span></p>
-<p>where <span class="math inline">\((e_j)\)</span> is a basis in <span class="math inline">\(V\)</span>. Or sometimes people write instead <span class="math inline">\(e^i(e_j) = \delta^i_j\)</span>, where <span class="math inline">\(\delta^i_j\)</span> is the <a href="https://en.wikipedia.org/wiki/Kronecker_delta">Kronecker delta</a>. We call this basis <span class="math inline">\((e^i)\)</span> the <strong>dual basis</strong> of <span class="math inline">\((e_j)\)</span>. You can see that a basis and its dual have a kind of “bi-orthogonality” property that turns out to be very convenient.</p>
-<p>Let’s look at formulas for changing bases now. If we have a vector <span class="math inline">\(v\)</span> in <span class="math inline">\(V\)</span> written as a column, how can we find the corresponding vector <span class="math inline">\(v^*\)</span> in <span class="math inline">\(V^*\)</span>? The obvious thing to do would be to take the transposition of <span class="math inline">\(v\)</span>. This will not always work. Recall the definitions of <span class="math inline">\(v, v', w\)</span> and <span class="math inline">\(w'\)</span> from the <em>first section</em>, and consider:</p>
-<p><span class="math display">\[v^\top v = \begin{bmatrix} 1 &amp; 2\end{bmatrix}\begin{bmatrix}1 \\
-2\end{bmatrix} = 1 + 4 = 5\]</span></p>
-<p><span class="math display">\[v'^\top v' = \begin{bmatrix} 4 &amp; 1\end{bmatrix}\begin{bmatrix}4 \\
-1\end{bmatrix} = 16 + 1 = 17\]</span></p>
-<p>This is no good. We get two different values for <span class="math inline">\(\bar v^*(\bar w)\)</span> depending on which basis we use, but the values of a function on a vector space shouldn’t depend on the basis. The trouble is that the dual of <span class="math inline">\((e'_i)\)</span> isn’t the transpose of those basis vectors (they don’t satisfy the bi-orthogonality property), so the duals of those vectors represented in it won’t be the transposes of those vectors either.</p>
-<p>This <em>will</em> be true for <a href="https://en.wikipedia.org/wiki/Orthonormality">orthonormal</a> bases, however. The standard basis <span class="math inline">\((e_i)\)</span> <em>is</em> orthonormal, and the duals of the vectors represented in it will in fact be those transposes.</p>
-<p><span class="math display">\[ \formbox{v^* = v^\top \text{for any vector } v \text{ written in an orthonormal basis.}} \]</span></p>
-<h2 id="formulas-1">Formulas</h2>
-<p>The next question is, if we perform a change of basis in <span class="math inline">\(V\)</span>, what is the corresponding change in <span class="math inline">\(V^*\)</span>? Let’s use the same reasoning that we did before. For a vector <span class="math inline">\(w\)</span> in <span class="math inline">\(\mathbb{R}\)</span> and a covector <span class="math inline">\(v^*\)</span>, we have</p>
-<p><span class="math display">\[
-v^*(w) = v_1 w^1 + \cdots + v_n w^n
-\]</span></p>
-<p>And so, like before, if we change the values of the <span class="math inline">\(w_j\)</span>’s, the values of the <span class="math inline">\(v^i\)</span>’s should change in the inverse manner to preserve equality. But <span class="math inline">\(w\)</span> changes as <span class="math inline">\(w' = A^{-1} w\)</span>, so <span class="math inline">\(v^*\)</span> must change as <span class="math inline">\(v'^* = v^* A\)</span>. And its basis (the dual basis) must change as <em>its</em> inverse: <span class="math inline">\(e'^* = A^{-1} e^*\)</span>.</p>
-<p><span class="math display">\[\formbox{\begin{align}
-e'^* &amp;= A^{-1} e^*\\
-v'^* &amp;= v^* A
-\end{align}}\]</span></p>
-<p>Notice that this time the basis vectors are playing the <strong>contravariant</strong> part, while the coordinates are playing the <strong>covariant</strong> part with respect to the original vector space.</p>
-<h2 id="example---part-4">Example - Part 4</h2>
-<p>Lets continue our example. Since <span class="math inline">\(e\)</span> is the standard basis, it is orthonormal, and we can therefore find the duals of <span class="math inline">\(v\)</span> and <span class="math inline">\(w\)</span> by taking transposes. We can then apply our formula to find the duals of <span class="math inline">\(v'^*\)</span> and <span class="math inline">\(w'^*\)</span>.</p>
-<span class="math display">\[\begin{align}
-v'^*(x, y) &amp;= \begin{bmatrix}1 &amp; 2\end{bmatrix}\begin{bmatrix}\frac12 &amp; -1\\
-0 &amp; 2\end{bmatrix}\begin{bmatrix}x\\
-y\end{bmatrix}\\
-&amp;= \begin{bmatrix}\frac12 &amp; 3\end{bmatrix}\begin{bmatrix}x\\
-y\end{bmatrix}\\
-&amp;= \frac12 x + 3y\\
-\\
-w'^*(x, y) &amp;= \begin{bmatrix}2 &amp; 1\end{bmatrix}\begin{bmatrix}\frac12 &amp; -1\\
-0 &amp; 2\end{bmatrix}\begin{bmatrix}x\\
-y\end{bmatrix}\\
-&amp;= \begin{bmatrix}1 &amp; 0\end{bmatrix}\begin{bmatrix}x\\
-y\end{bmatrix}\\
-&amp;= x
-\end{align}
-\]</span>
-<p>The duals too are unchanged after a change of basis.</p>
-<figure><img src="../images/covectors2.jpg" alt="Left: Drawing of $v^*$ and $w^*$. Right: Drawing of $v'^*$ and $w'^*$." /></figure>
-
-<h1 id="summary-of-formulas">Summary of Formulas</h1>
-<p><span class="math display">\[\formbox{\begin{array}{llr} 
-e'   &amp;= e A      &amp; &amp;(1)\\ 
-v'   &amp;= A^{-1} v &amp; &amp;(2)\\
-e'^* &amp;= A^{-1} e^* &amp; &amp;(3)\\
-v'^* &amp;= v^* A      &amp; &amp;(4)
-\end{array} }\]</span></p>
-<p>Suppose <span class="math inline">\((1)\)</span>, that <span class="math inline">\(e' = e A\)</span>, where <span class="math inline">\(A\)</span> is a non-singular matrix.</p>
-<p><strong>Proof of (2):</strong> We know <span class="math inline">\(e v = e' v'\)</span>. Now</p>
-<p><span class="math display">\[
-e' v' = e v = e A A^{-1} v = e' (A^{-1} v)
-\]</span></p>
-<p>But then it must be that <span class="math inline">\(v' = A^{-1} v\)</span> since basis representations are unique.</p>
-<p><strong>Proof of (4):</strong> We also know <span class="math inline">\(v'^* w' = v^* w\)</span> for all vectors <span class="math inline">\(w\)</span>. But then</p>
-<p><span class="math display">\[
-v'^* w' = v^* w = v^* w = v^* A A^{-1} w = (v^* A) w'
-\]</span></p>
-<p>for all <span class="math inline">\(w'\)</span>. So, <span class="math inline">\(v'^* = v^* A\)</span>.</p>
-<p><strong>Proof of (3):</strong> Lastly,</p>
-<p><span class="math display">\[
-v'^* e'^* = v^* e^* = v^* A A^{-1} e^* = v'^* A^{-1} e^*
-\]</span></p>
-<p>for all <span class="math inline">\(w'\)</span>. So, <span class="math inline">\(e'^* = A^{-1}e^*\)</span>. <strong>QED</strong></p>
-  </section>
-  
-</article>
-
-
-        <!-- Post Footer -->
-        <div>
-
-        </div>
-
-    
-  </div>
-  
 
 <!-- Pagination -->
 <nav class="paginate-container" aria-label="Pagination">
@@ -614,7 +560,7 @@ v'^* e'^* = v^* e^* = v^* A A^{-1} e^* = v'^* A^{-1} e^*
             <div id="side">
               <div>
                 <h1>Tags</h1>
-                <a style="font-size: 105%" href="../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../tags/category-theory/">category-theory</a> <a style="font-size: 105%" href="../tags/classification/">classification</a> <a style="font-size: 100%" href="../tags/convnets/">convnets</a> <a style="font-size: 100%" href="../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../tags/cql/">cql</a> <a style="font-size: 115%" href="../tags/data-science/">data-science</a> <a style="font-size: 105%" href="../tags/decision-boundaries/">decision-boundaries</a> <a style="font-size: 105%" href="../tags/deep-learning/">deep-learning</a> <a style="font-size: 100%" href="../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../tags/engrams/">engrams</a> <a style="font-size: 105%" href="../tags/finance/">finance</a> <a style="font-size: 100%" href="../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../tags/generalized-inverse/">generalized-inverse</a> <a style="font-size: 100%" href="../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../tags/investing/">investing</a> <a style="font-size: 100%" href="../tags/julia/">julia</a> <a style="font-size: 100%" href="../tags/kaggle/">kaggle</a> <a style="font-size: 100%" href="../tags/LDA/">LDA</a> <a style="font-size: 100%" href="../tags/least-squares/">least-squares</a> <a style="font-size: 115%" href="../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../tags/linear-equations/">linear-equations</a> <a style="font-size: 100%" href="../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../tags/memory/">memory</a> <a style="font-size: 100%" href="../tags/moore-penrose-inverse/">moore-penrose-inverse</a> <a style="font-size: 100%" href="../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../tags/numpy/">numpy</a> <a style="font-size: 110%" href="../tags/python/">python</a> <a style="font-size: 100%" href="../tags/QDA/">QDA</a> <a style="font-size: 110%" href="../tags/R/">R</a> <a style="font-size: 100%" href="../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../tags/review/">review</a> <a style="font-size: 100%" href="../tags/sage/">sage</a> <a style="font-size: 100%" href="../tags/sgd/">sgd</a> <a style="font-size: 100%" href="../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../tags/talk/">talk</a> <a style="font-size: 100%" href="../tags/tensorflow/">tensorflow</a> <a style="font-size: 100%" href="../tags/tensors/">tensors</a> <a style="font-size: 100%" href="../tags/tpus/">tpus</a> <a style="font-size: 110%" href="../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../tags/vectors/">vectors</a> <a style="font-size: 105%" href="../tags/visualization/">visualization</a>
+                <a style="font-size: 100%" href="../tags/advice/">advice</a> <a style="font-size: 105%" href="../tags/bayesian/">bayesian</a> <a style="font-size: 100%" href="../tags/BMA/">BMA</a> <a style="font-size: 100%" href="../tags/calculator/">calculator</a> <a style="font-size: 100%" href="../tags/career/">career</a> <a style="font-size: 100%" href="../tags/category-theory/">category-theory</a> <a style="font-size: 105%" href="../tags/classification/">classification</a> <a style="font-size: 100%" href="../tags/convnets/">convnets</a> <a style="font-size: 100%" href="../tags/coordinates/">coordinates</a> <a style="font-size: 100%" href="../tags/covectors/">covectors</a> <a style="font-size: 100%" href="../tags/cql/">cql</a> <a style="font-size: 115%" href="../tags/data-science/">data-science</a> <a style="font-size: 105%" href="../tags/decision-boundaries/">decision-boundaries</a> <a style="font-size: 105%" href="../tags/deep-learning/">deep-learning</a> <a style="font-size: 100%" href="../tags/eigenvalues/">eigenvalues</a> <a style="font-size: 100%" href="../tags/engrams/">engrams</a> <a style="font-size: 105%" href="../tags/finance/">finance</a> <a style="font-size: 100%" href="../tags/functional-programming/">functional-programming</a> <a style="font-size: 100%" href="../tags/generalized-inverse/">generalized-inverse</a> <a style="font-size: 100%" href="../tags/geometry/">geometry</a> <a style="font-size: 100%" href="../tags/haskell/">haskell</a> <a style="font-size: 100%" href="../tags/investing/">investing</a> <a style="font-size: 100%" href="../tags/julia/">julia</a> <a style="font-size: 100%" href="../tags/kaggle/">kaggle</a> <a style="font-size: 100%" href="../tags/LDA/">LDA</a> <a style="font-size: 100%" href="../tags/least-squares/">least-squares</a> <a style="font-size: 115%" href="../tags/linear-algebra/">linear-algebra</a> <a style="font-size: 100%" href="../tags/linear-equations/">linear-equations</a> <a style="font-size: 100%" href="../tags/matrix-decomposition/">matrix-decomposition</a> <a style="font-size: 100%" href="../tags/MCMC/">MCMC</a> <a style="font-size: 100%" href="../tags/memory/">memory</a> <a style="font-size: 100%" href="../tags/moore-penrose-inverse/">moore-penrose-inverse</a> <a style="font-size: 100%" href="../tags/neural-networks/">neural-networks</a> <a style="font-size: 100%" href="../tags/neuroscience/">neuroscience</a> <a style="font-size: 100%" href="../tags/NLP/">NLP</a> <a style="font-size: 100%" href="../tags/numpy/">numpy</a> <a style="font-size: 110%" href="../tags/python/">python</a> <a style="font-size: 100%" href="../tags/QDA/">QDA</a> <a style="font-size: 110%" href="../tags/R/">R</a> <a style="font-size: 100%" href="../tags/ReLUs/">ReLUs</a> <a style="font-size: 100%" href="../tags/retirement/">retirement</a> <a style="font-size: 100%" href="../tags/review/">review</a> <a style="font-size: 100%" href="../tags/sage/">sage</a> <a style="font-size: 100%" href="../tags/sgd/">sgd</a> <a style="font-size: 100%" href="../tags/simulation/">simulation</a> <a style="font-size: 100%" href="../tags/singular-values/">singular-values</a> <a style="font-size: 100%" href="../tags/stacking/">stacking</a> <a style="font-size: 100%" href="../tags/talk/">talk</a> <a style="font-size: 100%" href="../tags/tensorflow/">tensorflow</a> <a style="font-size: 100%" href="../tags/tensors/">tensors</a> <a style="font-size: 100%" href="../tags/tpus/">tpus</a> <a style="font-size: 110%" href="../tags/tutorial/">tutorial</a> <a style="font-size: 100%" href="../tags/vectors/">vectors</a> <a style="font-size: 105%" href="../tags/visualization/">visualization</a>
               </div>
               <div>
                 <h1>Links</h1>
