@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>Math for Machines</title>
+        <link>https://mathformachines.com</link>
+        <description><![CDATA[A blog about data science and machine learning, with a lot of math.]]></description>
+        <atom:link href="https://mathformachines.com/feeds/career.xml" rel="self"
+                   type="application/rss+xml" />
+        <lastBuildDate>Sat, 12 Feb 2022 00:00:00 UT</lastBuildDate>
+        <item>
+    <title>How to Get a Job in Tech</title>
+    <link>https://mathformachines.com/posts/breaking-into-tech/index.html</link>
+    <description><![CDATA[<p>A friend asked me recently for advice on beginning a career as a programmer. I’ve reproduced my response here.</p>
+<p>For some background on me: Two years ago I was a math lecturer at a university in my hometown. In March of 2020, I managed to get a job as a course developer at Kaggle (on contract).<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> I joined the competitions team at Kaggle (as a Google FTE) in August of 2021. My career change has been far more successful than I had ever imagined it could be, and for this reason feel some assurance in relating some of my own ideas on how it could be replicated. The purpose of advice as a genre, however, inevitably tends towards the reinforcing of the lived biases of the advisor – so, as always, let the buyer beware.</p>
+<hr>
+
+<p>The first thing is to learn how to do the job. The good thing is that there are a lot of free resources to learn from and that a lot of employers don’t really care about formal qualifications.</p>
+<p>The eventual goal is to start creating independent projects and putting them online somewhere while also getting involved in some sort of developer community. This is generally the most effective way of breaking into a tech job. Projects demonstrate competence and being known for having some kind of competence in a developer community will often lead to someone asking you to interview for a position they know about. My opinion is that job boards are mostly a waste of time. Even qualified people will often have to send out hundreds of resumes to get even a single interview and the jobs posted there tend to not be very good since managers generally try to hire out of their network first. (And often the job won’t even exist – sometimes they’ve already effectively hired someone but the job had to get posted to satisfy some policy or regulation. That was the case with me at my university, in fact.)</p>
+<p>For first getting started, though, online courses are worth looking at. <a href="https://www.coursera.org">Coursera</a> is probably the best one. Some of the courses have fees, but they will often <a href="https://www.coursera.support/s/article/209819033-Apply-for-Financial-Aid-or-a-Scholarship?language=en_US">waive these</a>; I’ve heard they aren’t very strict about this and will do it for almost anyone who asks. <a href="https://www.coursera.org/learn/learn-to-program">This course</a> is an intro to programming with Python (what we use on Kaggle), but they have a number of others. Google has a variety of <a href="https://www.coursera.org/google-career-certificates">professional certificates</a> offered through Coursera; these could be good for a second or third course and give some idea on what sorts of jobs are available. Most companies don’t care much about certificates, but the programs can be a nice guide for learning. For running code, <a href="https://replit.com/">replit</a> has a free programming environment which should run on any computer with an internet connection. <a href="https://www.oreilly.com/online-learning/individuals.html">O’Reilly</a> and <a href="https://www.manning.com/">Manning</a> are good publishers of technical books for more advanced topics; some libraries have free online access to electronic editions.</p>
+<p>Companies will often have a technical interview where they ask you to solve coding problems. The <a href="https://leetcode.com/">leetcode</a> and <a href="https://www.hackerrank.com/">HackerRank</a> websites offer practice for these as well as interviewing tips. Some companies care about these a great deal, while other companies don’t care at all. (I had to do it for Google.) It’s worth getting started on them early in any case.<a href="https://www.crackingthecodinginterview.com/">Cracking the Coding Interview</a> is a book that goes over the interviewing part more in depth and is worth reviewing prior to an interview.</p>
+<p>For putting projects online, most people use <a href="https://github.com/">GitHub</a>. Companies will generally expect you to know how to use it or something similar prior to getting hired. They have tutorials that go over everything you’d need to know. The kinds of projects to work on depends on the kind of job you want to get. The general advice is to do the work now for free that you want to get paid for later.</p>
+<p>GitHub can host <a href="https://pages.github.com/">personal websites</a> too. One strategy for getting noticed is to create a series of blog posts about some emerging and in demand technology for which there doesn’t exist much online yet. Someone with a job that needs that technology might come across your website (likely, since it’s one of the few that exists on that topic) and ask for an interview since you’re one of the only people in the world who seems to know anything about it.</p>
+<p>For networking, <a href="https://www.meetup.com/">Meetup</a> is a good place to find developer communities. Something local is probably the first choice, but there are “virtual” communities too. Giving a talk about some technical subject is a great way to become known as an expert in it and people with job leads will often be in the audience. Groups are always in need of people to give talks.</p>
+<p>And that’s basically everything I know!</p>
+<h1 id="footnotes">Footnotes</h1>
+<section class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>My first day at Kaggle was during my university’s spring break – the week of March 15, 2020. The timing of this career change was the singularly most fortunate of my life, and on my part entirely unplanned for.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</section>]]></description>
+    <pubDate>Sat, 12 Feb 2022 00:00:00 UT</pubDate>
+    <guid>https://mathformachines.com/posts/breaking-into-tech/index.html</guid>
+    <dc:creator>Ryan Holbrook</dc:creator>
+</item>
+
+    </channel>
+</rss>

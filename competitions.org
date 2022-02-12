@@ -1,0 +1,15 @@
+----
+title: Kaggle Competitions
+----
+
+#+begin_export html
+<p>
+#+end_export
+
+I've been a data scientist on the following [[https://www.kaggle.com/competitions][Kaggle competitions]]:
+
+- [[https://www.kaggle.com/c/nbme-score-clinical-patient-notes][NBME - Score Clinical Patient Notes]] (02/2021)
+- [[https://www.kaggle.com/c/tensorflow-great-barrier-reef][TensorFlow - Help Protect the Great Barrier Reef]] (with Sohier Dane - 11/2021)
+- [[https://www.kaggle.com/c/santa-2021][Santa 2021 - The Merry Movie Montage]] (11/2021)
+- [[https://www.kaggle.com/c/petfinder-pawpularity-score][Petfinder.my - Pawpularity Contest]] (10/2021)
+- [[https://www.kaggle.com/c/tabular-playground-series-sep-2021][Tabular Playground Series - September]] (with Walter Reade - 10/2021)

@@ -1,0 +1,109 @@
+----
+title: Kaggle Courses
+----
+
+#+begin_export html
+<p>
+#+end_export
+
+I've developed several courses for [[https://www.kaggle.com/learn][Kaggle Learn]]:
+- [[https://www.kaggle.com/learn/intro-to-deep-learning][Intro to Deep Learning]]
+- [[https://www.kaggle.com/learn/computer-vision][Computer Vision]]
+- [[https://www.kaggle.com/learn/feature-engineering][Feature Engineering]]
+- [[https://www.kaggle.com/learn/time-series][Time Series]]
+
+* Intro to Deep Learning
+
+#+begin_export html
+<p>
+#+end_export
+
+*Description:* Use TensorFlow and Keras to build and train neural networks for structured data.
+
+1. [[https://www.kaggle.com/ryanholbrook/a-single-neuron][A Single Neuron]] - Learn about linear units, the building blocks of deep learning.
+2. [[https://www.kaggle.com/ryanholbrook/deep-neural-networks][Deep Neural Networks]] - Add hidden layers to your network to uncover complex relationships.
+3. [[https://www.kaggle.com/ryanholbrook/stochastic-gradient-descent][Stochastic Gradient Descent]] - Use Keras and Tensorflow to train your first neural network.
+4. [[https://www.kaggle.com/ryanholbrook/overfitting-and-underfitting][Overfitting and Underfitting]] - Improve performance with extra capacity or early stopping.
+5. [[https://www.kaggle.com/ryanholbrook/dropout-and-batch-normalization][Dropout and Batch Normalization]] - Add these special layers to prevent overfitting and stabilize training.
+6. [[https://www.kaggle.com/ryanholbrook/binary-classification][Binary Classification]] - Apply deep learning to another common task.
+7. (Bonus) [[https://www.kaggle.com/ryanholbrook/detecting-the-higgs-boson-with-tpus][Detecting the Higgs Boson with TPUs]]
+
+#+BEGIN_EXPORT html
+<figure>
+<video autoplay loop mutued playsinline controls class="wide">
+  <source src="/images/intro-to-dl.webm" type="video/webm">
+  <source src="/images/intro-to-dl.mp4" type="video/mp4">
+  Can't play the video for some reason! Click <a href="/images/intro-to-dl.gif">here</a> to download a gif.
+</video>
+</figure>
+#+END_EXPORT
+
+* Computer Vision
+
+#+begin_export html
+<p>
+#+end_export
+
+*Description:* Build convolutional neural networks with TensorFlow and Keras.
+
+1. [[https://www.kaggle.com/ryanholbrook/the-convolutional-classifier][The Convolutional Classifier]] - Create your first computer vision model with Keras.
+2. [[https://www.kaggle.com/ryanholbrook/convolution-and-relu][Convolution and ReLU]] - Discover how convnets create features with convolutional layers.
+3. [[https://www.kaggle.com/ryanholbrook/maximum-pooling][Maximum Pooling]] - Learn more about feature extraction with maximum pooling.
+4. [[https://www.kaggle.com/ryanholbrook/the-sliding-window][The Sliding Window]] - Explore two important parameters: stride and padding.
+5. [[https://www.kaggle.com/ryanholbrook/custom-convnets][Custom Convnets]] - Design your own convnet.
+6. [[https://www.kaggle.com/ryanholbrook/data-augmentation][Data Augmentation]] - Boost performance by creating extra training data.
+7. (Bonus) [[https://www.kaggle.com/ryanholbrook/create-your-first-submission][Join the /Petals to the Metal/ Competition]]
+
+#+begin_export html
+<figure><img src="/images/computer-vision.jpg" /></figure>
+#+end_export
+
+* Feature Engineering
+
+#+begin_export html
+<p>
+#+end_export
+
+*Description:* Better features make better models. Discover how to get the most out of your data.
+
+1. [[https://www.kaggle.com/ryanholbrook/what-is-feature-engineering][What is Feature Engineering]] - Learn the steps and principles of creating better features.
+2. [[https://www.kaggle.com/ryanholbrook/mutual-information][Mutual Information]] - Locate the features with the most potential.
+3. [[https://www.kaggle.com/ryanholbrook/creating-features][Creating Features]] - Transform features with Pandas.
+4. [[https://www.kaggle.com/ryanholbrook/clustering-with-k-means][Clustering with K-Means]] - Untangle complex spatial relationships with cluster labels.
+5. [[https://www.kaggle.com/ryanholbrook/principal-component-analysis][Principal Component Analysis]] - Discover new features by analyzing variation.
+6. [[https://www.kaggle.com/ryanholbrook/target-encoding][Target Encoding]] - Boost any categorical feature with this powerful technique.
+7. (Bonus) [[https://www.kaggle.com/ryanholbrook/feature-engineering-for-house-prices][Feature Engineering for the /House Prices/ Competition]]
+
+#+begin_export html
+<figure><img src="/images/feature-engineering.jpg" /></figure>
+#+end_export
+
+* Time Series
+
+#+begin_export html
+<p>
+#+end_export
+
+*Description:* Apply machine learning to real-world forecasting tasks.
+
+1. [[https://www.kaggle.com/ryanholbrook/linear-regression-with-time-series][Linear Regression with Time Series]] - Use two features unique to time series: lags and time steps.
+2. [[https://www.kaggle.com/ryanholbrook/trend][Trend]] - Model long-term changes with moving averages and the time dummy.
+3. [[https://www.kaggle.com/ryanholbrook/seasonality][Seasonality]] - Create indicators and Fourier features to capture period change.
+4. [[https://www.kaggle.com/ryanholbrook/time-series-as-features][Time Series as Features]] - Predict the future from the past with a lag embedding.
+5. [[https://www.kaggle.com/ryanholbrook/hybrid-models][Hybrid Models]] - Combine the strengths of two forecasters with this powerful technique.
+6. [[https://www.kaggle.com/ryanholbrook/forecasting-with-machine-learning][Forecasting with Machine Learning]] - Apply ML to any forecasting task with these four strategies.
+
+#+begin_export html
+<figure><img src="/images/fourier-features.jpg" /></figure>
+#+end_export
+
+* Other Work
+
+#+begin_export html
+<p>
+#+end_export
+
+I've also completed some shorter projects.
+
+- [[https://www.kaggle.com/ryanholbrook/tfrecords-basics][TFRecords Basics]] and [[https://www.kaggle.com/ryanholbrook/walkthrough-building-a-dataset-of-tfrecords][Walkthrough: Building a Dataset of TFRecords]], and an [[https://youtu.be/KgjaC9VeOi8][accompanying video]] with [[https://www.jessemaegan.com/][Jesse Mostipak]].
+- [[https://www.kaggle.com/ryanholbrook/how-to-deploy-tensorflow-to-ai-platform-unified][How to Deploy TensorFlow to AI Platform (Unified)]]. Train and deploy a neural network that learns to crop images.
